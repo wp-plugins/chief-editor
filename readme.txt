@@ -22,7 +22,7 @@ To be visible and clicable in the admin panel, the status of posts have to be DR
 
 == Frequently Asked Questions ==
 
-[Maxiblog](http://www.maxiblog.fr/ "Maxiblog")
+[Post a comment here](http://www.termel.fr/?page_id=17 "Support")
 
 == Screenshots ==
 
