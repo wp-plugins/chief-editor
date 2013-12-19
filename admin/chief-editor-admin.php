@@ -166,21 +166,25 @@
         $query.= ' UNION ';
         endif;
 
-        $query.= " (SELECT ID, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status = 'draft' OR post_status = 'pending' OR post_status = 'pitch') AND post_type = 'post')";
+        $query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status = 'draft' OR post_status = 'pending' OR post_status = 'pitch' OR post_status = 'future') AND post_type = 'post')";
         $i++;
 
       endforeach;
 
-      $query.= " ORDER BY blog_id DESC";// LIMIT 0,$howMany;";
+      $query.= " ORDER BY post_status DESC, blog_id DESC";// LIMIT 0,$howMany;";
       # echo $query; # debugging code
       $rows = $wpdb->get_results( $query );
 
       // now we need to get each of our posts into an array and return them
       if ( $rows ) :
 
-	echo '<h2>Brouillons d articles trouve(s) : '. count($rows).'</h2>';
-	echo '<p>Vas y françois, tu peux cliquer sur le nom des articles pour les voir dans un nouvel onglet, et préparer les articles à publier cette semaine. Je vais essayer d améliorer cet outil par la suite. Merci.</p>';
-	echo '<table style="width:100%;">';
+	  $futureColor = '#FFE699';
+	  $draftColor = '#EDEDED';
+	  
+	  echo '<h3>Non published post(s) found : '. count($rows).'</h3>';
+	  echo 'Color codes:<div style="border:solid black 1px;background-color:'.$futureColor.';">Scheduled posts</div><div style="border:solid black 1px;background-color:'.$draftColor.';">Draft posts</div>';
+	  echo '<hr>';
+	  echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog title</td><td>Featured image</td><td>Post</td><td>Excerpt</td><td>Author</td><td>Date</td><td>Change date</td></tr>';
         $posts = array();
         foreach ( $rows as $row ) :
 		$blog_id = $row->blog_id;
@@ -193,6 +197,14 @@
 		//echo '<tr><td>'.$new_post->get_title().'</td></tr>';
 		//setup_postdata( $new_post );
 		//echo '<h2>'.the_title() .'</h2>';		
+		$images = get_children( array( 'post_parent' => $new_post->ID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order', 'order' => 'ASC', 'numberposts' => 999 ) );
+		$image_img_tag = '';
+		if ( $images ) {
+			$total_images = count( $images );
+			$image = array_shift( $images );
+			$image_img_tag = wp_get_attachment_image( $image->ID, 'thumbnail' );
+			}
+		$abstract = $new_post->post_excerpt; 
 		$permalink = get_blog_permalink( $blog_id, $data );
 		$author = $new_post->post_author;
 		$user_info = get_userdata($author);
@@ -202,8 +214,14 @@
       		#echo 'User ID: ' . $user_info->ID . "\n";
 		$title = $new_post->post_title;
 		$date = $new_post->post_date;
-		echo '<tr><td><h3>'.$blog_name.'</h3></td><td><h3><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></h3></td><td><h4>'.$username.'</h4></td><td><h4>'.$date.'</h4></td></tr>';
-		
+		$post_state = $new_post->post_status;
+		$line_color = $post_state == 'future' ? $futureColor : $draftColor;
+		$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
+	  $complete_new_table_line .= '<td><h3>'.$blog_name.'</h3></td><td><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$image_img_tag.'</a></td>';
+		$complete_new_table_line .= '<td><h3><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></h3></td>';
+		$complete_new_table_line .= '<td>'.$abstract.'</td><td><h4>'.$username.'</h4></td><td><h4>'.$date.'</h4></td>';
+		$complete_new_table_line .= '<td><form><input type="text" id="chief-editor-custom-date" class="chief-editor-custom-date" name="start_date" value="'.$date.'"/></form></td></tr>';
+		echo $complete_new_table_line;
 		$posts[] = $new_post;
 	endforeach;
 	echo '</table>';
@@ -227,6 +245,46 @@
     return "Error: Could not find blogs";
     
   endif;
+}
+
+
+public function getDefaultWPPublishBox() {
+
+	$result = "<div id=\"submitdiv\" class=\"postbox\">
+                                <div class=\"handlediv\" title=\"<?php esc_attr_e( 'Click to toggle' ); ?>\"><br /></div>
+                                <h3 class=\"hndle\"><?php _e('Press This') ?></h3>
+                                <div class=\"inside\">
+                                        <p id=\"publishing-actions\">
+                                        <?php
+                                                submit_button( __( 'Save Draft' ), 'button', 'draft', false, array( 'id' => 'save' ) );
+                                                if ( current_user_can('publish_posts') ) {
+                                                        submit_button( __( 'Publish' ), 'primary', 'publish', false );
+                                                } else {
+                                                        echo '<br /><br />';
+                                                        submit_button( __( 'Submit for Review' ), 'primary', 'review', false );
+                                                } ?>
+                                                <span class=\"spinner\" style=\"display: none;\"></span>
+                                        </p>
+                                        <?php if ( current_theme_supports( 'post-formats' ) && post_type_supports( 'post', 'post-formats' ) ) :
+                                                        $post_formats = get_theme_support( 'post-formats' );
+                                                        if ( is_array( $post_formats[0] ) ) :
+                                                                $default_format = get_option( 'default_post_format', '0' );
+                                                ?>
+                                        <p>
+                                                <label for=\"post_format\"><?php _e( 'Post Format:' ); ?>
+                                                <select name=\"post_format\" id=\"post_format\">
+                                                        <option value=\"0\"><?php echo get_post_format_string( 'standard' ); ?></option>
+                                                <?php foreach ( $post_formats[0] as $format ): ?>
+                                                        <option<?php selected( $default_format, $format ); ?> value=\"<?php echo esc_attr( $format ); ?>\"> <?php echo esc_html( get_post_format_string( $format ) ); ?></option>
+                                                <?php endforeach; ?>
+                                                </select></label>
+                                        </p>
+                                        <?php endif; endif; ?>
+                                </div>
+                        </div>";
+	return $result;
+
+
 }
 
     public function get_all_drafts() 

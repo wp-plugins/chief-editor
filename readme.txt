@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: munger41
-Donate link: http://www.maxiblog.com/
+Donate link: http://www.maxizone.fr/?page_id=560
 Tags: editor, chief, draft, multisite, insight
 Requires at least: 3.0.1
 Tested up to: 3.7.1
@@ -17,8 +17,9 @@ To be visible and clicable in the admin panel, the status of posts have to be DR
 
 == Installation ==
 
-1. Upload `chief-editor.zip` to the `/wp-content/plugins/` directory
+1. Upload `chief-editor.zip` to the `/wp-content/plugins/` directory OR install with WP admin GUI at network level
 2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Go to one of the blogs settings menu -> "Chief editor" item should appear OR go directly to url : http://www.my_site.com/wp-admin/options-general.php?page=chief-editor-admin
 
 == Frequently Asked Questions ==
 
@@ -29,6 +30,10 @@ To be visible and clicable in the admin panel, the status of posts have to be DR
 1. Admin view of all drafts across the network
 
 == Changelog ==
+
+= 1.1 =
+* Translated to english
+* Table layout improved
 
 = 1.0 =
 * First version
