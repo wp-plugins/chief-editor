@@ -8,12 +8,12 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin helps a multi-site chief editor to manage all drafts across the network.
+This plugin helps a multi-sites "chief editor" to manage all drafts across the network.
 
 == Description ==
 
-This plugin is aimed to help the multi site wordpress editor in chief in order to organize publication of posts. All drafts across all sites in the network are shown with a link to the article for quick reviewing. Really simple read only plugin, but very useful :)
-To be visible and clicable in the admin panel, the status of posts have to be DRAFT.
+This plugin is aimed to help the multi-sites wordpress editor-in-chief in order to plan publication of posts. All drafts across all sites in the network are shown with a link to the article for quick reviewing. Really simple read only plugin, but very useful :)
+To be visible and clicable on the settings page, the status of posts have to be DRAFT or SCHEDULED. Only editors (or higher roles) can use the plugin.
 
 == Installation ==
 
