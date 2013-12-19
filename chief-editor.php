@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Chief Editor
-Plugin URI: http://www.termel.fr
+Plugin URI: http://www.termel.fr/?page_id=17
 Description: Manage all drafts accross the network
-Version: 1.0
+Version: 1.1
 Author: Max UNGER
-Author URI: http://www.termel.fr
+Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
 */
 // Initialize Settings
