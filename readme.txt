@@ -40,5 +40,8 @@ To be visible and clicable in the admin panel, the status of posts have to be DR
 
 == Upgrade Notice ==
 
+= 1.1 =
+English & better layout
+
 = 1.0 =
 If user wants to have a list of all draft posts across the network.
