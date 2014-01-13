@@ -378,7 +378,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $complete_new_table_line .= '<td><form name="changeDateForm" method="post" action="">';
 	  $complete_new_table_line .= '<input type="hidden" name="post_id" value="'.$new_post->ID.'"/>';
 	  $complete_new_table_line .= '<input type="hidden" name="blog_id" value="'.$blog_id.'">';
-	  $change_date_button = '<input style="float:right;background-color:blue;color:white;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
+	  $change_date_button = '<input style="float:right;background-color:#2AA2CC;color:#000000;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
 	  $unschedule_button = '<input style="float:right;" id="save-post" class="button" type="submit" value="Unchedule" name="unschedulePost"></input>';
 	  $complete_new_table_line .= '<input type="text" class="datepicker" name="'.$date_chooser_name.'" value="'.$date.'"/>'.$change_date_button.$unschedule_button.'</form></td>';
 	  $complete_new_table_line .= '</tr>';
