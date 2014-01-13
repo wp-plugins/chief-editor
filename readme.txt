@@ -28,6 +28,8 @@ To be visible and clicable on the settings page, the status of posts have to be 
 == Screenshots ==
 
 1. Admin view of all drafts across the network
+2. Schedule posts directly from Chief Editor admin panel
+3. Stats on scheduled/draft posts
 
 == Changelog ==
 
