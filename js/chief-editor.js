@@ -1,7 +1,10 @@
-<script type="text/javascript">
-jQuery(document).ready(function() {
-	jQuery('#chief-editor-custom-date').datepicker({
-		dateFormat : 'yy-mm-dd'
+(function($) {
+	$(function() {
+		
+		// Check to make sure the input box exists yy-mm-dd
+		if( 0 < $('.datepicker').length ) {
+		  $('.datepicker').datepicker({dateFormat : 'yy-mm-dd'});
+		} // end if 
+		
 	});
-});
-</script>
+}(jQuery));

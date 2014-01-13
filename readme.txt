@@ -13,7 +13,7 @@ This plugin helps a multi-sites "chief editor" to manage all drafts across the n
 == Description ==
 
 This plugin is aimed to help the multi-sites wordpress editor-in-chief in order to plan publication of posts. All drafts across all sites in the network are shown with a link to the article for quick reviewing. Really simple read only plugin, but very useful :)
-To be visible and clicable on the settings page, the status of posts have to be DRAFT or SCHEDULED. Only editors (or higher roles) can use the plugin.
+To be visible and clicable on the settings page, the status of posts have to be DRAFT, PENDING or SCHEDULED. Only editors (or higher roles) can use the plugin.
 
 == Installation ==
 
@@ -31,6 +31,10 @@ To be visible and clicable on the settings page, the status of posts have to be 
 
 == Changelog ==
 
+= 1.2 =
+* Colored lines according post status
+* possibility to schedule/unschedule posts directly from chief-editor admin panel
+
 = 1.1 =
 * Translated to english
 * Table layout improved
@@ -39,6 +43,9 @@ To be visible and clicable on the settings page, the status of posts have to be 
 * First version
 
 == Upgrade Notice ==
+
+= 1.2 =
+If you want to manage all post scheduling from chief editor
 
 = 1.1 =
 English & better layout

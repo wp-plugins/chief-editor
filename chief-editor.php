@@ -2,8 +2,8 @@
 /*
 Plugin Name: Chief Editor
 Plugin URI: http://www.termel.fr/?page_id=17
-Description: Manage all drafts accross the network
-Version: 1.1
+Description: Manage all drafts, pending and scheduled posts accross the network
+Version: 1.2
 Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
@@ -46,9 +46,10 @@ add_action('admin_enqueue_scripts','chief_editor_scripts');
 ********************************************************/
 function chief_editor_init(){
     //do work
-    run_sub_process();
+    chief_editor_init_path();
 }
-function run_sub_process(){
+function chief_editor_init_path(){
     //more work
+ 
 }
 ?>

@@ -1,5 +1,96 @@
-<?php if(!class_exists('ChiefEditorSettings')){
-	class ChiefEditorSettings
+<?php 
+
+if (isset($_POST['submitDate'])) {
+  
+  echo $_POST["datepicker"] . '_' .$_POST["blog_id"]. '_'.$_POST["post_id"];
+  //echo $_POST["name"];
+  updatePostDate($_POST["blog_id"],$_POST["post_id"],$_POST["datepicker"]);
+  
+} else if (isset($_POST['unschedulePost'])) {
+  
+  echo 'Unscheduling post : '.$_POST["datepicker"] . '_' .$_POST["blog_id"]. '_'.$_POST["post_id"];
+  unschedulePost( $_POST["blog_id"],$_POST["post_id"] );
+}
+
+
+if (!defined('CHIEF_EDITOR_PLUGIN_NAME'))
+    define('CHIEF_EDITOR_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
+
+if (!defined('CHIEF_EDITOR_PLUGIN_DIR'))
+    define('CHIEF_EDITOR_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . CHIEF_EDITOR_PLUGIN_NAME);
+
+if (!defined('CHIEF_EDITOR_PLUGIN_URL'))
+    define('CHIEF_EDITOR_PLUGIN_URL', WP_PLUGIN_URL . '/' . CHIEF_EDITOR_PLUGIN_NAME);
+
+
+function updatePostDate($blog_id, $post_id, $post_date) {
+
+  //echo 'date' . $post_date . ' post ID : ' . $post_id .'\r\n';
+		
+		switch_to_blog( $blog_id );
+		
+		$operation = 'edit';
+  	    $newpostdata = array();
+		
+	  if ( strtotime($post_date) < strtotime( "tomorrow" ) ) {
+		echo strtotime($post_date) . '<'. strtotime( "tomorrow" ) ."\r\n";
+		echo 'cannot publish artilces from here, only schedule, dates in future';
+		return;
+		
+		//$status = 'publish';    
+        $newpostdata['post_status'] = $status;
+        $newpostdata['post_date'] = date( 'Y-m-d H:i:s',  $post_date );
+
+        // Also pass 'post_date_gmt' so that WP plays nice with dates
+        $newpostdata['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $post_date );
+
+    } elseif ( strtotime($post_date) > strtotime( 'today' ) ) {
+		
+		echo strtotime($post_date) . '>'. strtotime( "today" ) .'\r\n';
+        $status = 'future';    
+        $newpostdata['post_status'] = $status;
+        $newpostdata['post_date'] = date( 'Y-m-d H:i:s', strtotime($post_date) );
+		//echo $post_date . '=='. strtotime($post_date).'=='.$newpostdata['post_date'].'\r\n';
+        // Also pass 'post_date_gmt' so that WP plays nice with dates
+        $newpostdata['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', strtotime($post_date) );
+    }
+
+    if ('insert' == $operation) {
+        $err = wp_insert_post($newpostdata, true);
+	  
+    } elseif ('edit' == $operation) {
+	  
+	  //echo 'edit ==' .$operation."\r\n";
+        $newpostdata['ID'] = $post_id;
+	  	$newpostdata['edit_date'] = true;
+	  
+	  //echo $newpostdata['ID'] . "_" . $newpostdata['edit_date']. "_" . $newpostdata['post_status']. "_" . $newpostdata['post_date'] . "_" . $newpostdata['post_date_gmt'] ."\r\n";
+	  
+        $err = wp_update_post($newpostdata);
+	  //echo "wp_update_post::Error return: ".$err ."\r\n";
+    }
+}
+
+
+function unschedulePost($blog_id, $post_id) {
+   
+  //echo 'unschedulePost-1';
+  switch_to_blog( $blog_id );
+  //echo 'unschedulePost-2';
+  $newpostdata = array();
+  $status = 'draft';
+  //echo 'unschedulePost-3 '.$status;
+  $newpostdata['post_status'] = $status;
+  $newpostdata['ID'] = $post_id;
+  //echo 'unschedulePost-4 ' .$newpostdata['ID'];
+  $err = wp_update_post($newpostdata);
+  //echo 'wp_update_post::Error return: '.$err .'\r\n';
+  
+}
+
+
+if(!class_exists('ChiefEditorSettings')) {  
+  class ChiefEditorSettings
 	{
     	/**
      	* Holds the values to be used in the fields callbacks
@@ -27,6 +118,42 @@
             array( $this, 'create_admin_page' )
         );
     	}
+	  
+	  
+	/**
+	 * Registers and enqueues admin-specific styles.
+	 *
+	 * @version		1.0
+     * @since 		1.0
+	 */
+	public function register_admin_styles() {
+	
+		wp_enqueue_style( 'jquery-ui-datepicker', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/smoothness/jquery-ui.css' );
+		wp_enqueue_style( 'wp-jquery-date-picker', plugins_url( CHIEF_EDITOR_PLUGIN_NAME . '/css/chief-editor.css' ) );	
+		
+	} // end register_admin_styles
+
+	/**
+	 * Registers and enqueues admin-specific JavaScript.
+	 *
+	 * @version		1.0
+	 * @since 		1.0
+	 */	
+	public function register_admin_scripts() {
+	
+		wp_enqueue_script( 'jquery-ui-datepicker' );
+		wp_enqueue_script( 'wp-jquery-date-picker', plugins_url( CHIEF_EDITOR_PLUGIN_NAME . '/js/chief-editor.js' ) );
+		
+	} // end register_admin_scripts
+	  
+	  
+	  /*
+	function display()
+	{
+    echo "hello ".$_POST["studentname"];
+	}*/
+	
+	  
     /**
      * Options page callback
      */
@@ -171,20 +298,28 @@
 
       endforeach;
 
-      $query.= " ORDER BY post_status DESC, blog_id DESC";// LIMIT 0,$howMany;";
+      $query.= " ORDER BY post_status DESC, blog_id DESC, post_date DESC";// LIMIT 0,$howMany;";
       # echo $query; # debugging code
       $rows = $wpdb->get_results( $query );
 
+	  
+	  
       // now we need to get each of our posts into an array and return them
       if ( $rows ) :
-
-	  $futureColor = '#FFE699';
+	  $nb_of_scheduled = 0;
+	  $nb_of_drafts = 0;
+	  $nb_of_pending = 0;
+	  $futureColor = '#A4F2FF';
 	  $draftColor = '#EDEDED';
+	  $pendingColor = '#9CFFA1';
+	  $tableHeaderColor = "#6B6B6B";
+	  echo '<h3>Total non published post(s) found : '. count($rows).'</h3>';
+	  //echo '<input type="text" id="datepicker" name="start_date" value="'.$date.'"/>';
 	  
-	  echo '<h3>Non published post(s) found : '. count($rows).'</h3>';
-	  echo 'Color codes:<div style="border:solid black 1px;background-color:'.$futureColor.';">Scheduled posts</div><div style="border:solid black 1px;background-color:'.$draftColor.';">Draft posts</div>';
+	  //echo 'Color codes:<div style="border:solid black 1px;background-color:'.$futureColor.';">Scheduled posts</div><div style="border:solid black 1px;background-color:'.$draftColor.';">Draft posts</div>';
 	  echo '<hr>';
-	  echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog title</td><td>Featured image</td><td>Post</td><td>Excerpt</td><td>Author</td><td>Date</td><td>Change date</td></tr>';
+	  echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
+	  echo '<td>Blog title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author</td><td>Scheduled for date</td><td>Change scheduling</td></tr>';
         $posts = array();
         foreach ( $rows as $row ) :
 		$blog_id = $row->blog_id;
@@ -215,16 +350,57 @@
 		$title = $new_post->post_title;
 		$date = $new_post->post_date;
 		$post_state = $new_post->post_status;
-		$line_color = $post_state == 'future' ? $futureColor : $draftColor;
+		$line_color = $post_state == 'future' ? $futureColor : ( $post_state == 'pending' ? $pendingColor : $draftColor);
+	  
+		  if ($post_state == 'future') {
+		   $nb_of_scheduled++;
+		  } elseif ($post_state == 'draft') {
+			$nb_of_drafts++;
+		} elseif ($post_state == 'pending') {
+			$nb_of_pending++;
+		  }
+	  
 		$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
 	  $complete_new_table_line .= '<td><h3>'.$blog_name.'</h3></td><td><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$image_img_tag.'</a></td>';
 		$complete_new_table_line .= '<td><h3><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></h3></td>';
-		$complete_new_table_line .= '<td>'.$abstract.'</td><td><h4>'.$username.'</h4></td><td><h4>'.$date.'</h4></td>';
-		$complete_new_table_line .= '<td><form><input type="text" id="chief-editor-custom-date" class="chief-editor-custom-date" name="start_date" value="'.$date.'"/></form></td></tr>';
+	  $status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
+	  $complete_new_table_line .= '<td><img src="'.$status_image.'"/></td>';
+		$complete_new_table_line .= '<td>'.$abstract.'</td><td>'.$username.'</td>';
+	  
+	  if ($post_state == 'future') {
+		$complete_new_table_line .= '<td><h3>' . $date . '</h3></td>';
+	  } else {
+		$complete_new_table_line .= '<td>not scheduled</td>';
+	  }
+	  
+	  $date_chooser_name = 'datepicker';//_'.$blog_id.'_'.$new_post->ID;
+	  
+	  $complete_new_table_line .= '<td><form name="changeDateForm" method="post" action="">';
+	  $complete_new_table_line .= '<input type="hidden" name="post_id" value="'.$new_post->ID.'"/>';
+	  $complete_new_table_line .= '<input type="hidden" name="blog_id" value="'.$blog_id.'">';
+	  $change_date_button = '<input style="float:right;background-color:blue;color:white;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
+	  $unschedule_button = '<input style="float:right;" id="save-post" class="button" type="submit" value="Unchedule" name="unschedulePost"></input>';
+	  $complete_new_table_line .= '<input type="text" class="datepicker" name="'.$date_chooser_name.'" value="'.$date.'"/>'.$change_date_button.$unschedule_button.'</form></td>';
+	  $complete_new_table_line .= '</tr>';
 		echo $complete_new_table_line;
+	  
+	  
+	  
+	  
+	  
 		$posts[] = $new_post;
 	endforeach;
 	echo '</table>';
+	  
+	  echo '<hr>';
+	  echo '<table style="border:solid black 1px;width:50%;">';
+	  echo '<tr style="background-color:'.$futureColor.';"><td>Scheduled posts : </td><td>'.$nb_of_scheduled.'</td></tr>';
+	  echo '<tr style="background-color:'.$pendingColor.';"><td>Pending posts : </td><td>'.$nb_of_pending.'</td></tr>';
+	  echo '<tr style="background-color:'.$draftColor.';"><td>Draft posts : </td><td>'.$nb_of_drafts.'</td></tr>';
+	  echo '<tr style="background-color:#ffffff;color:#000000;"><td>Total unpublished posts : </td><td>'.count($rows).'</td></tr>';
+	  echo '</table>';
+	  
+	  
         //echo "<pre>"; print_r($posts); echo "</pre>"; exit; # debugging code
         return $posts;
 
@@ -248,6 +424,9 @@
 }
 
 
+	 
+	  
+	  
 public function getDefaultWPPublishBox() {
 
 	$result = "<div id=\"submitdiv\" class=\"postbox\">
