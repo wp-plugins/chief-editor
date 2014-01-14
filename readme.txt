@@ -33,6 +33,9 @@ To be visible and clicable on the settings page, the status of posts have to be 
 
 == Changelog ==
 
+= 1.3 =
+Bug fix
+
 = 1.2 =
 * Colored lines according post status
 * possibility to schedule/unschedule posts directly from chief-editor admin panel

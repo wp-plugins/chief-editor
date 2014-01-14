@@ -46,7 +46,7 @@ function updatePostDate($blog_id, $post_id, $post_date) {
 
     } elseif ( strtotime($post_date) > strtotime( 'today' ) ) {
 		
-		echo strtotime($post_date) . '>'. strtotime( "today" ) .'\r\n';
+		//echo strtotime($post_date) . '>'. strtotime( "today" ) .'\r\n';
         $status = 'future';    
         $newpostdata['post_status'] = $status;
         $newpostdata['post_date'] = date( 'Y-m-d H:i:s', strtotime($post_date) );
@@ -301,98 +301,98 @@ if(!class_exists('ChiefEditorSettings')) {
       $query.= " ORDER BY post_status DESC, blog_id DESC, post_date DESC";// LIMIT 0,$howMany;";
       # echo $query; # debugging code
       $rows = $wpdb->get_results( $query );
-
-	  
 	  
       // now we need to get each of our posts into an array and return them
       if ( $rows ) :
-	  $nb_of_scheduled = 0;
-	  $nb_of_drafts = 0;
-	  $nb_of_pending = 0;
-	  $futureColor = '#A4F2FF';
-	  $draftColor = '#EDEDED';
-	  $pendingColor = '#9CFFA1';
-	  $tableHeaderColor = "#6B6B6B";
-	  echo '<h3>Total non published post(s) found : '. count($rows).'</h3>';
-	  //echo '<input type="text" id="datepicker" name="start_date" value="'.$date.'"/>';
-	  
-	  //echo 'Color codes:<div style="border:solid black 1px;background-color:'.$futureColor.';">Scheduled posts</div><div style="border:solid black 1px;background-color:'.$draftColor.';">Draft posts</div>';
-	  echo '<hr>';
-	  echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
-	  echo '<td>Blog title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author</td><td>Scheduled for date</td><td>Change scheduling</td></tr>';
+	  	$nb_of_scheduled = 0;
+	  	$nb_of_drafts = 0;
+	  	$nb_of_pending = 0;
+	  	$futureColor = '#A4F2FF';
+	  	$draftColor = '#EDEDED';
+	  	$pendingColor = '#9CFFA1';
+	  	$tableHeaderColor = "#6B6B6B";
+	  	echo '<h3>Total non published post(s) found : '. count($rows).'</h3>';
+	  	echo '<hr>';
+	  	echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
+	  	echo '<td>Blog title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td><td>Scheduled for date</td><td>Change scheduling</td></tr>';
         $posts = array();
         foreach ( $rows as $row ) :
-		$blog_id = $row->blog_id;
-		$data = $row->ID;
-        	$new_post = get_blog_post( $blog_id, $data );
-        	#global $blog_id;
-		$current_blog_details = get_blog_details( $blog_id );
-		$blog_name = $current_blog_details->blogname;
-		//echo $blog_name;
-		//echo '<tr><td>'.$new_post->get_title().'</td></tr>';
-		//setup_postdata( $new_post );
-		//echo '<h2>'.the_title() .'</h2>';		
-		$images = get_children( array( 'post_parent' => $new_post->ID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order', 'order' => 'ASC', 'numberposts' => 999 ) );
-		$image_img_tag = '';
-		if ( $images ) {
-			$total_images = count( $images );
-			$image = array_shift( $images );
-			$image_img_tag = wp_get_attachment_image( $image->ID, 'thumbnail' );
-			}
-		$abstract = $new_post->post_excerpt; 
-		$permalink = get_blog_permalink( $blog_id, $data );
-		$author = $new_post->post_author;
-		$user_info = get_userdata($author);
-      		$username = $user_info->user_login;
-		#echo 'Username: ' . $user_info->user_login . "\n";
+			$blog_id = $row->blog_id;
+			$data = $row->ID;      
+			$current_blog_details = get_blog_details( $blog_id );
+			$blog_name = $current_blog_details->blogname;
+			$new_post = get_blog_post( $blog_id, $data );
+	  		$post_id = $new_post->ID;
+	  		$permalink = get_blog_permalink( $blog_id, $data );
+	  		$title = $new_post->post_title;
+	  
+	  		$post_thumbnail = '';
+	  		$post_thumbnail .= '<a href="' . $permalink . '" title="' . esc_attr( $title) . '">';
+	  //$post_thumbnail .= '<img src="'.$this->multisite_get_thumb($post_id,100,100,$blog_id,true,true).'"/>';
+	  $post_thumbnail .= $this->get_the_post_thumbnail_by_blog($blog_id,$post_id);
+	  		$post_thumbnail .=  '</a>';
+	  //echo $post_thumbnail;
+	  		//} else {
+	  		//echo 'no thumbnail... for post '.$post_id;
+	  		//}
+			$abstract = $new_post->post_excerpt; 
+			$author = $new_post->post_author;
+			$user_info = get_userdata($author);
+      		$userlogin = $user_info->user_login;
+	    	$userdisplayname = $user_info->display_name;
+			#echo 'Username: ' . $user_info->user_login . "\n";
      		#echo 'User roles: ' . implode(', ', $user_info->roles) . "\n";
       		#echo 'User ID: ' . $user_info->ID . "\n";
-		$title = $new_post->post_title;
-		$date = $new_post->post_date;
-		$post_state = $new_post->post_status;
-		$line_color = $post_state == 'future' ? $futureColor : ( $post_state == 'pending' ? $pendingColor : $draftColor);
+		
+			$date = $new_post->post_date;
+			$post_state = $new_post->post_status;
+			$line_color = $post_state == 'future' ? $futureColor : ( $post_state == 'pending' ? $pendingColor : $draftColor);
 	  
-		  if ($post_state == 'future') {
-		   $nb_of_scheduled++;
-		  } elseif ($post_state == 'draft') {
-			$nb_of_drafts++;
-		} elseif ($post_state == 'pending') {
-			$nb_of_pending++;
-		  }
+		  	if ($post_state == 'future') {
+		   		$nb_of_scheduled++;
+		  	} elseif ($post_state == 'draft') {
+				$nb_of_drafts++;
+			} elseif ($post_state == 'pending') {
+				$nb_of_pending++;
+		  	}
 	  
-		$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
-	  $complete_new_table_line .= '<td><h3>'.$blog_name.'</h3></td><td><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$image_img_tag.'</a></td>';
-		$complete_new_table_line .= '<td><h3><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></h3></td>';
-	  $status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
-	  $complete_new_table_line .= '<td><img src="'.$status_image.'"/></td>';
-		$complete_new_table_line .= '<td>'.$abstract.'</td><td>'.$username.'</td>';
+			$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
+	  		$complete_new_table_line .= '<td><h4>'.$blog_name.'</h4></td>';
+	  		$complete_new_table_line .= '<td>'.$post_thumbnail.'</td>';
+	  		$edit_post_link = '';
+	  		$edit_post_link .= $this->get_multisite_post_edit_link($blog_id ,$post_id);
+	  //echo 'WOW'.$edit_post_link;
+	  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span> (<a href="'.$edit_post_link.'" target="_blank">Edit</a>)</td>';
+	  		$status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
+	  		$complete_new_table_line .= '<td><img src="'.$status_image.'"/></td>';
+			$complete_new_table_line .= '<td>'.$abstract.'</td><td>'.$userdisplayname.' ('.$userlogin.')</td>';
 	  
-	  if ($post_state == 'future') {
-		$complete_new_table_line .= '<td><h3>' . $date . '</h3></td>';
-	  } else {
-		$complete_new_table_line .= '<td>not scheduled</td>';
-	  }
+	  		if ($post_state == 'future') {
+				$complete_new_table_line .= '<td><h3>' . $date . '</h3></td>';
+	  		} else {
+				$complete_new_table_line .= '<td>not scheduled</td>';
+	  		}
 	  
-	  $date_chooser_name = 'datepicker';//_'.$blog_id.'_'.$new_post->ID;
+	  		$date_chooser_name = 'datepicker';//_'.$blog_id.'_'.$new_post->ID;
 	  
-	  $complete_new_table_line .= '<td><form name="changeDateForm" method="post" action="">';
-	  $complete_new_table_line .= '<input type="hidden" name="post_id" value="'.$new_post->ID.'"/>';
-	  $complete_new_table_line .= '<input type="hidden" name="blog_id" value="'.$blog_id.'">';
-	  $change_date_button = '<input style="float:right;background-color:#2AA2CC;color:#000000;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
-	  $unschedule_button = '<input style="float:right;" id="save-post" class="button" type="submit" value="Unchedule" name="unschedulePost"></input>';
-	  $complete_new_table_line .= '<input type="text" class="datepicker" name="'.$date_chooser_name.'" value="'.$date.'"/>'.$change_date_button.$unschedule_button.'</form></td>';
-	  $complete_new_table_line .= '</tr>';
-		echo $complete_new_table_line;
+	  		$complete_new_table_line .= '<td><form name="changeDateForm" method="post" action="">';
+	  		$complete_new_table_line .= '<input type="hidden" name="post_id" value="'.$new_post->ID.'"/>';
+	  		$complete_new_table_line .= '<input type="hidden" name="blog_id" value="'.$blog_id.'">';
+	  		$change_date_button = '<input style="float:right;background-color:#2AA2CC;color:#000000;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
+	  		$unschedule_button = '<input style="float:right;" id="save-post" class="button" type="submit" value="Unchedule" name="unschedulePost"></input>';
+	  		$complete_new_table_line .= '<input type="text" class="datepicker" name="'.$date_chooser_name.'" value="'.$date.'"/>'.$change_date_button.$unschedule_button.'</form></td>';
+	  		$complete_new_table_line .= '</tr>';
+			
+	  		echo $complete_new_table_line;
 	  
-	  
-	  
-	  
-	  
-		$posts[] = $new_post;
-	endforeach;
-	echo '</table>';
-	  
+	  		$posts[] = $new_post;
+		
+	  endforeach;
+		
+	  echo '</table>';
+
 	  echo '<hr>';
+
 	  echo '<table style="border:solid black 1px;width:50%;">';
 	  echo '<tr style="background-color:'.$futureColor.';"><td>Scheduled posts : </td><td>'.$nb_of_scheduled.'</td></tr>';
 	  echo '<tr style="background-color:'.$pendingColor.';"><td>Pending posts : </td><td>'.$nb_of_pending.'</td></tr>';
@@ -423,9 +423,120 @@ if(!class_exists('ChiefEditorSettings')) {
   endif;
 }
 
-
-	 
 	  
+	  
+function get_multisite_post_edit_link($blogID, $postID) {
+	
+  	switch_to_blog($blogID);
+
+  	$out = get_edit_post_link($postID);
+  	//echo 'WOW'.$edit_post_link;
+	
+  	restore_current_blog();
+
+	return $out;
+	
+}
+	  
+function multisite_get_thumb($postID, $w = 400, $h = 300, $blogID = 1, $link = true, $return = false) {
+	
+  	switch_to_blog($blogID);
+	$scriptpath = get_bloginfo('template_directory');
+  	
+	if( $thumbnail = get_post_meta($postID, 'thumbnail', true) ){
+		$iurl = '/wp-content/iptv/img/'.$thumbnail;
+	} else {
+	  
+	  //$images = get_children( array( 'post_parent' => $postID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order', 'order' => 'ASC', 'numberposts' => 999 ) );
+		
+	  $images = get_children(array('post_parent' => $postID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order'));
+	  
+	  //echo "Getting featured image for post id ".$blogID."/".$postID." nbOfImages :".count($images)."\n";
+	  
+		if ( $images ){
+			$img = array_shift($images);
+			$imagelink = wp_get_attachment_image_src($img->ID,array($w,$h));
+			$iurl = $imagelink[0];
+		  echo $blogID.'/'.$postID.' $iurl:'.$iurl;
+		}
+	}
+	$out = '';
+	if( $iurl ){
+		$img = $iurl;
+	  $out .= $img;
+	  /*
+	  	if( $link )
+		  $out .= '';
+			$out .= '';
+			if( $link ) 
+			  $out .= '';
+			  */
+	}
+	
+  	restore_current_blog();
+
+	if($return) {
+		return $out;
+	} else {
+		echo $out;
+	}
+}
+
+//if( !function_exists( 'get_the_post_thumbnail_by_blog' ) ) {
+	function get_the_post_thumbnail_by_blog($blog_id=NULL,$post_id=NULL,$size='thumbnail',$attrs=NULL) {
+		global $current_blog;
+		$sameblog = false;
+
+		if( empty( $blog_id ) || $blog_id == $current_blog->blog_id ) {
+			$blog_id = $current_blog->blog_id;
+			$sameblog = true;
+		}
+		if( empty( $post_id ) ) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		if( $sameblog )
+			return get_the_post_thumbnail( $post_id, $size, $attrs );
+
+		if( !$this->has_post_thumbnail_by_blog($blog_id,$post_id) )
+			return false;
+
+		global $wpdb;
+	  //$oldblog = $wpdb->set_blog_id( $blog_id );
+switch_to_blog($blog_id);
+	  
+		$blogdetails = get_blog_details( $blog_id );
+	  // str_replace ( mixed $search , mixed $replace , mixed $subject [, int &$count ] )
+	  //echo 'Replace '.$current_blog->domain . $current_blog->path.' by '.$blogdetails->domain . $blogdetails->path.' in '.get_the_post_thumbnail( $post_id, $size, $attrs );
+		$thumbcode = str_replace( $current_blog->domain . $current_blog->path, $blogdetails->domain . $blogdetails->path, get_the_post_thumbnail( $post_id, $size, $attrs ) );
+
+	  //$wpdb->set_blog_id( $oldblog );
+	  restore_current_blog();
+		return $thumbcode;
+	}
+
+	function has_post_thumbnail_by_blog($blog_id=NULL,$post_id=NULL) {
+		if( empty( $blog_id ) ) {
+			global $current_blog;
+			$blog_id = $current_blog->blog_id;
+		}
+		if( empty( $post_id ) ) {
+			global $post;
+			$post_id = $post->ID;
+		}
+
+		global $wpdb;
+		$oldblog = $wpdb->set_blog_id( $blog_id );
+
+		$thumbid = has_post_thumbnail( $post_id );
+		$wpdb->set_blog_id( $oldblog );
+		return ($thumbid !== false) ? true : false;
+	}
+
+	function the_post_thumbnail_by_blog($blog_id=NULL,$post_id=NULL,$size='post-thumbnail',$attrs=NULL) {
+		echo get_the_post_thumbnail_by_blog($blog_id,$post_id,$size,$attrs);
+	}
+//}
 	  
 public function getDefaultWPPublishBox() {
 
