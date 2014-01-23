@@ -8,12 +8,13 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin helps a multi-sites "chief editor" to manage all drafts across the network.
+Helps multi-sites "chief editor" to manage all drafts and comments across the network.
 
 == Description ==
 
 This plugin is aimed to help the multi-sites wordpress editor-in-chief in order to plan publication of posts. All drafts across all sites in the network are shown with a link to the article for quick reviewing. Really simple read only plugin, but very useful :)
 To be visible and clicable on the settings page, the status of posts have to be DRAFT, PENDING or SCHEDULED. Only editors (or higher roles) can use the plugin.
+All recent comments accross the network are also visible and a link allow the user to answer directly.
 
 == Installation ==
 
@@ -33,8 +34,12 @@ To be visible and clicable on the settings page, the status of posts have to be 
 
 == Changelog ==
 
+= 2.0 =
+* Comments tab added in order to manage all recent comments accross the network
+* Remove schedule functionnality because buggy
+
 = 1.3 =
-Bug fix
+* Bug fix
 
 = 1.2 =
 * Colored lines according post status
@@ -49,11 +54,14 @@ Bug fix
 
 == Upgrade Notice ==
 
+= 2.0 =
+* Manage comments as well
+
 = 1.2 =
-If you want to manage all post scheduling from chief editor
+* If you want to manage all post scheduling from chief editor
 
 = 1.1 =
-English & better layout
+* English & better layout
 
 = 1.0 =
-If user wants to have a list of all draft posts across the network.
+* If user wants to have a list of all draft posts across the network.

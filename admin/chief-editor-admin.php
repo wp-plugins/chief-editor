@@ -25,34 +25,45 @@ if (!defined('CHIEF_EDITOR_PLUGIN_URL'))
 
 function updatePostDate($blog_id, $post_id, $post_date) {
 
-  //echo 'date' . $post_date . ' post ID : ' . $post_id .'\r\n';
-		
-		switch_to_blog( $blog_id );
+  echo '<br/>date: ' . $post_date . ' strtotime: ' . strtotime($post_date) . ' strtotime(now): ' . strtotime('now').' '.strtotime("+1 hour").'<br/>';
+  		echo 'date("Y-m-d H:i:s"):' . date("Y-m-d H:i:s");
+  		echo 'time("Y-m-d H:i:s"):' . time("Y-m-d H:i:s");
+  		$now = gmdate('Y-m-d H:i:59');
+  echo '<br/>now from gmdate'.$now;
+  		$time = time();
+  echo '<br/>time:'.$time;
+  
+  $status = strtotime($post_date) > strtotime('+1 hour') ? 'future' : 'publish';
+  
+  
+  switch_to_blog( $blog_id );
 		
 		$operation = 'edit';
   	    $newpostdata = array();
-		
-	  if ( strtotime($post_date) < strtotime( "tomorrow" ) ) {
-		echo strtotime($post_date) . '<'. strtotime( "tomorrow" ) ."\r\n";
+  //strtotime("now"), "\n";
+	  if ( $status == 'publish' ) {
+		echo ' ' .strtotime($post_date) .'('.$post_date. ') < '. strtotime( "now" ) ,"\n" ;
 		echo 'cannot publish artilces from here, only schedule, dates in future';
 		return;
 		
 		//$status = 'publish';    
-        $newpostdata['post_status'] = $status;
-        $newpostdata['post_date'] = date( 'Y-m-d H:i:s',  $post_date );
+		//$newpostdata['post_status'] = $status;
+		//$newpostdata['post_date'] = date( 'Y-m-d H:i:s',  $post_date );
 
         // Also pass 'post_date_gmt' so that WP plays nice with dates
-        $newpostdata['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $post_date );
+		//$newpostdata['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $post_date );
 
-    } elseif ( strtotime($post_date) > strtotime( 'today' ) ) {
+    } elseif ( $status == 'future' ) {
 		
-		//echo strtotime($post_date) . '>'. strtotime( "today" ) .'\r\n';
-        $status = 'future';    
+		echo '<br/>SCHEDULING: ' .strtotime($post_date) . '>'. strtotime( "today" ) .'\r\n';
+		//$status = 'future';    
         $newpostdata['post_status'] = $status;
         $newpostdata['post_date'] = date( 'Y-m-d H:i:s', strtotime($post_date) );
-		//echo $post_date . '=='. strtotime($post_date).'=='.$newpostdata['post_date'].'\r\n';
+		$newpostdata->edit_date = true;
         // Also pass 'post_date_gmt' so that WP plays nice with dates
         $newpostdata['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', strtotime($post_date) );
+		
+		echo '<br/>SCHEDULING: ' . $newpostdata['post_date'] . ' / GMDate : ' . $newpostdata['post_date_gmt'];
     }
 
     if ('insert' == $operation) {
@@ -62,12 +73,14 @@ function updatePostDate($blog_id, $post_id, $post_date) {
 	  
 	  //echo 'edit ==' .$operation."\r\n";
         $newpostdata['ID'] = $post_id;
-	  	$newpostdata['edit_date'] = true;
+	  	
+		  //$newpostdata['edit_date'] = true;
 	  
 	  //echo $newpostdata['ID'] . "_" . $newpostdata['edit_date']. "_" . $newpostdata['post_status']. "_" . $newpostdata['post_date'] . "_" . $newpostdata['post_date_gmt'] ."\r\n";
-	  
+	  //echo '<br/>'.$newpostdata;
         $err = wp_update_post($newpostdata);
 	  //echo "wp_update_post::Error return: ".$err ."\r\n";
+	  
     }
 }
 
@@ -96,14 +109,137 @@ if(!class_exists('ChiefEditorSettings')) {
      	* Holds the values to be used in the fields callbacks
      	*/
     	private $options;
+	  private $general_settings_key = 'chief_editor_posts_tab';
+    private $advanced_settings_key = 'chief_editor_comments_tab';
+    private $chief_editor_options_key = 'chief_editor_plugin_options';
+	  //private $plugin_settings_tabs = array();
+	  	private $chief_editor_settings_tabs = array();
     	/**
      	* Start up
      	*/
     	public function __construct()
     	{
-        	add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
+		  /*
+		  add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
         	add_action( 'admin_init', array( $this, 'page_init' ) );
+			*/
+		  
+		  add_action( 'init', array( &$this, 'load_settings' ) );
+    add_action( 'admin_init', array( &$this, 'register_general_settings' ) );
+    add_action( 'admin_init', array( &$this, 'register_advanced_settings' ) );
+    add_action( 'admin_menu', array( &$this, 'add_admin_menus' ) );
+		  
     	}
+	  
+	  function load_settings() {
+    $this->general_settings = (array) get_option( $this->general_settings_key );
+    $this->advanced_settings = (array) get_option( $this->advanced_settings_key );
+
+    // Merge with defaults
+    $this->general_settings = array_merge( array(
+        'general_option' => 'General value'
+    ), $this->general_settings );
+
+    $this->advanced_settings = array_merge( array(
+        'advanced_option' => 'Advanced value'
+    ), $this->advanced_settings );
+}
+	  
+	function register_general_settings() {
+    	$this->chief_editor_settings_tabs[$this->general_settings_key] = 'Posts';
+	  /*
+	  register_setting( $this->general_settings_key, $this->general_settings_key );
+	  add_settings_section( 'section_general', 'General Plugin Settings', array( &$this, 'section_general_desc' ), $this->general_settings_key );
+    	add_settings_field( 'general_option', 'A General Option', array( &$this, 'field_general_option' ), $this->general_settings_key, 'section_general' );
+		*/
+	  
+	}
+	  
+	  function section_general_desc() { echo 'General section description goes here.'; }
+	  
+	function field_general_option() {
+    	?>
+    	<input type="text" name="<?php echo $this->general_settings_key; ?>[general_option]" value="<?php echo esc_attr( $this->general_settings['general_option'] ); ?>" />
+    	<?php
+	}
+
+	function register_advanced_settings() {
+	  
+    	$this->chief_editor_settings_tabs[$this->advanced_settings_key] = 'Comments';
+	  /*
+    	register_setting( $this->advanced_settings_key, $this->advanced_settings_key );
+    	add_settings_section( 'section_advanced', 'Advanced Plugin Settings', array( &$this, 'section_advanced_desc' ), $this->advanced_settings_key );
+    	add_settings_field( 'advanced_option', 'An Advanced Option', array( &$this, 'field_advanced_option' ), $this->advanced_settings_key, 'section_advanced' );
+		*/
+	}
+
+function section_advanced_desc() { echo 'Advanced section description goes here.'; }
+
+function field_advanced_option() {
+    ?>
+    <input type="text" name="<?php echo $this->advanced_settings_key; ?>[advanced_option]" value="<?php echo esc_attr( $this->advanced_settings['advanced_option'] ); ?>" />
+    <?php
+}
+	  
+	  
+	  function add_admin_menus() {
+    		add_options_page( 'Chief Editor Settings', 'Chief Editor', 'manage_options', $this->chief_editor_options_key, array( &$this, 'plugin_options_page' ) );
+}
+	  
+	  
+	  function plugin_options_page() {
+    $tab = isset( $_GET['tab'] ) ? $_GET['tab'] : $this->general_settings_key;
+    ?>
+    <div class="wrap">
+        <?php $this->plugin_options_tabs(); ?>
+        <form method="post" action="options.php">
+            <?php wp_nonce_field( 'update-options' ); ?>
+            <?php settings_fields( $tab ); ?>
+            <?php do_settings_sections( $tab ); ?>
+		  <?php /*submit_button();*/ ?>
+        </form>
+    </div>
+    <?php
+}
+	  
+	  function plugin_options_tabs() {
+		
+		$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : $this->general_settings_key;
+		//screen_icon();
+		echo '<div style="text-align:center;padding:5px;">';
+		echo screen_icon() . '<h1>Chief Editor</h1>';
+      	echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">Visit Plugin Site</a>  <a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">Rate!</a>';
+		//echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
+		echo '</div> ';
+    	echo '<h2 class="nav-tab-wrapper">';
+    	foreach ( $this->chief_editor_settings_tabs as $tab_key => $tab_caption ) {
+        	$active = $current_tab == $tab_key ? 'nav-tab-active' : '';
+        	echo '<a class="nav-tab ' . $active . '" href="?page=' . $this->chief_editor_options_key . '&tab=' . $tab_key . '">' . $tab_caption . '</a>';
+    	}
+    	echo '</h2>';
+		  
+		if ($current_tab == 'chief_editor_posts_tab') {
+			$this->recent_mu_posts();		  
+		} elseif ($current_tab == 'chief_editor_comments_tab') {
+		  //$this->recent_multisite_comments();
+		  
+		  $last_month = mktime(0, 0, 0, date("m")-1, date("d"),   date("Y"));
+		$start_date = date('Y-m-d H:i:s', $last_month );
+		$end_date = date('Y-m-d H:i:s');
+		  $intro_text = 'All comments accross the network since '.$start_date.'<br/>';
+		  echo $intro_text;
+		 $allComments = $this->getAllCommentsMultisite('1000',$start_date,$end_date);
+		 echo $this->formatCommentsFromArray($allComments);
+		  // $merged = 
+		  	//echo $this->formatCommentsFromArray($merged);
+		}
+		
+		echo '<div style="text-align:right;">';
+		// echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">Visit Plugin Site</a>  <a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">Rate This Plugin</a>';
+		echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
+		echo '</div> ';
+}
+	  
     	/**
      	* Add options page
      	*/
@@ -176,46 +312,13 @@ if(!class_exists('ChiefEditorSettings')) {
             <!-- </form> -->
 	    <?php // create list of drafts
 		
-	//$this->get_all_drafts();
+	
 	$this->recent_mu_posts();
 ?>
         </div>
         <?php
     }
-    /**
-     * Register and add settings
-     */
-    public function page_init()
-    {        
-        register_setting(
-            'my_option_group', // Option group
-            'my_option_name', // Option name
-            array( $this, 'sanitize' ) // Sanitize
-        );
-
-        add_settings_section(
-            'setting_section_id', // ID
-            'Preferences', // Title
-            array( $this, 'print_section_info' ), // Callback
-            'chief-editor-admin' // Page
-        );  
-
-        add_settings_field(
-            'id_number', // ID
-            'ID Number', // Title 
-            array( $this, 'id_number_callback' ), // Callback
-            'chief-editor-admin', // Page
-            'setting_section_id' // Section           
-        );      
-
-        add_settings_field(
-            'title', 
-            'Title', 
-            array( $this, 'title_callback' ), 
-            'chief-editor-admin', 
-            'setting_section_id'
-        ); 
-    }
+   
     /**
      * Sanitize each setting field as needed
      *
@@ -311,15 +414,19 @@ if(!class_exists('ChiefEditorSettings')) {
 	  	$draftColor = '#EDEDED';
 	  	$pendingColor = '#9CFFA1';
 	  	$tableHeaderColor = "#6B6B6B";
-	  	echo '<h3>Total non published post(s) found : '. count($rows).'</h3>';
-	  	echo '<hr>';
+	  //echo '<hr>';
+	  //echo '<h2>Posts</h2>';
+	  //echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
+	  echo '<br/>';
 	  	echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
-	  	echo '<td>Blog title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td><td>Scheduled for date</td><td>Change scheduling</td></tr>';
+	  echo '<td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
+	  echo '<td>Scheduled for date</td>';//<td>Change scheduling</td></tr>';
         $posts = array();
         foreach ( $rows as $row ) :
 			$blog_id = $row->blog_id;
 			$data = $row->ID;      
 			$current_blog_details = get_blog_details( $blog_id );
+	  $blog_path = $current_blog_details->path;
 			$blog_name = $current_blog_details->blogname;
 			$new_post = get_blog_post( $blog_id, $data );
 	  		$post_id = $new_post->ID;
@@ -329,7 +436,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  		$post_thumbnail = '';
 	  		$post_thumbnail .= '<a href="' . $permalink . '" title="' . esc_attr( $title) . '">';
 	  //$post_thumbnail .= '<img src="'.$this->multisite_get_thumb($post_id,100,100,$blog_id,true,true).'"/>';
-	  $post_thumbnail .= $this->get_the_post_thumbnail_by_blog($blog_id,$post_id);
+	  $post_thumbnail .= $this->get_the_post_thumbnail_by_blog($blog_id,$post_id,array(100,100));
 	  		$post_thumbnail .=  '</a>';
 	  //echo $post_thumbnail;
 	  		//} else {
@@ -357,7 +464,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  	}
 	  
 			$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
-	  		$complete_new_table_line .= '<td><h4>'.$blog_name.'</h4></td>';
+	  $complete_new_table_line .= '<td><a href="'.$blog_path.'" target="_blank"><h4>'.$blog_name.'</h4></a></td>';
 	  		$complete_new_table_line .= '<td>'.$post_thumbnail.'</td>';
 	  		$edit_post_link = '';
 	  		$edit_post_link .= $this->get_multisite_post_edit_link($blog_id ,$post_id);
@@ -373,6 +480,7 @@ if(!class_exists('ChiefEditorSettings')) {
 				$complete_new_table_line .= '<td>not scheduled</td>';
 	  		}
 	  
+	  /*
 	  		$date_chooser_name = 'datepicker';//_'.$blog_id.'_'.$new_post->ID;
 	  
 	  		$complete_new_table_line .= '<td><form name="changeDateForm" method="post" action="">';
@@ -381,7 +489,8 @@ if(!class_exists('ChiefEditorSettings')) {
 	  		$change_date_button = '<input style="float:right;background-color:#2AA2CC;color:#000000;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
 	  		$unschedule_button = '<input style="float:right;" id="save-post" class="button" type="submit" value="Unchedule" name="unschedulePost"></input>';
 	  		$complete_new_table_line .= '<input type="text" class="datepicker" name="'.$date_chooser_name.'" value="'.$date.'"/>'.$change_date_button.$unschedule_button.'</form></td>';
-	  		$complete_new_table_line .= '</tr>';
+			*/
+			$complete_new_table_line .= '</tr>';
 			
 	  		echo $complete_new_table_line;
 	  
@@ -400,7 +509,9 @@ if(!class_exists('ChiefEditorSettings')) {
 	  echo '<tr style="background-color:#ffffff;color:#000000;"><td>Total unpublished posts : </td><td>'.count($rows).'</td></tr>';
 	  echo '</table>';
 	  
+	  echo '<hr>';
 	  
+	 
         //echo "<pre>"; print_r($posts); echo "</pre>"; exit; # debugging code
         return $posts;
 
@@ -423,7 +534,260 @@ if(!class_exists('ChiefEditorSettings')) {
   endif;
 }
 
+	  function recent_multisite_comments() {
+		//echo '<h2>Comments</h2>';
+	  	$network_sites = wp_get_sites();
+		$number_of_items = '1000';
+		$result = array();
+	   	foreach ( $network_sites as $network_site ) :
+			//echo '<hr>';
+	  		$blog_path = $network_site['path'];
+			$blog_id = $network_site['blog_id'];
+			echo '<h2><b><u>Blog '.$blog_id.' : '.$blog_path.'</u></b></h2<br/>';
+
+			switch_to_blog($blog_id);
+			
+			// $result = array_merge($result, (array)$this->getAllComments());
+		//add_filter('comments_clauses', 'mp_comments_last_week_filter' );
+		//$commentsFromLastWeek = $this->getCommentsFromLastWeek();
+		
+		//$comments = get_comments();
+		
+		
+		
+			echo '<h3>Pending</h3>';
+	  		echo $this->formatCommentsFromArray($this->getAllComments('hold',$number_of_items));
+
+			echo '<h3>Approved</h3>';
+	  		echo $this->formatCommentsFromArray($this->getAllComments('approve',$number_of_items));
+
+	  		echo '<h3>Spam</h3>';
+	  		echo $this->formatCommentsFromArray($this->getAllComments('spam',$number_of_items));
+
+	  		echo '<h3>Trash</h3>';
+	  		echo $this->formatCommentsFromArray($this->getAllComments('trash',$number_of_items));
+
+			echo '<hr>';
+		
+		//remove_filter( 'comments_clauses', 'mp_comments_last_week_filter' );
+			restore_current_blog();
+	  endforeach;
 	  
+		
+		return $result;
+	  
+	  }
+	  
+	  function mp_comments_last_week_filter( $clauses ){
+	$last_week	= gmdate( 'W' ) - 1;
+	$query_args	= array('w'	=> $last_week);
+	$date_query	= new WP_Date_Query( $query_args, 'comment_date' );
+		echo $date_query;
+	$clauses['where'] .= $date_query->get_sql();
+	return $clauses;
+}
+
+
+	  
+	  function getAllCommentsMultisite($number,$start_date,$end_date) {
+	  
+	  	global $wpdb;
+		$selects = array();
+		
+		$table_name = "{$wpdb->base_prefix}comments";
+		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+		  //echo $table_name . 'EXISTS !';
+		  $selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, 0 as blog_id FROM {$table_name}
+      			WHERE comment_date >= '{$start_date}'
+					AND comment_date < '{$end_date}'
+      			ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
+		  
+		} else {
+		  //echo $table_name . 'DOES NOT EXISTS !';
+		}
+		
+		foreach (wp_get_sites() as $blog) {
+		  
+		  if ($blog['blog_id'] == '1') {
+			$table_name = "{$wpdb->base_prefix}{$blog['blog_id']}_comments";
+			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+			  //echo $table_name . ' skipped !';
+		  		continue;
+			} else {
+			  //echo $table_name . ' EXISTS !';
+			}
+			}
+		  /*LEFT JOIN {$wpdb->base_prefix}{$blog['blog_id']}_posts
+      			ON comment_post_id = id
+				WHERE post_status = 'publish'
+        			AND post_password = ''
+        			AND comment_approved = '1'*/
+   			// select only the fields you need here!
+   			$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, {$blog['blog_id']} as blog_id FROM {$wpdb->base_prefix}{$blog['blog_id']}_comments
+      			WHERE comment_date >= '{$start_date}'
+					AND comment_date < '{$end_date}'
+      			ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
+		}
+		
+		//echo $selects;
+		$query = implode(" UNION ALL ", $selects)." ORDER BY comment_date_gmt DESC";
+		//echo '<br/>'.$query;
+		
+  		$comments = $wpdb->get_results($query);
+		//echo '<br/>count : '. count($comments);
+		
+		return $comments;
+	  }
+	  
+	  
+	  function getAllComments($status = '', $number = 100) {
+
+		/*
+		$args = array (
+	'status'         => 'hold',
+	'type'           => 'comment',
+	'number'         => '10',
+	'meta_query'     => array(
+		array(
+			'key'       => 'comment_date',
+			'value'     => 'strtotime(\'2 weeks ago\')',
+			'compare'   => '>=',
+			'type'      => 'DATE',
+		),
+	),
+);
+
+		*/
+		//$start_date = strtotime('1 year ago');
+		//date("Y-m-d H:i:s");
+		$last_month = mktime(0, 0, 0, date("m")-100, date("d"),   date("Y"));
+		//echo $last_month;
+		$start_date = date( 'Y-m-d H:i:s', $last_month );
+		$end_date = date('Y-m-d H:i:s');
+		echo $start_date.'<=>'.$end_date;
+		//echo 'MYSQL format: '.current_time('mysql');
+		if (false) {
+		  $comment_status = $status;
+		global $wpdb;
+		$sql = "SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_content, comment_approved, comment_type, comment_parent
+FROM wp_comments WHERE comment_date > '".$start_date."' AND comment_approved = ".$comment_status." ORDER BY comment_date_gmt DESC";
+		$comments = $wpdb->get_results($sql);
+		
+		
+	  } else {
+		$args = array(
+
+	'author_email' => '',
+	'ID'           => '',
+	'karma'        => '',
+	'number'       => $number,
+	'offset'       => '',
+	'orderby'      => '',
+	'order'        => 'DESC',
+	'parent'       => '',
+	'post_ID'      => '',
+	'post_id'      => 0,
+	'post_author'  => '',
+	'post_name'    => '',
+	'post_parent'  => '',
+	'post_status'  => '',
+	'post_type'    => '',
+	'status'       => $status,
+	'type'         => 'comment',
+	'user_id'      => '',
+	'search'       => '',
+	'count'        => false,
+	'meta_key'     => '',
+	'meta_value'   => '',
+	'meta_query'   => array(
+		array(
+			'key'       => 'comment_date',
+		  	'value'     => $start_date,
+			'compare'   => '>',
+			'type'		=> 'CHAR',
+		),
+	  ),
+		);
+		
+		
+		/*
+		$start_date = date('Y'.$month.'01'); // First day of the month
+$end_date = date('Y'.$month.'t'); // 't' gets the last day of the month
+
+$meta_query = array(
+    'key'       => 'event_start_date',
+    'value'     => array($start_date, $end_date),
+    'compare'   => 'BETWEEN',
+    'type'      => 'DATE'
+);
+		
+		array(
+		array(
+			'key'       => 'comment_date',
+		  'value'     => '2007-01-01 00:00:00',
+			'compare'   => '>',
+			'type'		=> 'DATE',
+		),
+	  ),
+		*/
+		
+		
+		// The Query
+		$comments_query = new WP_Comment_Query;
+		
+		$comments = $comments_query->query( $args );
+	  }
+		//$mq_sql = $comments_query->get_search_sql();//->get_sql( 'comment', $wpdb->comments, 'comment_ID');
+		// $this->meta_query->get_sql( 'comment', $wpdb->comments, 'comment_ID', $this );
+		// echo "Last SQL-Query: {$customPosts->request}";
+		//echo 'SQL:<br/>' . $my_sql;
+		
+			
+		return $comments;
+	 }
+	  
+	  function formatCommentsFromArray($comments) {
+		if ( $comments ) {
+		  $line_color = '#DEDEDE';
+		  $border_color = '#6B6B6B';
+		  $out = '<table style="border:solid '.$border_color.' 1px;width:100%;border-collapse:collapse;">';
+		  $out .= '<tr><th>Author</th><th>Answer</th><th>Comment</th><th>Post</th><th>Blog</th></tr>';
+		  
+			foreach ( $comments as $comment ) {
+			  
+			  $comment_id = $comment->comment_ID;
+			  $post_id = $comment->comment_post_ID;
+			  //echo $post_id;
+			  switch_to_blog( $comment->blog_id );
+			  $post_permalink = get_permalink($post_id); // use $blog_id
+			  $post_title = get_the_title($post_id);
+			  $blogdetails = get_blog_details( $comment->blog_id );
+			  $blog_path = $blogdetails->path;
+			  $blog_permalink = get_blog_permalink( $comment->blog_id, $post_id );
+			  restore_current_blog();
+			  
+			  //echo $post_permalink;
+			  $out .= '<tr style="background-color:'.$line_color.';border:solid '.$border_color.' 1px;">';
+			  //$out .= '<tr><td>'.$comment->comment_post_ID .'</td>';
+			  $out .= '<td style="border:solid '.$border_color.' 1px;">'.$comment->comment_author .'<br/><i>'.$comment->comment_author_email .'</i></td>';
+			  $link_to_comment = '<a href="'.$post_permalink.'#comment-'.$comment->comment_ID.'" rel="external nofollow" title="'.$post_title.'" target="_blank">';
+			  $out .= '<td style="border:solid '.$border_color.' 1px;text-align:center;">';
+			  $out .= $link_to_comment;//<a href="'.get_comment_link($comment).'" target="_blank">';
+			  $out .= '<input style="text-align:center;background-color:#2AA2CC;color:#000000;" id="show-comment" class="button" type="submit" value="Answer" name="showComment"></input></a>';
+			  $comment_status = 'spam';
+			  // $out .= '<a href="'. wp_set_comment_status( $comment_id, $comment_status ).'" target="_blank"><input style="float:right;background-color:#CC0000;color:#000000;" id="spam-comment" class="button" type="submit" value="Spam" name="spamComment"></input></a>';
+			  $out .= '</td>';
+			  $out .= '<td style="border:solid '.$border_color.' 1px;">Written on '.$comment->comment_date . '<br/>' . $comment->comment_content . '</td>';
+			  $out .= '<td style="border:solid '.$border_color.' 1px;"><a href="'.$post_permalink.'" target="_blank">'.$post_title . '</a></td>';
+			  $out .= '<td style="border:solid '.$border_color.' 1px;"><a href="'.$blog_path.'" target="_blank">'.$blog_path . '</a></td>';
+			  $out .= '</tr>';
+			}
+		  	$out .= '</table>';
+		} else {
+			$out = 'No comments found.';
+		}
+		return $out;
+	  }
 	  
 function get_multisite_post_edit_link($blogID, $postID) {
 	
@@ -538,88 +902,7 @@ switch_to_blog($blog_id);
 	}
 //}
 	  
-public function getDefaultWPPublishBox() {
-
-	$result = "<div id=\"submitdiv\" class=\"postbox\">
-                                <div class=\"handlediv\" title=\"<?php esc_attr_e( 'Click to toggle' ); ?>\"><br /></div>
-                                <h3 class=\"hndle\"><?php _e('Press This') ?></h3>
-                                <div class=\"inside\">
-                                        <p id=\"publishing-actions\">
-                                        <?php
-                                                submit_button( __( 'Save Draft' ), 'button', 'draft', false, array( 'id' => 'save' ) );
-                                                if ( current_user_can('publish_posts') ) {
-                                                        submit_button( __( 'Publish' ), 'primary', 'publish', false );
-                                                } else {
-                                                        echo '<br /><br />';
-                                                        submit_button( __( 'Submit for Review' ), 'primary', 'review', false );
-                                                } ?>
-                                                <span class=\"spinner\" style=\"display: none;\"></span>
-                                        </p>
-                                        <?php if ( current_theme_supports( 'post-formats' ) && post_type_supports( 'post', 'post-formats' ) ) :
-                                                        $post_formats = get_theme_support( 'post-formats' );
-                                                        if ( is_array( $post_formats[0] ) ) :
-                                                                $default_format = get_option( 'default_post_format', '0' );
-                                                ?>
-                                        <p>
-                                                <label for=\"post_format\"><?php _e( 'Post Format:' ); ?>
-                                                <select name=\"post_format\" id=\"post_format\">
-                                                        <option value=\"0\"><?php echo get_post_format_string( 'standard' ); ?></option>
-                                                <?php foreach ( $post_formats[0] as $format ): ?>
-                                                        <option<?php selected( $default_format, $format ); ?> value=\"<?php echo esc_attr( $format ); ?>\"> <?php echo esc_html( get_post_format_string( $format ) ); ?></option>
-                                                <?php endforeach; ?>
-                                                </select></label>
-                                        </p>
-                                        <?php endif; endif; ?>
-                                </div>
-                        </div>";
-	return $result;
 
 
-}
-
-    public function get_all_drafts() 
-	{
-	global $wpdb;
-	global $post;
-
-	$site_blog_ids = $wpdb->get_results($wpdb->prepare("SELECT blog_id FROM wp_blogs where blog_id > 1")); // get all subsite blog ids
-	//print_r( $site_blog_ids ); // checkem - output is "Array ( [0] => stdClass Object ( [blog_id] => 2 ) [1] => stdClass Object ( [blog_id] => 3 ) [2] => stdClass Object ( [blog_id] => 5 ) ) "
-	foreach( $site_blog_ids AS $site_blog_id ) { //iterate through the ids
-		print_r( "siteid= ".$site_blog_id->blog_id."</br>" );
-	
-	
-
-	$fivesdrafts = $wpdb->get_results( 
-	"
-	SELECT * 
-	FROM $wpdb->posts
-	WHERE post_status = 'draft'
-	"
-	);
-
-	echo '<div>';
-	echo '<h2>Brouillons d articles trouve(s) : '. count($fivesdrafts).'</h2>';
-	//echo '<table style="width:100%;">'
-	if ( $fivesdrafts )
-	{
-	echo '<table style="width:100%;">';
-		foreach ( $fivesdrafts as $post )
-		{
-		setup_postdata( $post );
-		//echo '<h2>'.the_title() .'</h2>';		
-		$permalink = get_permalink($post->ID);
-		$author = get_the_author();		
-		echo '<tr><td><h3><a href="'.$permalink.'" target="blank_" rel="bookmark" title="Permalink:'.get_the_title().'">'.get_the_title().'</a></h3></td><td><h3>'.$author.'</h3></td><td><h3>'.get_the_date().'</h3></td></tr>';
-		
-		}	
-	echo '</table>';
-	}
-	else
-	{
-		echo '<h2>Not Found</h2>';
-	}
-	echo '</div>';
-	}
-	}
 }
 }
