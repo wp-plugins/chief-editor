@@ -183,7 +183,7 @@ function field_advanced_option() {
 	  
 	  
 	  function add_admin_menus() {
-    		add_options_page( 'Chief Editor Settings', 'Chief Editor', 'manage_options', $this->chief_editor_options_key, array( &$this, 'plugin_options_page' ) );
+    		add_options_page( 'Chief Editor Settings', 'Chief Editor', 'delete_others_pages', $this->chief_editor_options_key, array( &$this, 'plugin_options_page' ) );
 }
 	  
 	  
