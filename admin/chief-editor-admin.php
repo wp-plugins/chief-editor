@@ -183,7 +183,7 @@ function field_advanced_option() {
 	  
 	  
 	  function add_admin_menus() {
-    		add_options_page( 'Chief Editor Settings', 'Chief Editor', 'delete_others_pages', $this->chief_editor_options_key, array( &$this, 'plugin_options_page' ) );
+    		add_options_page( 'Chief Editor Settings', 'Chief Editor', 'manage_options', $this->chief_editor_options_key, array( &$this, 'plugin_options_page' ) );
 }
 	  
 	  
@@ -222,13 +222,25 @@ function field_advanced_option() {
 			$this->recent_mu_posts();		  
 		} elseif ($current_tab == 'chief_editor_comments_tab') {
 		  //$this->recent_multisite_comments();
-		  
+		  global $wpdb;
 		  $last_month = mktime(0, 0, 0, date("m")-1, date("d"),   date("Y"));
 		$start_date = date('Y-m-d H:i:s', $last_month );
 		$end_date = date('Y-m-d H:i:s');
 		  $intro_text = 'All comments accross the network since '.$start_date.'<br/>';
-		  echo $intro_text;
+		  
+		  if ( is_multisite() ) {
 		 $allComments = $this->getAllCommentsMultisite('1000',$start_date,$end_date);
+		  } else {
+			$selects = "SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content FROM wp_comments
+      			WHERE comment_date >= '{$start_date}'
+					AND comment_date < '{$end_date}'
+      			ORDER BY comment_date_gmt DESC LIMIT 1000"; // real number is (number * # of blogs)
+			$allComments =  $wpdb->get_results($selects);
+
+		  }
+		  
+		  
+		  echo $intro_text . ' ' . count($allComments). ' item(s)';
 		 echo $this->formatCommentsFromArray($allComments);
 		  // $merged = 
 		  	//echo $this->formatCommentsFromArray($merged);
@@ -363,50 +375,39 @@ function field_advanced_option() {
             isset( $this->options['title'] ) ? esc_attr( $this->options['title']) : ''
         );
     }
+
+
     public function recent_mu_posts( $howMany = 10 ) {
-	    global $wpdb;
-  	    global $table_prefix;
+	    
 	    //global $blog_id;
         // get an array of the table names that our posts will be in
         // we do this by first getting all of our blog ids and then forming the name of the 
         // table and putting it into an array
-        $rows = $wpdb->get_results( "SELECT blog_id from $wpdb->blogs WHERE
-        public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0';" );
+	  if ( !is_multisite() ) {
+		
+		global $wpdb;
+			
+		$querystr = "
+    SELECT DISTINCT $wpdb->posts.* 
+    FROM $wpdb->posts, $wpdb->postmeta
+    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id     
+    AND ($wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' OR $wpdb->posts.post_status = 'pitch' OR $wpdb->posts.post_status = 'future')
+    AND $wpdb->posts.post_type = 'post'
+    ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
+ ";
 
-  if ( $rows ) :
-
-    $blogPostTableNames = array();
-    foreach ( $rows as $row ) :
-    
-      $blogPostTableNames[$row->blog_id] = $wpdb->get_blog_prefix( $row->blog_id ) . 'posts';
-
-    endforeach;
-    # print_r($blogPostTableNames); # debugging code
-
-    // now we need to do a query to get all the posts from all our blogs
-    // with limits applied
-    if ( count( $blogPostTableNames ) > 0 ) :
-
-      $query = '';
-      $i = 0;
-
-      foreach ( $blogPostTableNames as $blogId => $tableName ) :
-
-        if ( $i > 0 ) :
-        $query.= ' UNION ';
-        endif;
-
-        $query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status = 'draft' OR post_status = 'pending' OR post_status = 'pitch' OR post_status = 'future') AND post_type = 'post')";
-        $i++;
-
-      endforeach;
-
-      $query.= " ORDER BY post_status DESC, blog_id DESC, post_date DESC";// LIMIT 0,$howMany;";
-      # echo $query; # debugging code
-      $rows = $wpdb->get_results( $query );
-	  
+ 		$rows = $wpdb->get_results($querystr, OBJECT);
+		
+		//echo 'count($rows) '.count($rows);
+		
+	  } else {
+		
+		$rows = $this->get_all_pending_posts_multisite();
+		//echo 'MULTISITE :: count($rows) '.count($rows);
+		
+	  }
       // now we need to get each of our posts into an array and return them
-      if ( $rows ) :
+	  if ( $rows ) {
 	  	$nb_of_scheduled = 0;
 	  	$nb_of_drafts = 0;
 	  	$nb_of_pending = 0;
@@ -414,29 +415,44 @@ function field_advanced_option() {
 	  	$draftColor = '#EDEDED';
 	  	$pendingColor = '#9CFFA1';
 	  	$tableHeaderColor = "#6B6B6B";
-	  //echo '<hr>';
-	  //echo '<h2>Posts</h2>';
-	  //echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
-	  echo '<br/>';
+	  	//echo '<hr>';
+	  	//echo '<h2>Posts</h2>';
+	  	//echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
+	  	echo '<br/>';
 	  	echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
-	  echo '<td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
-	  echo '<td>Scheduled for date</td>';//<td>Change scheduling</td></tr>';
+	  	echo '<td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
+	  	echo '<td>Scheduled for date</td>';//<td>Change scheduling</td></tr>';
         $posts = array();
-        foreach ( $rows as $row ) :
-			$blog_id = $row->blog_id;
+		foreach ( $rows as $row ) {
+			
 			$data = $row->ID;      
-			$current_blog_details = get_blog_details( $blog_id );
-	  $blog_path = $current_blog_details->path;
-			$blog_name = $current_blog_details->blogname;
-			$new_post = get_blog_post( $blog_id, $data );
+	   		if ( is_multisite() ) {
+				$blog_id = $row->blog_id;
+				$current_blog_details = get_blog_details( $blog_id );
+	  			$blog_path = $current_blog_details->path;
+				$blog_name = $current_blog_details->blogname;
+		 		$permalink = get_blog_permalink( $blog_id, $data );
+		 		$new_post = get_blog_post( $blog_id, $data );
+	   		} else {
+		 		$blog_id = '0';
+		 		//$bloginfo = get_bloginfo();
+		 		$blog_path = get_bloginfo('url');
+				$blog_name = get_bloginfo('name');
+		 		$new_post = get_post( $data );
+		 		$permalink = get_permalink( $data );
+	   		}
+	  			
 	  		$post_id = $new_post->ID;
-	  		$permalink = get_blog_permalink( $blog_id, $data );
 	  		$title = $new_post->post_title;
 	  
 	  		$post_thumbnail = '';
 	  		$post_thumbnail .= '<a href="' . $permalink . '" title="' . esc_attr( $title) . '">';
 	  //$post_thumbnail .= '<img src="'.$this->multisite_get_thumb($post_id,100,100,$blog_id,true,true).'"/>';
-	  $post_thumbnail .= $this->get_the_post_thumbnail_by_blog($blog_id,$post_id,array(100,100));
+	  		if ( is_multisite() ) {
+				$post_thumbnail .= $this->get_the_post_thumbnail_by_blog($blog_id,$post_id,array(100,100));
+			} else {
+				$post_thumbnail .= get_the_post_thumbnail( $post_id, array(100,100));
+			}
 	  		$post_thumbnail .=  '</a>';
 	  //echo $post_thumbnail;
 	  		//} else {
@@ -464,12 +480,16 @@ function field_advanced_option() {
 		  	}
 	  
 			$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
-	  $complete_new_table_line .= '<td><a href="'.$blog_path.'" target="_blank"><h4>'.$blog_name.'</h4></a></td>';
+	  		$complete_new_table_line .= '<td><a href="'.$blog_path.'" target="_blank"><h4>'.$blog_name.'</h4></a></td>';
 	  		$complete_new_table_line .= '<td>'.$post_thumbnail.'</td>';
 	  		$edit_post_link = '';
-	  		$edit_post_link .= $this->get_multisite_post_edit_link($blog_id ,$post_id);
-	  //echo 'WOW'.$edit_post_link;
-	  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span> (<a href="'.$edit_post_link.'" target="_blank">Edit</a>)</td>';
+	  		if ( is_multisite() ) {
+	  			$edit_post_link .= $this->get_multisite_post_edit_link($blog_id ,$post_id);
+	  		} else {
+	  			$edit_post_link .= get_edit_post_link( $post_id);
+	  		}
+	  		//echo 'WOW'.$edit_post_link;
+	  		$complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span> (<a href="'.$edit_post_link.'" target="_blank">Edit</a>)</td>';
 	  		$status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
 	  		$complete_new_table_line .= '<td><img src="'.$status_image.'"/></td>';
 			$complete_new_table_line .= '<td>'.$abstract.'</td><td>'.$userdisplayname.' ('.$userlogin.')</td>';
@@ -496,44 +516,66 @@ function field_advanced_option() {
 	  
 	  		$posts[] = $new_post;
 		
-	  endforeach;
+	  }
 		
 	  echo '</table>';
-
 	  echo '<hr>';
-
 	  echo '<table style="border:solid black 1px;width:50%;">';
 	  echo '<tr style="background-color:'.$futureColor.';"><td>Scheduled posts : </td><td>'.$nb_of_scheduled.'</td></tr>';
 	  echo '<tr style="background-color:'.$pendingColor.';"><td>Pending posts : </td><td>'.$nb_of_pending.'</td></tr>';
 	  echo '<tr style="background-color:'.$draftColor.';"><td>Draft posts : </td><td>'.$nb_of_drafts.'</td></tr>';
 	  echo '<tr style="background-color:#ffffff;color:#000000;"><td>Total unpublished posts : </td><td>'.count($rows).'</td></tr>';
 	  echo '</table>';
-	  
 	  echo '<hr>';
 	  
 	 
         //echo "<pre>"; print_r($posts); echo "</pre>"; exit; # debugging code
         return $posts;
-
-      else:
-
-        return "Error: No Posts found";
-
-      endif;
-
-    else:
-
-       return "Error: Could not find blogs in the database";
-
-    endif;
-  
-  else:
-
-    return "Error: Could not find blogs";
-    
-  endif;
 }
+	
+}
+	  
 
+
+	  
+	  function get_all_pending_posts_multisite() {
+	  
+	  	global $wpdb;
+  	    global $table_prefix;
+        $rows = $wpdb->get_results( "SELECT blog_id from $wpdb->blogs WHERE
+        public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0';" );
+	  
+		if ( $rows ) {
+			$blogPostTableNames = array();
+			foreach ( $rows as $row ) {
+    			$blogPostTableNames[$row->blog_id] = $wpdb->get_blog_prefix( $row->blog_id ) . 'posts';
+			}
+    # print_r($blogPostTableNames); # debugging code
+
+    // now we need to do a query to get all the posts from all our blogs
+    // with limits applied
+		  	if ( count( $blogPostTableNames ) > 0 ) {
+				$query = '';
+      			$i = 0;
+				foreach ( $blogPostTableNames as $blogId => $tableName ) {
+					if ( $i > 0 ) {
+        				$query.= ' UNION ';
+					}
+
+        			$query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status = 'draft' OR post_status = 'pending' OR post_status = 'pitch' OR post_status = 'future') AND post_type = 'post')";
+        			$i++;
+				}
+			
+			  $query.= " ORDER BY post_status DESC, blog_id DESC, post_date DESC";// LIMIT 0,$howMany;";	
+			  # echo $query; # debugging code
+			  $rows = $wpdb->get_results( $query );
+	  		}
+	  	return $rows;
+		}
+	  }
+	  
+	  
+	  
 	  function recent_multisite_comments() {
 		//echo '<h2>Comments</h2>';
 	  	$network_sites = wp_get_sites();
@@ -758,14 +800,21 @@ $meta_query = array(
 			  $comment_id = $comment->comment_ID;
 			  $post_id = $comment->comment_post_ID;
 			  //echo $post_id;
-			  switch_to_blog( $comment->blog_id );
+			  if (is_multisite()){
+				switch_to_blog( $comment->blog_id );
+			  }
 			  $post_permalink = get_permalink($post_id); // use $blog_id
 			  $post_title = get_the_title($post_id);
+			  if (is_multisite()){
 			  $blogdetails = get_blog_details( $comment->blog_id );
 			  $blog_path = $blogdetails->path;
 			  $blog_permalink = get_blog_permalink( $comment->blog_id, $post_id );
 			  restore_current_blog();
-			  
+			  } else {
+				 $blog_path = get_bloginfo('url');
+			$blog_permalink = get_bloginfo('url');
+				
+			  }
 			  //echo $post_permalink;
 			  $out .= '<tr style="background-color:'.$line_color.';border:solid '.$border_color.' 1px;">';
 			  //$out .= '<tr><td>'.$comment->comment_post_ID .'</td>';

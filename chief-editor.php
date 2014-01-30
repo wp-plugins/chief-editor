@@ -3,7 +3,7 @@
 Plugin Name: Chief Editor
 Plugin URI: http://www.termel.fr/?page_id=17
 Description: Manage all drafts, pending and scheduled posts and comments accross the network
-Version: 2.0
+Version: 2.1
 Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2

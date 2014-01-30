@@ -34,6 +34,9 @@ All recent comments accross the network are also visible and a link allow the us
 
 == Changelog ==
 
+= 2.1 =
+* Single wordpress install (not multisite) ready
+
 = 2.0 =
 * Comments tab added in order to manage all recent comments accross the network
 * Remove schedule functionnality because buggy
