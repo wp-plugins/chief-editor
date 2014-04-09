@@ -111,6 +111,7 @@ if(!class_exists('ChiefEditorSettings')) {
     	private $options;
 	  private $general_settings_key = 'chief_editor_posts_tab';
     private $advanced_settings_key = 'chief_editor_comments_tab';
+	  private $stats_key = 'chief_editor_stats_tab';
     private $chief_editor_options_key = 'chief_editor_plugin_options';
 	  //private $plugin_settings_tabs = array();
 	  	private $chief_editor_settings_tabs = array();
@@ -127,6 +128,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  add_action( 'init', array( &$this, 'load_settings' ) );
     add_action( 'admin_init', array( &$this, 'register_general_settings' ) );
     add_action( 'admin_init', array( &$this, 'register_advanced_settings' ) );
+		  add_action( 'admin_init', array (&$this, 'register_stats_tab'));
     add_action( 'admin_menu', array( &$this, 'add_admin_menus' ) );
 		  
     	}
@@ -172,6 +174,10 @@ if(!class_exists('ChiefEditorSettings')) {
     	add_settings_field( 'advanced_option', 'An Advanced Option', array( &$this, 'field_advanced_option' ), $this->advanced_settings_key, 'section_advanced' );
 		*/
 	}
+	  
+	  function register_stats_tab() {
+	  	$this->chief_editor_settings_tabs[$this->stats_key] = 'Authors';
+	  }
 
 function section_advanced_desc() { echo 'Advanced section description goes here.'; }
 
@@ -219,8 +225,11 @@ function field_advanced_option() {
     	echo '</h2>';
 		  
 		if ($current_tab == 'chief_editor_posts_tab') {
-			$this->recent_mu_posts();		  
+		  
+			$this->recent_mu_posts();
+		  
 		} elseif ($current_tab == 'chief_editor_comments_tab') {
+		  
 		  //$this->recent_multisite_comments();
 		  global $wpdb;
 		  $last_month = mktime(0, 0, 0, date("m")-1, date("d"),   date("Y"));
@@ -244,6 +253,8 @@ function field_advanced_option() {
 		 echo $this->formatCommentsFromArray($allComments);
 		  // $merged = 
 		  	//echo $this->formatCommentsFromArray($merged);
+		} elseif ($current_tab == 'chief_editor_stats_tab') {
+		  	$this->bm_author_stats("alltime");
 		}
 		
 		echo '<div style="text-align:right;">';
@@ -252,6 +263,258 @@ function field_advanced_option() {
 		echo '</div> ';
 }
 	  
+	  
+	  public function bm_author_stats($period) {
+	global $wpdb;
+		
+		$table_class = "border:solid #6B6B6B 1px;width:100%;";
+		$border_class = "border:solid #6B6B6B 1px;";
+		
+		//wp_list_authors('show_fullname=1&optioncount=1&orderby=post_count&order=DESC&number=50');
+	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;">';
+	$authorquery = "SELECT DISTINCT p.post_author, count(ID) AS posts FROM $wpdb->posts p WHERE p.post_type = 'post'";
+	if ($period == "month") {
+		$authorquery .= " AND p.post_date > date_sub(now(),interval 1 month)";
+	}
+	$authorquery .= "  GROUP BY p.post_author ORDER BY posts DESC";
+	
+	$authors = $wpdb->get_results($authorquery);
+		//echo 'Number of authors : '.count($authors);
+		$users = get_users();
+		echo 'Number of authors : '.count($users);
+		//echo '<tr>';
+	$color_bool = true;
+		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Name</td><td>login</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments/post</td><td>Words/comment</td></tr>';
+	foreach ($users as $author) {
+	  /*if ($i == 4) {
+			echo '</tr><tr>';
+			$i = 0;
+			}*/
+	  $line_color = ($color_bool?'#FFFFFF':'#EDEDED');
+	  echo '<tr style="border:solid #6B6B6B 1px;background-color:'.$line_color.'">';
+	  //$this->bm_print_stats($this->bm_get_stats($period,$author->post_author));
+	  $author_stats = $this->bm_get_stats($period,$author->ID);
+	  $user_info = get_userdata($author->ID);
+      $userlogin = $user_info->user_login;
+	   $userdisplayname = $user_info->display_name;
+	  $words_per_post = 0;
+	  $words_per_comment = 0;
+	  
+	  if ($author_stats['posts'] > 0) {
+		$words_per_post = round($author_stats['postwords'] / $author_stats['posts']);
+	}
+	  if ($author_stats['commentwords'] > 0 && $author_stats['posts'] > 0) {
+		$words_per_comment = floor($author_stats['commentwords'] / $author_stats['posts']);
+	}
+	  
+	 
+	  
+	  echo '<td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td>';
+	  //$i++; 
+	  echo '</tr>';
+	  $color_bool = !$color_bool;
+	}
+		//echo '</tr>';
+	echo '</table>';
+}
+	  
+	  public function bm_print_stats($stats) {
+		
+		//$options = get_option('BlogMetricsOptions');
+		
+		$option['fullstats'] = 1;
+	
+	if ($stats['period'] == "alltime") {
+		$per = "per";
+	} else if ($stats['period'] == "month") {
+		$per = "this";
+	}
+	echo '<td style="vertical-align:text-top;width:220px;">';
+	if ( !is_numeric($stats['authors']) ) {
+		echo '<h3>'.$stats['authors'].'</h3>';
+	}
+	echo '<h4 style="margin-bottom:2px;">Raw Author Contribution</h4>';
+	
+	if ($stats['avgposts'] == 1) {
+		echo $stats['avgposts']." post $per month<br/>\n";
+	} else {
+		echo $stats['avgposts']." posts $per month<br/>\n";
+	}
+	if ($stats['posts'] > 0) {
+		echo 'Avg: '.round($stats['postwords'] / $stats['posts'])." words per post<br/>\n";
+	}
+	if ($stats['stddevpostwords']) {
+		echo 'Std dev: '.round($stats['stddevpostwords']).' words'."<br/>\n";
+	}
+	echo '<h4 style="margin-bottom:2px;">Conversation Rate Per Post</h4>';
+	echo '<table style="border-collapse:collapse;">';
+	echo '<tr><td>Avg: &nbsp;</td><td>'.$stats['avgcomments'].' comments'."</td></tr>\n";
+	if ($stats['stddevcomments']) {
+		echo '<tr><td>Std dev: &nbsp;</td><td>'.$stats['stddevcomments'].' comments'."</td></tr>\n";
+	}
+	if ($stats['commentwords'] > 0 && $stats['posts'] > 0) {
+		echo '<tr><td>Avg:</td><td>'.floor($stats['commentwords'] / $stats['posts']).' words in comments'."</td></tr>\n";
+	}
+	echo '<tr><td>Avg:</td><td>'.$stats['avgtrackbacks'].' trackbacks'."</td></tr>\n";
+	if ($stats['stddevtrackbacks']) {
+		echo '<tr><td>Std dev:</td><td>'.$stats['stddevtrackbacks'].' trackbacks'."</td></tr>\n";
+	}
+	echo '</table>'."\n\n";
+	
+	if ($options['fullstats']) {
+		echo '<h4 style="margin-bottom:2px;">Full Stats</h4>';
+		echo '<table style="border-collapse:collapse;">';
+		if ( is_numeric($stats['authors']) ) {
+			echo '<tr><td>Author(s):</td><td>'.$stats['authors']."</td></tr>";
+		}
+		if ($stats['period'] == "alltime") {
+			echo '<tr><td>Posts:</td><td>'.$stats['posts']."</td></tr>";	
+		}
+		echo '<tr><td>Words in posts:</td><td>'.$stats['postwords']."</td></tr>";
+		echo '<tr><td>Comments:</td><td>'.$stats['comments']."</td></tr>";
+		echo '<tr><td>Words in comments:</td><td>'.$stats['commentwords']."</td></tr>";
+		echo '<tr><td>Trackbacks:</td><td>'.$stats['trackbacks']."</td></tr>";
+		if ($stats['period'] == "alltime") {
+			echo '<tr><td>Months blogging: &nbsp;</td><td>'.$stats['bloggingmonths']."</td></tr>";
+		} 
+		echo '</table>';
+	}
+	echo '</td>';
+}
+
+	  function bm_get_stats($period="alltime",$authorid=0) {
+	global $wpdb;
+	$options = get_option('BlogMetricsOptions');
+	
+	$periodquery = "";
+	$authorquery = "";
+	
+	if ($period == "month") {
+		$periodquery = " AND p.post_date > date_sub(now(),interval 1 month)";
+	}
+	if ($authorid != 0) {
+		$authorquery = " AND p.post_author = $authorid";
+	}
+
+	$authorsquery = "SELECT COUNT(DISTINCT post_author) FROM $wpdb->posts p WHERE p.post_type = 'post'".$periodquery;
+
+	// Override query if an authorid is set, to return display name for author
+	if ($authorid != 0) {
+		$authorsquery = "SELECT u.display_name FROM $wpdb->users u WHERE u.ID = $authorid";
+	}
+	
+	$postsquery = "SELECT COUNT(ID) FROM $wpdb->posts p WHERE p.post_type = 'post' AND p.post_status='publish'".$periodquery.$authorquery;
+	
+	$firstpostquery = "SELECT p.post_date FROM $wpdb->posts p WHERE p.post_status = 'publish'$authorquery ORDER BY p.post_date LIMIT 1";
+	
+	$commentfromwhere 	="FROM $wpdb->comments c, $wpdb->posts p, $wpdb->users u "
+						."WHERE c.comment_approved = '1'"
+						." AND c.comment_author_email != u.user_email"
+						." AND c.comment_post_ID = p.ID"
+						." AND c.comment_type = ''"
+						." AND p.post_type = 'post'"
+						." AND p.post_author = u.ID"
+						.$periodquery.$authorquery;
+	
+	$commentsquery 		= "SELECT COUNT(c.comment_ID) ".$commentfromwhere;
+	$commentwordsquery 	= $commentfromwhere;
+
+	$trackbackquery = str_replace("c.comment_type = ''","c.comment_type != ''",$commentsquery);
+	
+	$postwordsquery = "FROM $wpdb->posts p WHERE p.post_status = 'publish' AND p.post_type = 'post'".$periodquery.$authorquery;
+	
+	$stats['authors'] 		= $wpdb->get_var($authorsquery);
+	$stats['posts'] 		= $wpdb->get_var($postsquery);
+	$stats['comments'] 		= $wpdb->get_var($commentsquery);
+	$stats['trackbacks']	= $wpdb->get_var($trackbackquery);
+	$stats['postwords'] 	= $this->bm_wordcount($postwordsquery,"post_content","ID");
+	$stats['commentwords'] 	= $this->bm_wordcount($commentwordsquery,"comment_content","comment_ID");
+	if ($period == "alltime") {
+		$stats['firstpost'] = $wpdb->get_var($firstpostquery);
+		$stats['bloggingmonths'] 	= floor( ( time() - strtotime($stats['firstpost']) ) / 2628000);
+		if ($stats['bloggingmonths'] == 0) {
+			$stats['bloggingmonths'] = 1;
+		}
+	} else if ($period == "month") {
+		$stats['bloggingmonths']	= 1;
+	}
+	if ($stats['posts'] > 0) {
+		$stats['avgposts'] 		= round($stats['posts'] / $stats['bloggingmonths'],1);
+	}
+	
+	if ($stats['comments'] > 0 && $stats['posts'] > 0) {
+		$stats['avgcomments'] = round(($stats['comments'] / $stats['posts']),1);
+	} else {
+		$stats['avgcomments'] = 0;
+	}
+	if ($stats['avgcomments'] > 1 && $options['stddev']) {
+		 $commentstddevquery = "SELECT (COUNT(c.comment_ID)-".$stats['avgcomments'].")*(COUNT(c.comment_ID)-".$stats['avgcomments'].") AS commentdiff2 ".$commentfromwhere." GROUP BY c.comment_post_ID";
+		$results = $wpdb->get_results($commentstddevquery);
+		$totaldev = 0;
+		foreach($results as $result) {
+			$totaldev += $result->commentdiff2;
+		}
+		$stats['stddevcomments'] = round(sqrt($totaldev / $stats['posts']),1);
+	}
+	if ($stats['trackbacks'] > 0) {
+		$stats['avgtrackbacks'] = round($stats['trackbacks'] / $stats['posts'],1);
+	} else {
+		$stats['avgtrackbacks'] = 0;
+	}
+	if ($stats['avgtrackbacks'] > 1 && $options['stddev']) {
+		$trackbacksstddevquery = str_replace("c.comment_type = ''","c.comment_type != ''",$commentstddevquery);
+		$results = $wpdb->get_results($trackbacksstddevquery);
+		$totaldev = 0;
+		if ($results) {
+			foreach($results as $result) {
+				$totaldev += $result->commentdiff2;
+			}
+			$stats['stddevtrackbacks'] = round(sqrt($totaldev / $stats['posts']),1);
+		} else {
+			$stats['stddevtrackbacks'] = 0;
+		}
+	}
+	if ($stats['postwords'] > 0 && $options['stddev'] && $stats['posts'] > 1) {
+		$stats['stddevpostwords'] 	= $this->bm_wordcount($postwordsquery,"post_content","ID",($stats['postwords'] / $stats['posts']));
+	}
+		
+	$stats['period'] = $period;
+	return $stats;
+}
+	  function bm_wordcount($statement, $attribute, $countAttribute, $avg = 0) {
+	global $wpdb;
+	$result=0;
+
+	$countStatement = "SELECT COUNT(".$countAttribute.") " .$statement;
+	$counter = $wpdb->get_var($countStatement);
+	$startLimit = 0;
+
+	$rows_at_Once=$counter;
+
+	$incrementStatement = "SELECT ".$attribute." ".$statement;
+
+	$intermedcount = 0;
+	
+	while( $startLimit < $counter) {
+		$query = $incrementStatement." LIMIT ".$startLimit.", ".$rows_at_Once;
+		$results = $wpdb->get_col($query);
+		//count the words for each statement
+		$intermedcount += count($results);
+		for ($i=0; $i<count($results); $i++) {
+			$sum = str_word_count($results[$i]);
+			if ($avg == 0) {
+				$result += $sum;
+			} else {
+				$intermed += ($sum*$sum);
+			}
+		}
+		$startLimit+=$rows_at_Once;
+	}
+	if ($avg != 0) {
+		$result = sqrt($intermed/$intermedcount);
+	}
+	return $result;
+}
     	/**
      	* Add options page
      	*/
@@ -419,7 +682,7 @@ function field_advanced_option() {
 	  	//echo '<h2>Posts</h2>';
 	  	//echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
 	  	echo '<br/>';
-	  	echo '<table style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
+	  	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
 	  	echo '<td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
 	  	echo '<td>Scheduled for date</td>';//<td>Change scheduling</td></tr>';
         $posts = array();
@@ -520,7 +783,7 @@ function field_advanced_option() {
 		
 	  echo '</table>';
 	  echo '<hr>';
-	  echo '<table style="border:solid black 1px;width:50%;">';
+	  echo '<table class="sortable" style="border:solid black 1px;width:50%;">';
 	  echo '<tr style="background-color:'.$futureColor.';"><td>Scheduled posts : </td><td>'.$nb_of_scheduled.'</td></tr>';
 	  echo '<tr style="background-color:'.$pendingColor.';"><td>Pending posts : </td><td>'.$nb_of_pending.'</td></tr>';
 	  echo '<tr style="background-color:'.$draftColor.';"><td>Draft posts : </td><td>'.$nb_of_drafts.'</td></tr>';
@@ -792,7 +1055,7 @@ $meta_query = array(
 		if ( $comments ) {
 		  $line_color = '#DEDEDE';
 		  $border_color = '#6B6B6B';
-		  $out = '<table style="border:solid '.$border_color.' 1px;width:100%;border-collapse:collapse;">';
+		  $out = '<table class="sortable" style="border:solid '.$border_color.' 1px;width:100%;border-collapse:collapse;">';
 		  $out .= '<tr><th>Author</th><th>Answer</th><th>Comment</th><th>Post</th><th>Blog</th></tr>';
 		  
 			foreach ( $comments as $comment ) {
@@ -949,9 +1212,5 @@ switch_to_blog($blog_id);
 	function the_post_thumbnail_by_blog($blog_id=NULL,$post_id=NULL,$size='post-thumbnail',$attrs=NULL) {
 		echo get_the_post_thumbnail_by_blog($blog_id,$post_id,$size,$attrs);
 	}
-//}
-	  
-
-
 }
 }

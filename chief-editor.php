@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Chief Editor
-Plugin URI: http://www.termel.fr/?page_id=17
+Plugin URI: http://www.termel.fr
 Description: Manage all drafts, pending and scheduled posts and comments accross the network
-Version: 2.1
+Version: 2.2
 Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
@@ -34,6 +34,10 @@ function chief_editor_scripts(){
    	wp_enqueue_style('jquery-ui-smoothness', $url, false, null);
 	wp_register_script( 'chief-editor-js', plugins_url( '/js/chief-editor.js', __FILE__ ));	
 	wp_enqueue_script('chief-editor-js');
+  
+  wp_register_script( 'sorttable-js', plugins_url( '/js/sorttable.js', __FILE__ ));	
+	wp_enqueue_script('sorttable-js');
+  
 	//echo '...done';
 }
 //add_action('wp_enqueue_scripts','chief_editor_scripts');
