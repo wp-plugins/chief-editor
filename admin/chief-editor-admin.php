@@ -291,7 +291,7 @@ function field_advanced_option() {
 			$i = 0;
 			}*/
 	  $line_color = ($color_bool?'#FFFFFF':'#EDEDED');
-	  echo '<tr style="border:solid #6B6B6B 1px;background-color:'.$line_color.'">';
+	  
 	  //$this->bm_print_stats($this->bm_get_stats($period,$author->post_author));
 	  $author_stats = $this->bm_get_stats($period,$author->ID);
 	  $user_info = get_userdata($author->ID);
@@ -306,9 +306,11 @@ function field_advanced_option() {
 	  if ($author_stats['commentwords'] > 0 && $author_stats['posts'] > 0) {
 		$words_per_comment = floor($author_stats['commentwords'] / $author_stats['posts']);
 	}
-	  
+	  if ($author_stats['posts'] == 0) {
+		continue;
+	  }
 	 
-	  
+	  echo '<tr style="border:solid #6B6B6B 1px;background-color:'.$line_color.'">';
 	  echo '<td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td>';
 	  //$i++; 
 	  echo '</tr>';
