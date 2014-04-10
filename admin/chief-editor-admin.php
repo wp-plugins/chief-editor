@@ -264,6 +264,29 @@ function field_advanced_option() {
 }
 	  
 	  
+	  public function get_all_writers_over_network() {
+		// Set up global variables. Great
+global $wpdb, $blog_id, $post;
+
+// Get a list of blogs in your multisite network
+$blogs = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM wp_blogs ORDER BY blog_id" ) );
+
+$globalcontainer = array();
+foreach( $blogs as $blog ) {
+
+    switch_to_blog( $blog->blog_id );
+
+  $globalquery = array_merge (get_users('role=contributor'),get_users('role=author'),get_users('role=editor'));//get_posts( 'numberposts=5&post_type=any' );
+
+    $globalcontainer = array_merge( $globalcontainer, $globalquery );
+	
+    restore_current_blog();
+}
+		
+		return $globalcontainer;
+	  }
+
+	  
 	  public function bm_author_stats($period) {
 	global $wpdb;
 		
@@ -272,28 +295,49 @@ function field_advanced_option() {
 		
 		//wp_list_authors('show_fullname=1&optioncount=1&orderby=post_count&order=DESC&number=50');
 	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;">';
-	$authorquery = "SELECT DISTINCT p.post_author, count(ID) AS posts FROM $wpdb->posts p WHERE p.post_type = 'post'";
+		$color_bool = true;
+		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog</td><td>Name</td><td>login</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments/post</td><td>Words/comment</td></tr>';
+	
+		/*
+		$authorquery = "SELECT DISTINCT p.post_author, count(ID) AS posts FROM $wpdb->posts p WHERE p.post_type = 'post'";
 	if ($period == "month") {
 		$authorquery .= " AND p.post_date > date_sub(now(),interval 1 month)";
 	}
 	$authorquery .= "  GROUP BY p.post_author ORDER BY posts DESC";
 	
-	$authors = $wpdb->get_results($authorquery);
+	$authors = $wpdb->get_results($authorquery);*/
 		//echo 'Number of authors : '.count($authors);
-		$users = get_users();
-		echo 'Number of authors : '.count($users);
+		//$users = $this->get_all_writers_over_network();
+		
+		//echo 'Number of authors : '.count($users);
+		
+		global $wpdb, $blog_id, $post;
+
+// Get a list of blogs in your multisite network
+$blogs = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM wp_blogs ORDER BY blog_id" ) );
+
+$globalcontainer = array();
+foreach( $blogs as $blog ) {
+
+    switch_to_blog( $blog->blog_id );
+	$blog_name = get_bloginfo('name');
+  
+  	$users = array_merge (get_users('role=contributor'),get_users('role=author'),get_users('role=editor'));//get_posts( 'numberposts=5&post_type=any' );
+		
 		//echo '<tr>';
-	$color_bool = true;
-		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Name</td><td>login</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments/post</td><td>Words/comment</td></tr>';
 	foreach ($users as $author) {
-	  /*if ($i == 4) {
-			echo '</tr><tr>';
-			$i = 0;
-			}*/
-	  $line_color = ($color_bool?'#FFFFFF':'#EDEDED');
+	 
 	  
 	  //$this->bm_print_stats($this->bm_get_stats($period,$author->post_author));
 	  $author_stats = $this->bm_get_stats($period,$author->ID);
+	  
+	  if ($author_stats['posts'] == 0) {
+		continue;
+	  }
+	  
+	  $line_color = ($color_bool?'#FFFFFF':'#EDEDED');
+	  echo '<tr style="border:solid #6B6B6B 1px;background-color:'.$line_color.'">';
+	  
 	  $user_info = get_userdata($author->ID);
       $userlogin = $user_info->user_login;
 	   $userdisplayname = $user_info->display_name;
@@ -306,16 +350,20 @@ function field_advanced_option() {
 	  if ($author_stats['commentwords'] > 0 && $author_stats['posts'] > 0) {
 		$words_per_comment = floor($author_stats['commentwords'] / $author_stats['posts']);
 	}
-	  if ($author_stats['posts'] == 0) {
-		continue;
-	  }
+	  
 	 
-	  echo '<tr style="border:solid #6B6B6B 1px;background-color:'.$line_color.'">';
-	  echo '<td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td>';
+	  
+	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td>';
 	  //$i++; 
 	  echo '</tr>';
 	  $color_bool = !$color_bool;
 	}
+  
+  //$globalcontainer = array_merge( $globalcontainer, $globalquery );
+	
+    restore_current_blog();
+}
+	
 		//echo '</tr>';
 	echo '</table>';
 }
