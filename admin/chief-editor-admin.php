@@ -296,7 +296,7 @@ foreach( $blogs as $blog ) {
 		//wp_list_authors('show_fullname=1&optioncount=1&orderby=post_count&order=DESC&number=50');
 	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;">';
 		$color_bool = true;
-		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog</td><td>Name</td><td>login</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments/post</td><td>Words/comment</td></tr>';
+		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog</td><td>Name</td><td>login</td><td>Month blogging</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments</td><td>Comments/post</td><td>Words/comment</td></tr>';
 	
 		/*
 		$authorquery = "SELECT DISTINCT p.post_author, count(ID) AS posts FROM $wpdb->posts p WHERE p.post_type = 'post'";
@@ -326,18 +326,15 @@ foreach( $blogs as $blog ) {
 		
 		//echo '<tr>';
 	foreach ($users as $author) {
-	 
-	  
-	  //$this->bm_print_stats($this->bm_get_stats($period,$author->post_author));
-	  $author_stats = $this->bm_get_stats($period,$author->ID);
-	  
-	  if ($author_stats['posts'] == 0) {
+	
+	   $author_stats = $this->bm_get_stats($period,$author->ID);
+	   if ($author_stats['posts'] == 0) {
 		continue;
 	  }
-	  
 	  $line_color = ($color_bool?'#FFFFFF':'#EDEDED');
 	  echo '<tr style="border:solid #6B6B6B 1px;background-color:'.$line_color.'">';
-	  
+	  //$this->bm_print_stats($this->bm_get_stats($period,$author->post_author));
+	 
 	  $user_info = get_userdata($author->ID);
       $userlogin = $user_info->user_login;
 	   $userdisplayname = $user_info->display_name;
@@ -353,7 +350,7 @@ foreach( $blogs as $blog ) {
 	  
 	 
 	  
-	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td>';
+	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['bloggingmonths'].'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['comments'].'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td>';
 	  //$i++; 
 	  echo '</tr>';
 	  $color_bool = !$color_bool;

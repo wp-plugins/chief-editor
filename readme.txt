@@ -15,8 +15,7 @@ Helps multi-sites "chief editor" to manage all drafts and comments across the ne
 This plugin is aimed to help the multi-sites wordpress editor-in-chief in order to plan publication of posts. All drafts across all sites in the network are shown with a link to the article for quick reviewing. Really simple read only plugin, but very useful :)
 To be visible and clicable on the settings page, the status of posts have to be DRAFT, PENDING or SCHEDULED. Only editors (or higher roles) can use the plugin.
 All recent comments accross the network are also visible and a link allow the user to answer directly.
-
-The Authors tab allow you to compare all authors accross the network.
+The Authors tab allow you to compare all authors efficiency accross the network.
 
 == Installation ==
 
