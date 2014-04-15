@@ -327,6 +327,11 @@ foreach( $blogs as $blog ) {
 		//echo '<tr>';
 	foreach ($users as $author) {
 	
+	$user_role = $user->role;
+	  if ($user_role == 'subscriber') {
+	  	continue;
+	  }
+	  
 	   $author_stats = $this->bm_get_stats($period,$author->ID);
 	   if ($author_stats['posts'] == 0) {
 		continue;
