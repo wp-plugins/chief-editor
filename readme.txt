@@ -1,14 +1,14 @@
 === Plugin Name ===
 Contributors: munger41
 Donate link: http://www.maxizone.fr/?page_id=560
-Tags: editor, chief, draft, multisite, insight
+Tags: editor, chief, draft, multisite, author, stat
 Requires at least: 3.0.1
-Tested up to: 3.8
+Tested up to: 3.9.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Helps wp multisite "chief editor" to manage all drafts and comments across the network. Also includes author stats.
+Helps wp multisite "chief editor" to manage all drafts and comments across the network. Also includes full authors stats.
 
 == Description ==
 
@@ -29,11 +29,16 @@ The Authors tab allow you to compare all authors efficiency accross the network.
 
 == Screenshots ==
 
-1. Admin view of all drafts across the network
-2. Schedule posts directly from Chief Editor admin panel
-3. Stats on scheduled/draft posts
+1. Easily see all drafts, approved and scheduled posts across the network
+2. See comments of all blogs in the same place, and get a direct link to answer
+3. Complete stats per author, clic on column head to sort, then on button to trace corresponding graphs
+4. Horizontal Bars author stats using ChartNew.js lib
+5. Pie Chart
 
 == Changelog ==
+
+= 2.4 =
+* dynamic graphs added using ChartNew.js
 
 = 2.3 =
 * more authors stats added

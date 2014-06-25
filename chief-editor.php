@@ -3,7 +3,7 @@
 Plugin Name: Chief Editor
 Plugin URI: http://www.termel.fr
 Description: Manage all drafts, pending and scheduled posts and comments accross the network
-Version: 2.3
+Version: 2.4
 Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
@@ -12,13 +12,6 @@ License: A "Slug" license name e.g. GPL2
 include_once(sprintf("%s/admin/chief-editor-admin.php", dirname(__FILE__)));
 $ChiefEditorSettings = new ChiefEditorSettings();
 
-//SETUP
-/*
-function chief_editor_install(){
-    //Do some installation work
-}
-register_activation_hook(__FILE__,'chief_editor_install'); 
-*/
 //SCRIPTS
 function chief_editor_scripts(){
 	//echo 'Loading Chief Editor scripts...';
@@ -35,25 +28,29 @@ function chief_editor_scripts(){
 	wp_register_script( 'chief-editor-js', plugins_url( '/js/chief-editor.js', __FILE__ ));	
 	wp_enqueue_script('chief-editor-js');
   
-  wp_register_script( 'sorttable-js', plugins_url( '/js/sorttable.js', __FILE__ ));	
+  	wp_register_script( 'sorttable-js', plugins_url( '/js/sorttable.js', __FILE__ ));	
 	wp_enqueue_script('sorttable-js');
+  	
+  	wp_register_script( 'Chart-js', plugins_url( '/js/ChartNew.js', __FILE__ ));	
+	wp_enqueue_script('Chart-js');
+   
+  	wp_register_script( 'chief-editor-graph-js', plugins_url( '/js/chief-editor-graph.js', __FILE__ ));	
+ 	wp_enqueue_script('chief-editor-graph-js');
   
-	//echo '...done';
 }
-//add_action('wp_enqueue_scripts','chief_editor_scripts');
+
 add_action('admin_enqueue_scripts','chief_editor_scripts');
 
-//HOOKS
-//add_action('init','chief_editor_init');
 /********************************************************/
 /* FUNCTIONS
 ********************************************************/
+
 function chief_editor_init(){
     //do work
     chief_editor_init_path();
 }
+
 function chief_editor_init_path(){
     //more work
- 
 }
 ?>

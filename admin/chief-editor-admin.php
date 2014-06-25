@@ -291,12 +291,13 @@ foreach( $blogs as $blog ) {
 	global $wpdb;
 		
 		$table_class = "border:solid #6B6B6B 1px;width:100%;";
-		$border_class = "border:solid #6B6B6B 1px;";
-		
-		//wp_list_authors('show_fullname=1&optioncount=1&orderby=post_count&order=DESC&number=50');
-	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;">';
+		$border_class = "border:solid #6B6B6B 1px;";		
+		echo '<form>';
+    echo '<INPUT type="button" value="Trace graph for sorted column" name="traceGraphButton" onClick="traceGraph();">';
+	echo '</FORM>';
+		echo '<table class="sortable" id="authorTable" style="border:solid #6B6B6B 1px;width:100%;">';
 		$color_bool = true;
-		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog</td><td>Name</td><td>login</td><td>Month blogging</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments</td><td>Comments/post</td><td>Words/comment</td><td>Efficiency</td></tr>';
+		echo '<tr style="background-color:#6B6B6B;color:#FFFFFF"><td>Blog</td><td>Name</td><td>login</td><td>Month blogging</td><td>Posts</td><td>Posts/month</td><td>Words/post</td><td>Comments</td><td>Comments/post</td><td>Words/comment</td><td>Comments/month</td></tr>';
 	
 		/*
 		$authorquery = "SELECT DISTINCT p.post_author, count(ID) AS posts FROM $wpdb->posts p WHERE p.post_type = 'post'";
@@ -327,7 +328,7 @@ foreach( $blogs as $blog ) {
 		//echo '<tr>';
 	foreach ($users as $author) {
 	
-	$user_role = $user->role;
+	$user_role = $author->role;
 	  if ($user_role == 'subscriber') {
 	  	continue;
 	  }
@@ -353,7 +354,7 @@ foreach( $blogs as $blog ) {
 		$words_per_comment = floor($author_stats['commentwords'] / $author_stats['posts']);
 	}
 	  
-	 $performance = 100 * $author_stats['avgposts'] * $author_stats['avgcomments'] / $words_per_post;
+	 $performance = $author_stats['avgposts'] * $author_stats['avgcomments'];
 	  
 	  
 	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['bloggingmonths'].'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['comments'].'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td><td>'.$performance.'</td>';
@@ -362,13 +363,17 @@ foreach( $blogs as $blog ) {
 	  $color_bool = !$color_bool;
 	}
   
-  //$globalcontainer = array_merge( $globalcontainer, $globalquery );
 	
     restore_current_blog();
 }
 	
-		//echo '</tr>';
 	echo '</table>';
+	echo '<form>';
+    echo '<INPUT type="button" value="Trace graph for sorted column" name="traceGraphButton" onClick="traceGraph();">';
+	echo '</FORM>';
+	echo '<hr>';
+	echo '<div style="text-align:center;"><canvas id="graphCanvas" height="600" width="1000"></canvas><br><br><canvas id="pieGraphCanvas" height="600" width="1000"></div>';
+	
 }
 	  
 	  public function bm_print_stats($stats) {
