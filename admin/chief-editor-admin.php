@@ -322,7 +322,8 @@ foreach( $blogs as $blog ) {
 
     switch_to_blog( $blog->blog_id );
 	$blog_name = get_bloginfo('name');
-  
+  	$blog_title = get_bloginfo('title');
+  $blog_wpurl = get_bloginfo('wpurl');
   	$users = array_merge (get_users('role=contributor'),get_users('role=author'),get_users('role=editor'));//get_posts( 'numberposts=5&post_type=any' );
 		
 		//echo '<tr>';
@@ -356,8 +357,8 @@ foreach( $blogs as $blog ) {
 	  
 	 $performance = $author_stats['avgposts'] * $author_stats['avgcomments'];
 	  
-	  
-	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.'</td><td>'.$author_stats['bloggingmonths'].'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['comments'].'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td><td>'.$performance.'</td>';
+	  $user_rss_feed = $blog_wpurl.'/author/'.$userlogin.'/feed/';
+	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.' - '.$user_rss_feed.'</td><td>'.$author_stats['bloggingmonths'].'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['comments'].'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td><td>'.$performance.'</td>';
 	  //$i++; 
 	  echo '</tr>';
 	  $color_bool = !$color_bool;
