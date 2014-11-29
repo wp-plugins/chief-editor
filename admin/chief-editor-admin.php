@@ -358,7 +358,7 @@ foreach( $blogs as $blog ) {
 	 $performance = $author_stats['avgposts'] * $author_stats['avgcomments'];
 	  
 	  $user_rss_feed = $blog_wpurl.'/author/'.$userlogin.'/feed/';
-	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.' - '.$user_rss_feed.'</td><td>'.$author_stats['bloggingmonths'].'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['comments'].'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td><td>'.$performance.'</td>';
+	  echo '<td>'.$blog_name.'</td><td>'.$userdisplayname.'</td><td>'.$userlogin.' - <a target="_blank" href="'.$user_rss_feed.'">'.$user_rss_feed.'</a></td><td>'.$author_stats['bloggingmonths'].'</td><td>'.$author_stats['posts'].'</td><td>'.$author_stats['avgposts'].'</td><td>'.$words_per_post.'</td><td>'.$author_stats['comments'].'</td><td>'.$author_stats['avgcomments'].'</td><td>'.$words_per_comment.'</td><td>'.$performance.'</td>';
 	  //$i++; 
 	  echo '</tr>';
 	  $color_bool = !$color_bool;
