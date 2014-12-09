@@ -713,7 +713,7 @@ foreach( $blogs as $blog ) {
     SELECT DISTINCT $wpdb->posts.* 
     FROM $wpdb->posts, $wpdb->postmeta
     WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id     
-	AND ($wpdb->posts.post_status != 'publish' AND $wpdb->posts.post_status != 'inherit' AND $wpdb->posts.post_status != 'auto-draft')
+	AND ($wpdb->posts.post_status != 'publish' AND $wpdb->posts.post_status != 'inherit' AND $wpdb->posts.post_status != 'auto-draft' AND $wpdb->posts.post_status != 'trash')
     AND $wpdb->posts.post_type = 'post'
     ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
  ";
@@ -911,7 +911,7 @@ foreach( $blogs as $blog ) {
         				$query.= ' UNION ';
 					}
 
-        			$query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status != 'publish' AND post_status != 'inherit' AND post_status != 'auto-draft') AND post_type = 'post')";
+        			$query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status != 'publish' AND post_status != 'inherit' AND post_status != 'auto-draft' AND post_status != 'trash') AND post_type = 'post')";
         			$i++;
 				}
 			
