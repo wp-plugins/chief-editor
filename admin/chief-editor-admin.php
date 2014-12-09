@@ -713,7 +713,7 @@ foreach( $blogs as $blog ) {
     SELECT DISTINCT $wpdb->posts.* 
     FROM $wpdb->posts, $wpdb->postmeta
     WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id     
-    AND ($wpdb->posts.post_status = 'draft' OR $wpdb->posts.post_status = 'pending' OR $wpdb->posts.post_status = 'pitch' OR $wpdb->posts.post_status = 'future')
+	AND ($wpdb->posts.post_status != 'publish' AND $wpdb->posts.post_status != 'inherit' AND $wpdb->posts.post_status != 'auto-draft')
     AND $wpdb->posts.post_type = 'post'
     ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
  ";
@@ -742,11 +742,12 @@ foreach( $blogs as $blog ) {
 	  	//echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
 	  	echo '<br/>';
 	  	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
-	  	echo '<td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
+	  	echo '<td>#</td><td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
 	  	echo '<td>Scheduled for date</td>';//<td>Change scheduling</td></tr>';
         $posts = array();
+		$countIdx = 0;
 		foreach ( $rows as $row ) {
-			
+			$countIdx++;
 			$data = $row->ID;      
 	   		if ( is_multisite() ) {
 				$blog_id = $row->blog_id;
@@ -791,7 +792,8 @@ foreach( $blogs as $blog ) {
 		
 			$date = $new_post->post_date;
 			$post_state = $new_post->post_status;
-			$line_color = $post_state == 'future' ? $futureColor : ( $post_state == 'pending' ? $pendingColor : $draftColor);
+			$line_color = $this->get_post_color_from_status($post_state);
+			  //$post_state == 'future' ? $futureColor : ( $post_state == 'pending' ? $pendingColor : $draftColor);
 	  
 		  	if ($post_state == 'future') {
 		   		$nb_of_scheduled++;
@@ -802,6 +804,7 @@ foreach( $blogs as $blog ) {
 		  	}
 	  
 			$complete_new_table_line = '<tr style="background-color:'.$line_color.';">';
+		  $complete_new_table_line .= '<td>'.$countIdx.'</td>';
 	  		$complete_new_table_line .= '<td><a href="'.$blog_path.'" target="_blank"><h4>'.$blog_name.'</h4></a></td>';
 	  		$complete_new_table_line .= '<td>'.$post_thumbnail.'</td>';
 	  		$edit_post_link = '';
@@ -857,7 +860,31 @@ foreach( $blogs as $blog ) {
 	
 }
 	  
-
+	  function get_post_color_from_status ($post_state) {
+		$futureColor = '#A4F2FF';
+	  	$draftColor = '#EDEDED';
+	  	$pendingColor = '#9CFFA1';
+		$pitchColor = '#EBFFEC';
+		$assignedColor = '#FFADFB';
+		$inProgressColor = '#FBFFAD';
+		$result = $draftColor;
+		if ($post_state == 'future') {
+		  $result = $futureColor;
+		  
+		} else if ($post_state == 'pending') {
+		  $result = $pendingColor;
+		}else if ($post_state == 'pitch') {
+		  $result = $pitchColor;
+		}else if ($post_state == 'assigned') {
+		  $result = $assignedColor;
+		} else if ($post_state == 'in-progress') {
+		  $result = $inProgressColor;
+		}
+		
+		return $result;
+		//return $post_state == 'future' ? $futureColor : ( $post_state == 'pending' ? $pendingColor : $draftColor);
+	  
+	  }
 
 	  
 	  function get_all_pending_posts_multisite() {
@@ -884,7 +911,7 @@ foreach( $blogs as $blog ) {
         				$query.= ' UNION ';
 					}
 
-        			$query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status = 'draft' OR post_status = 'pending' OR post_status = 'pitch' OR post_status = 'future') AND post_type = 'post')";
+        			$query.= " (SELECT ID, post_status, post_date, $blogId as `blog_id` FROM $tableName WHERE (post_status != 'publish' AND post_status != 'inherit' AND post_status != 'auto-draft') AND post_type = 'post')";
         			$i++;
 				}
 			
