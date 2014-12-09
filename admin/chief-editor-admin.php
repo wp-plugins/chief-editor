@@ -884,10 +884,10 @@ foreach( $blogs as $blog ) {
 	  function get_post_color_from_status ($post_state) {
 		$futureColor = '#91FEFF';
 	  	$draftColor = '#EDEDED';
-	  	$pendingColor = '#69D947';
+	  	$pendingColor = '#CFF09E';
 		$pitchColor = '#FDD87F';
 		$assignedColor = '#FFADFB';
-		$inProgressColor = '#CFF09E';
+		$inProgressColor = '#f3f5b1';
 		$BATColor = '#69D947';
 		$result = $draftColor;
 		if ($post_state == 'future') {
