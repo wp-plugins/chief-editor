@@ -816,7 +816,8 @@ foreach( $blogs as $blog ) {
 	  		//echo 'WOW'.$edit_post_link;
 	  		$complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span> (<a href="'.$edit_post_link.'" target="_blank">Edit</a>)</td>';
 	  		$status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
-	  		$complete_new_table_line .= '<td><img src="'.$status_image.'"/></td>';
+		  	$status_meaning = $this->get_post_status_meaning_from_status($post_state);
+		  	$complete_new_table_line .= '<td>'.$status_meaning.'<br/><img src="'.$status_image.'"/></td>';
 			$complete_new_table_line .= '<td>'.$abstract.'</td><td>'.$userdisplayname.' ('.$userlogin.')</td>';
 	  
 	  		if ($post_state == 'future') {
@@ -860,13 +861,34 @@ foreach( $blogs as $blog ) {
 	
 }
 	  
+	  function get_post_status_meaning_from_status($post_state) {
+		$result = $post_state;
+		/*if ($post_state == 'future') {
+		  $result = $futureColor;
+		  
+		} else if ($post_state == 'pending') {
+		  $result = $pendingColor;
+		}else if ($post_state == 'pitch') {
+		  $result = $pitchColor;
+		}else if ($post_state == 'assigned') {
+		  $result = $assignedColor;
+		} else if ($post_state == 'in-progress') {
+		  $result = $inProgressColor;
+		} else if ($post_state == 'bat') {
+		  $result = $BATColor;
+		  }*/
+		
+		return $result;
+	  }
+	  
 	  function get_post_color_from_status ($post_state) {
-		$futureColor = '#A4F2FF';
+		$futureColor = '#91FEFF';
 	  	$draftColor = '#EDEDED';
-	  	$pendingColor = '#9CFFA1';
-		$pitchColor = '#EBFFEC';
+	  	$pendingColor = '#69D947';
+		$pitchColor = '#FDD87F';
 		$assignedColor = '#FFADFB';
-		$inProgressColor = '#FBFFAD';
+		$inProgressColor = '#CFF09E';
+		$BATColor = '#69D947';
 		$result = $draftColor;
 		if ($post_state == 'future') {
 		  $result = $futureColor;
@@ -879,6 +901,8 @@ foreach( $blogs as $blog ) {
 		  $result = $assignedColor;
 		} else if ($post_state == 'in-progress') {
 		  $result = $inProgressColor;
+		} else if ($post_state == 'bat') {
+		  $result = $BATColor;
 		}
 		
 		return $result;

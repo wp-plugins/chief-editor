@@ -37,6 +37,9 @@ The Authors tab allow you to compare all authors efficiency accross the network.
 
 == Changelog ==
 
+= 2.7 =
+* compatible with default Edit Flow post statuses
+
 = 2.4 =
 * dynamic graphs added using ChartNew.js
 
