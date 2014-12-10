@@ -939,8 +939,8 @@ foreach( $blogs as $blog ) {
         			$i++;
 				}
 			
-			  $query.= " ORDER BY post_status DESC, blog_id DESC, post_date DESC";// LIMIT 0,$howMany;";	
-			  # echo $query; # debugging code
+			  $query.= " ORDER BY post_status='pitch',post_status='assigned',post_status='draft',post_status='in-progress',post_status='pending',post_status='future', post_date DESC";
+			
 			  $rows = $wpdb->get_results( $query );
 	  		}
 	  	return $rows;
