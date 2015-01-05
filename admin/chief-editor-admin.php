@@ -790,7 +790,12 @@ foreach( $blogs as $blog ) {
      		#echo 'User roles: ' . implode(', ', $user_info->roles) . "\n";
       		#echo 'User ID: ' . $user_info->ID . "\n";
 		  	$date_format = 'l, F jS, Y';
-			$creation_date = get_the_time( $date_format, $post_id );
+		  	if ( is_multisite() ) {
+	  			$creation_date = $this->get_multisite_post_time($date_format, $blog_id ,$post_id);
+	  		} else {
+	  			$creation_date = get_the_time( $date_format, $post_id );
+	  		}
+			
 			$date = $new_post->post_date;
 			$post_state = $new_post->post_status;
 			$line_color = $this->get_post_color_from_status($post_state);
@@ -1222,6 +1227,18 @@ function get_multisite_post_edit_link($blogID, $postID) {
 
   	$out = get_edit_post_link($postID);
   	//echo 'WOW'.$edit_post_link;
+	
+  	restore_current_blog();
+
+	return $out;
+	
+}
+	  
+function get_multisite_post_time($date_format, $blogID, $postID) {
+	
+  	switch_to_blog($blogID);
+
+  	$out = get_the_time( $date_format, $postID );
 	
   	restore_current_blog();
 
