@@ -742,7 +742,7 @@ foreach( $blogs as $blog ) {
 	  	//echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
 	  	echo '<br/>';
 	  	echo '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;"><tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
-	  	echo '<td>#</td><td>Blog Title</td><td>Featured image</td><td>Post</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
+		echo '<td>#</td><td>Blog Title</td><td>Featured image</td><td>Post</td><td>Submission date</td><td>Status</td><td>Excerpt</td><td>Author (login)</td>';
 	  	echo '<td>Scheduled for date</td>';//<td>Change scheduling</td></tr>';
         $posts = array();
 		$countIdx = 0;
@@ -789,7 +789,8 @@ foreach( $blogs as $blog ) {
 			#echo 'Username: ' . $user_info->user_login . "\n";
      		#echo 'User roles: ' . implode(', ', $user_info->roles) . "\n";
       		#echo 'User ID: ' . $user_info->ID . "\n";
-		
+		  	$date_format = 'l, F jS, Y';
+			$creation_date = get_the_time( $date_format, $post_id );
 			$date = $new_post->post_date;
 			$post_state = $new_post->post_status;
 			$line_color = $this->get_post_color_from_status($post_state);
@@ -815,7 +816,8 @@ foreach( $blogs as $blog ) {
 	  		}
 	  		//echo 'WOW'.$edit_post_link;
 	  		$complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span> (<a href="'.$edit_post_link.'" target="_blank">Edit</a>)</td>';
-	  		$status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
+		  	$complete_new_table_line .= '<td>'.$creation_date.'</td>';
+		  	$status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
 		  	$status_meaning = $this->get_post_status_meaning_from_status($post_state);
 		  	$complete_new_table_line .= '<td>'.$status_meaning.'<br/><img src="'.$status_image.'"/></td>';
 			$complete_new_table_line .= '<td>'.$abstract.'</td><td>'.$userdisplayname.' ('.$userlogin.')</td>';
@@ -939,8 +941,11 @@ foreach( $blogs as $blog ) {
         			$i++;
 				}
 			
+			  #$query.= " ORDER BY post_status DESC, blog_id DESC, post_date DESC";// LIMIT 0,$howMany;";	
 			  $query.= " ORDER BY post_status='pitch',post_status='assigned',post_status='draft',post_status='in-progress',post_status='pending',post_status='future', post_date DESC";
-			
+			  
+			  #x_field='F', x_field='P'
+			  # echo $query; # debugging code
 			  $rows = $wpdb->get_results( $query );
 	  		}
 	  	return $rows;
