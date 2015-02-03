@@ -1,0 +1,187 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Chief Editor\n"
+"POT-Creation-Date: 2015-02-03 17:58+0100\n"
+"PO-Revision-Date: 2015-02-03 18:03+0100\n"
+"Last-Translator: \n"
+"Language-Team: termel <admin@termel.fr>\n"
+"Language: Français\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: ../admin\n"
+"X-Poedit-SearchPath-1: .\n"
+
+#: admin/chief-editor-admin.php:209
+msgid "Email sent successfully"
+msgstr "Courriel envoyé avec succès! :)"
+
+#: admin/chief-editor-admin.php:209
+msgid "Problem sending email..."
+msgstr ""
+"Un petit problème est survenu lors de l'envoi du courriel... merci de "
+"contacter votre hébergeur."
+
+#: admin/chief-editor-admin.php:235
+msgid "Are you sure you want to sent BAT email?"
+msgstr "Voulez-vous vraiment envoyer un email de BAT ?"
+
+#: admin/chief-editor-admin.php:241
+msgid "Send"
+msgstr "Envoyer"
+
+#: admin/chief-editor-admin.php:272 admin/chief-editor-admin.php:592
+msgid "Posts"
+msgstr "Articles"
+
+#: admin/chief-editor-admin.php:288 admin/chief-editor-admin.php:593
+msgid "Comments"
+msgstr "Commentaires"
+
+#: admin/chief-editor-admin.php:293
+msgid "Authors"
+msgstr "Auteurs"
+
+#: admin/chief-editor-admin.php:297 admin/chief-editor-admin.php:384
+msgid "Settings"
+msgstr "Paramètres"
+
+#: admin/chief-editor-admin.php:332
+msgid "Visit Plugin Site"
+msgstr "Visiter la page du plugin"
+
+#: admin/chief-editor-admin.php:332
+msgid "Rate!"
+msgstr "Votez!"
+
+#: admin/chief-editor-admin.php:354
+msgid "All comments accross the network since "
+msgstr "Tous les commentaires sur tous les blogs depuis "
+
+#: admin/chief-editor-admin.php:370
+msgid " item(s)"
+msgstr " élément(s)"
+
+#: admin/chief-editor-admin.php:384
+msgid "Chief Editor"
+msgstr "Chief Editor"
+
+#: admin/chief-editor-admin.php:413
+msgid "Automatic Email to authors"
+msgstr "Courriel automatique aux auteurs"
+
+#: admin/chief-editor-admin.php:420
+msgid "Sender email address"
+msgstr "Adresse email de l'expéditeur"
+
+#: admin/chief-editor-admin.php:427
+msgid "Sender name"
+msgstr "Nom de l'expéditeur"
+
+#: admin/chief-editor-admin.php:435
+msgid "Email recipients addresses"
+msgstr "Adresses email des destinataires (en plus de l'auteur du post)"
+
+#: admin/chief-editor-admin.php:443
+msgid "Email content"
+msgstr "Contenu du mail"
+
+#: admin/chief-editor-admin.php:481
+msgid ""
+"The following settings are used to send pre-formatted email to post authors, "
+"in order for them to validate it online before publishing"
+msgstr ""
+"Les réglages suivants sont utilisés pour l'envoi d'un email pré-formatté aux "
+"auteurs des posts, dans le but d'obtenir le Bon-à-tirer (BAT) de leur part "
+"après validation."
+
+#: admin/chief-editor-admin.php:586 admin/chief-editor-admin.php:671
+msgid "Trace graph for sorted column"
+msgstr "Visualiser les données de la colonne triée"
+
+#: admin/chief-editor-admin.php:591
+msgid "Name"
+msgstr "Nom"
+
+#: admin/chief-editor-admin.php:591
+msgid "login"
+msgstr "identifiant"
+
+#: admin/chief-editor-admin.php:591
+msgid "Month blogging"
+msgstr "Ancienneté"
+
+#: admin/chief-editor-admin.php:592
+msgid "Posts/month"
+msgstr "Articles/mois"
+
+#: admin/chief-editor-admin.php:593
+msgid "Words/post"
+msgstr "Mots/articles"
+
+#: admin/chief-editor-admin.php:594
+msgid "Comments/post"
+msgstr "Commentaires/article"
+
+#: admin/chief-editor-admin.php:594
+msgid "Words/comment"
+msgstr "Mots/commentaire"
+
+#: admin/chief-editor-admin.php:594
+msgid "Comments/month"
+msgstr "Commentaires/mois"
+
+#: admin/chief-editor-admin.php:963
+msgid "Blog Title"
+msgstr "Titre du blog"
+
+#: admin/chief-editor-admin.php:963
+msgid "Featured image"
+msgstr "Image de chapo"
+
+#: admin/chief-editor-admin.php:964
+msgid "Submission date"
+msgstr "Date de soumission"
+
+#: admin/chief-editor-admin.php:964
+msgid "Status"
+msgstr "Status"
+
+#: admin/chief-editor-admin.php:965
+msgid "Excerpt"
+msgstr "Résumé"
+
+#: admin/chief-editor-admin.php:965
+msgid "Author (login)"
+msgstr "Auteur (identifiant)"
+
+#: admin/chief-editor-admin.php:966
+msgid "Scheduled for date"
+msgstr "Planifié pour le "
+
+#: admin/chief-editor-admin.php:1054
+msgid "Send BAT to author"
+msgstr "Envoyer le BAT à l'auteur"
+
+#: admin/chief-editor-admin.php:1065
+msgid "not scheduled"
+msgstr "non planifié"
+
+#: admin/chief-editor-admin.php:1089
+msgid "Scheduled posts : "
+msgstr "Articles planifiés : "
+
+#: admin/chief-editor-admin.php:1090
+msgid "Pending posts : "
+msgstr "Articles BAT : "
+
+#: admin/chief-editor-admin.php:1091
+msgid "Draft posts : "
+msgstr "Brouillons : "
+
+#: admin/chief-editor-admin.php:1092
+msgid "Total unpublished posts : "
+msgstr "Nombre total de posts non publiés : "

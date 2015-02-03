@@ -3,19 +3,21 @@ Contributors: munger41
 Donate link: http://www.maxizone.fr/?page_id=560
 Tags: editor, chief, draft, multisite, author, stat
 Requires at least: 3.0.1
-Tested up to: 4.0.1
+Tested up to: 4.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Helps wp multisite "chief editor" to manage all drafts and comments across the network. Also includes full authors stats.
+Helps wp multisite "chief editor" to manage all drafts, comments, authors and "for press" sends across the network. Also includes full authors stats.
 
 == Description ==
 
-This plugin is aimed to help the multisite wordpress editor-in-chief in order to plan publication of posts. All drafts across all sites in the network are shown with a link to the article for quick reviewing. Really simple read only plugin, but very useful :)
-To be visible and clicable on the settings page, the status of posts have to be DRAFT, PENDING or SCHEDULED. Only editors (or higher roles) can use the plugin.
+This plugin is aimed to help the multisite wordpress editor-in-chief in order to plan publication of posts.
+All posts across all sites in the network are shown with a link to the article for quick reviewing or editing.
 All recent comments accross the network are also visible and a link allow the user to answer directly.
 The Authors tab allow you to compare all authors efficiency accross the network.
+"For Press" automatic email is now possible.
+Only editors (or higher roles) can use the plugin.
 
 == Installation ==
 
@@ -36,6 +38,9 @@ The Authors tab allow you to compare all authors efficiency accross the network.
 5. Pie Chart
 
 == Changelog ==
+
+= 2.8 =
+* "For Press" automatic email sends
 
 = 2.7 =
 * compatible with default Edit Flow post statuses
