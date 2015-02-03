@@ -1059,7 +1059,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  $complete_new_table_line .= '</td>';
 		  
 		  if ($post_state == 'future') {
-			$complete_new_table_line .= '<td><h3>' . $creation_date . '</h3></td>';
+			$complete_new_table_line .= '<td><h3>' . $date . '</h3></td>';
 		  }
 		  else {
 			$complete_new_table_line .= '<td>'.__('not scheduled','chief-editor').'</td>';
