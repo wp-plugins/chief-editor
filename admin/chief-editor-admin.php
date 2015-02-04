@@ -1014,8 +1014,8 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  #echo 'Username: ' . $user_info->user_login . "\n";
 		  #echo 'User roles: ' . implode(', ', $user_info->roles) . "\n";
 		  #echo 'User ID: ' . $user_info->ID . "\n";
-		  $date_format = 'l, F jS, Y';
-		  $creation_date = get_the_time( $date_format, $post_id );
+		  $date_format = '1, jS F Y';
+		  $creation_date = get_the_time( $date_format, $new_post );
 		  $date = $new_post->post_date;
 		  $post_state = $new_post->post_status;
 		  $line_color = $this->get_post_color_from_status($post_state);
