@@ -39,6 +39,9 @@ Only editors (or higher roles) can use the plugin.
 
 == Changelog ==
 
+= 2.9 =
+* bug fix for comments
+
 = 2.8 =
 * "For Press" automatic email sends
 
