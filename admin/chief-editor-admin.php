@@ -206,8 +206,12 @@ if(!class_exists('ChiefEditorSettings')) {
 
   
 	  // send confirmation for ajax callback
-	 echo $success ? __('Email sent successfully','chief-editor') : __('Problem sending email...','chief-editor');
+	 $message_to_user = $success ? __('Email sent successfully','chief-editor') : __('Problem sending email...','chief-editor') . "\n" 
+	   . $multiple_to_recipients . "\n" .$msg_object ."\n" . $msg_content ."\n"."From ".$sender_name."<".$sender_email.">";
+	  //. $multiple_to_recipients .'\n' . $msg_object.'\n' . $headers'\n' . $msg_content;
+	 
 	  
+	  echo $message_to_user;
 	}
 	
 	
