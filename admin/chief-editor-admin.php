@@ -1014,7 +1014,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  #echo 'Username: ' . $user_info->user_login . "\n";
 		  #echo 'User roles: ' . implode(', ', $user_info->roles) . "\n";
 		  #echo 'User ID: ' . $user_info->ID . "\n";
-		  $date_format = '1, jS F Y';
+		  $date_format = 'l, jS F Y';
 		  $creation_date = get_the_time( $date_format, $new_post );
 		  $date = $new_post->post_date;
 		  $post_state = $new_post->post_status;
