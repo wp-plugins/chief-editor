@@ -190,11 +190,11 @@ if(!class_exists('ChiefEditorSettings')) {
 	  
 	  $search = array ('/%username%/', '/%userlogin%/','/%useremail%/', '/%postlink%/', '/%posttitle%/','/%blogurl%/','/%n%/');	 
 	$replace = array ($user_displayname, $user_login,( $user_email == "" ? "no email" : $user_email ), $permalink, $post_title,$blog_url, "\n");
-	foreach ( $userdata_fields as $userdata_key => $userdata_field ) { 
+	/*foreach ( $userdata_fields as $userdata_key => $userdata_field ) { 
 		$ind = 1 + $userdata_key;
 		array_push($search, '/%userdata'.$ind.'%/');  
 		array_push($replace, $userdata_field["value"]);
-	}   
+	}   */
 	$msg_content = preg_replace($search, $replace, $options['email_content']);
 	
 	  //echo $msg_content;
