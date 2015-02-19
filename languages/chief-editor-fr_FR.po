@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Chief Editor\n"
-"POT-Creation-Date: 2015-02-03 17:58+0100\n"
-"PO-Revision-Date: 2015-02-03 18:03+0100\n"
+"POT-Creation-Date: 2015-02-19 10:25+0100\n"
+"PO-Revision-Date: 2015-02-19 10:26+0100\n"
 "Last-Translator: \n"
 "Language-Team: termel <admin@termel.fr>\n"
 "Language: Français\n"
@@ -15,81 +15,89 @@ msgstr ""
 "X-Poedit-SearchPath-0: ../admin\n"
 "X-Poedit-SearchPath-1: .\n"
 
-#: admin/chief-editor-admin.php:209
+#: admin/chief-editor-admin.php:231
 msgid "Email sent successfully"
 msgstr "Courriel envoyé avec succès! :)"
 
-#: admin/chief-editor-admin.php:209
+#: admin/chief-editor-admin.php:231
 msgid "Problem sending email..."
 msgstr ""
 "Un petit problème est survenu lors de l'envoi du courriel... merci de "
 "contacter votre hébergeur."
 
-#: admin/chief-editor-admin.php:235
+#: admin/chief-editor-admin.php:262
 msgid "Are you sure you want to sent BAT email?"
 msgstr "Voulez-vous vraiment envoyer un email de BAT ?"
 
-#: admin/chief-editor-admin.php:241
+#: admin/chief-editor-admin.php:268
 msgid "Send"
 msgstr "Envoyer"
 
-#: admin/chief-editor-admin.php:272 admin/chief-editor-admin.php:592
+#: admin/chief-editor-admin.php:301 admin/chief-editor-admin.php:937
 msgid "Posts"
 msgstr "Articles"
 
-#: admin/chief-editor-admin.php:288 admin/chief-editor-admin.php:593
+#: admin/chief-editor-admin.php:306
+msgid "Calendar"
+msgstr "Calendrier"
+
+#: admin/chief-editor-admin.php:321 admin/chief-editor-admin.php:938
 msgid "Comments"
 msgstr "Commentaires"
 
-#: admin/chief-editor-admin.php:293
+#: admin/chief-editor-admin.php:326
 msgid "Authors"
 msgstr "Auteurs"
 
-#: admin/chief-editor-admin.php:297 admin/chief-editor-admin.php:384
+#: admin/chief-editor-admin.php:330 admin/chief-editor-admin.php:423
 msgid "Settings"
 msgstr "Paramètres"
 
-#: admin/chief-editor-admin.php:332
+#: admin/chief-editor-admin.php:366
 msgid "Visit Plugin Site"
 msgstr "Visiter la page du plugin"
 
-#: admin/chief-editor-admin.php:332
+#: admin/chief-editor-admin.php:366
 msgid "Rate!"
 msgstr "Votez!"
 
-#: admin/chief-editor-admin.php:354
+#: admin/chief-editor-admin.php:393
 msgid "All comments accross the network since "
 msgstr "Tous les commentaires sur tous les blogs depuis "
 
-#: admin/chief-editor-admin.php:370
+#: admin/chief-editor-admin.php:398
+msgid "Most commented posts"
+msgstr "Posts les + commentés"
+
+#: admin/chief-editor-admin.php:411
 msgid " item(s)"
 msgstr " élément(s)"
 
-#: admin/chief-editor-admin.php:384
+#: admin/chief-editor-admin.php:423
 msgid "Chief Editor"
 msgstr "Chief Editor"
 
-#: admin/chief-editor-admin.php:413
+#: admin/chief-editor-admin.php:511
 msgid "Automatic Email to authors"
 msgstr "Courriel automatique aux auteurs"
 
-#: admin/chief-editor-admin.php:420
+#: admin/chief-editor-admin.php:519
 msgid "Sender email address"
 msgstr "Adresse email de l'expéditeur"
 
-#: admin/chief-editor-admin.php:427
+#: admin/chief-editor-admin.php:527
 msgid "Sender name"
 msgstr "Nom de l'expéditeur"
 
-#: admin/chief-editor-admin.php:435
+#: admin/chief-editor-admin.php:536
 msgid "Email recipients addresses"
 msgstr "Adresses email des destinataires (en plus de l'auteur du post)"
 
-#: admin/chief-editor-admin.php:443
+#: admin/chief-editor-admin.php:545
 msgid "Email content"
 msgstr "Contenu du mail"
 
-#: admin/chief-editor-admin.php:481
+#: admin/chief-editor-admin.php:632
 msgid ""
 "The following settings are used to send pre-formatted email to post authors, "
 "in order for them to validate it online before publishing"
@@ -98,90 +106,94 @@ msgstr ""
 "auteurs des posts, dans le but d'obtenir le Bon-à-tirer (BAT) de leur part "
 "après validation."
 
-#: admin/chief-editor-admin.php:586 admin/chief-editor-admin.php:671
+#: admin/chief-editor-admin.php:764
+msgid "Blog"
+msgstr "Blog"
+
+#: admin/chief-editor-admin.php:931 admin/chief-editor-admin.php:1016
 msgid "Trace graph for sorted column"
 msgstr "Visualiser les données de la colonne triée"
 
-#: admin/chief-editor-admin.php:591
+#: admin/chief-editor-admin.php:936
 msgid "Name"
 msgstr "Nom"
 
-#: admin/chief-editor-admin.php:591
+#: admin/chief-editor-admin.php:936
 msgid "login"
 msgstr "identifiant"
 
-#: admin/chief-editor-admin.php:591
+#: admin/chief-editor-admin.php:936
 msgid "Month blogging"
 msgstr "Ancienneté"
 
-#: admin/chief-editor-admin.php:592
+#: admin/chief-editor-admin.php:937
 msgid "Posts/month"
 msgstr "Articles/mois"
 
-#: admin/chief-editor-admin.php:593
+#: admin/chief-editor-admin.php:938
 msgid "Words/post"
 msgstr "Mots/articles"
 
-#: admin/chief-editor-admin.php:594
+#: admin/chief-editor-admin.php:939
 msgid "Comments/post"
 msgstr "Commentaires/article"
 
-#: admin/chief-editor-admin.php:594
+#: admin/chief-editor-admin.php:939
 msgid "Words/comment"
 msgstr "Mots/commentaire"
 
-#: admin/chief-editor-admin.php:594
+#: admin/chief-editor-admin.php:939
 msgid "Comments/month"
 msgstr "Commentaires/mois"
 
-#: admin/chief-editor-admin.php:963
+#: admin/chief-editor-admin.php:1308
 msgid "Blog Title"
 msgstr "Titre du blog"
 
-#: admin/chief-editor-admin.php:963
+#: admin/chief-editor-admin.php:1308
 msgid "Featured image"
 msgstr "Image de chapo"
 
-#: admin/chief-editor-admin.php:964
+#: admin/chief-editor-admin.php:1309
 msgid "Submission date"
 msgstr "Date de soumission"
 
-#: admin/chief-editor-admin.php:964
+#: admin/chief-editor-admin.php:1309
 msgid "Status"
 msgstr "Status"
 
-#: admin/chief-editor-admin.php:965
+#: admin/chief-editor-admin.php:1310
 msgid "Excerpt"
 msgstr "Résumé"
 
-#: admin/chief-editor-admin.php:965
+#: admin/chief-editor-admin.php:1310
 msgid "Author (login)"
 msgstr "Auteur (identifiant)"
 
-#: admin/chief-editor-admin.php:966
+#: admin/chief-editor-admin.php:1311
 msgid "Scheduled for date"
 msgstr "Planifié pour le "
 
-#: admin/chief-editor-admin.php:1054
+#: admin/chief-editor-admin.php:1399
 msgid "Send BAT to author"
 msgstr "Envoyer le BAT à l'auteur"
 
-#: admin/chief-editor-admin.php:1065
+#: admin/chief-editor-admin.php:1410
 msgid "not scheduled"
 msgstr "non planifié"
 
-#: admin/chief-editor-admin.php:1089
+#: admin/chief-editor-admin.php:1434
 msgid "Scheduled posts : "
 msgstr "Articles planifiés : "
 
-#: admin/chief-editor-admin.php:1090
+#: admin/chief-editor-admin.php:1435
 msgid "Pending posts : "
 msgstr "Articles BAT : "
 
-#: admin/chief-editor-admin.php:1091
+#: admin/chief-editor-admin.php:1436
 msgid "Draft posts : "
 msgstr "Brouillons : "
 
-#: admin/chief-editor-admin.php:1092
+#: admin/chief-editor-admin.php:1437
 msgid "Total unpublished posts : "
 msgstr "Nombre total de posts non publiés : "

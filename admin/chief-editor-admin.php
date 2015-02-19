@@ -13,6 +13,13 @@ else if (isset($_POST['unschedulePost'])) {
   unschedulePost( $_POST["blog_id"],$_POST["post_id"] );
 }
 
+define("CE_SCHEDULED_COLOR", "#91FEFF");
+define("CE_INPRESS_COLOR", "#CFF09E");
+define("CE_DRAFT_COLOR", "#cccccc");
+define("CE_NEW_COLOR", "#FDD87F");
+define("CE_INPRESS_SENT_COLOR", "#f3f5b1");
+define("CE_ASSIGNED_COLOR", "#FFADFB");
+define("CE_PUBLISHED_COLOR","#BAADFB");
 
 if (!defined('CHIEF_EDITOR_PLUGIN_NAME'))
   define('CHIEF_EDITOR_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
@@ -104,7 +111,6 @@ function unschedulePost($blog_id, $post_id) {
   
 }
 
-
 if(!class_exists('ChiefEditorSettings')) {
   
   class ChiefEditorSettings
@@ -115,27 +121,38 @@ if(!class_exists('ChiefEditorSettings')) {
 	private $options;
 	private $lang_domain = 'chief-editor';
 	private $general_settings_key = 'chief_editor_posts_tab';
+	private $calendar_settings_key = 'chief_editor_calendar_tab';
 	private $advanced_settings_key = 'chief_editor_comments_tab';
 	private $stats_key = 'chief_editor_stats_tab';
 	private $chief_editor_options_key = 'chief_editor_settings_tab';
 	private $chief_editor_admin_page_name = 'chief_editor';
-	
 	private $chief_editor_settings_tabs = array();
 	/**
 	* Start up
 	*/
 	public function __construct()
 	{
-	  //add_action( 'init', array( &$this, 'load_settings' ) );
 	  add_action( 'admin_init', array( &$this, 'register_general_settings' ) );
+	  add_action( 'admin_init', array (&$this, 'register_calendar_tab'));
 	  add_action( 'admin_init', array( &$this, 'register_advanced_settings' ) );
 	  add_action( 'admin_init', array (&$this, 'register_stats_tab'));
 	  add_action( 'admin_init', array (&$this, 'register_options_tab'));
 	  add_action( 'admin_init', array (&$this, 'settings_page_init'));
+	  
 	  add_action( 'admin_menu', array( &$this, 'add_admin_menus' ));
 	  add_action( 'admin_enqueue_scripts',array( &$this,'chief_editor_load_scripts'));
 	  add_action( 'wp_ajax_ce_send_author_std_validation_email', array( &$this,'ce_process_ajax'));
 	  add_action( 'wp_ajax_ce_send_author_std_validation_email_confirmed', array( &$this,'ce_process_ajax_bat_confirm'));
+	  
+	}
+	
+	/**
+	* Register and enqueue style sheet.
+	*/
+	public function register_plugin_styles() {
+	  
+	  wp_register_style( 'chief-editor', plugins_url( 'chief-editor/css/chief-editor.css' ) );
+	  wp_enqueue_style( 'chief-editor' );
 	}
 	
 	function ce_process_ajax_bat_confirm() {
@@ -157,8 +174,9 @@ if(!class_exists('ChiefEditorSettings')) {
 	  // get post unique URL
 	  
 	  switch_to_blog( $blogID );
-
-	  $current_post = get_post($postID); 
+	  
+	  $current_post = get_post($postID);
+	  
 	  $post_title = $current_post->post_title;
 	  $permalink = get_permalink( $postID);
 	  $post_author_id = $current_post->post_author ;
@@ -168,7 +186,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $user_login = $user_info->user_login;
 	  $user_displayname = $user_info->display_name;
 	  $user_email = $user_info->user_email;
-		
+	  
 	  restore_current_blog();
 	  
 	  // build mail content with std text
@@ -188,28 +206,32 @@ if(!class_exists('ChiefEditorSettings')) {
 	  
 	  //add_filter( 'wp_mail_content_type', 'set_html_content_type' );
 	  
-	  $search = array ('/%username%/', '/%userlogin%/','/%useremail%/', '/%postlink%/', '/%posttitle%/','/%blogurl%/','/%n%/');	 
-	$replace = array ($user_displayname, $user_login,( $user_email == "" ? "no email" : $user_email ), $permalink, $post_title,$blog_url, "\n");
-	/*foreach ( $userdata_fields as $userdata_key => $userdata_field ) { 
-		$ind = 1 + $userdata_key;
-		array_push($search, '/%userdata'.$ind.'%/');  
-		array_push($replace, $userdata_field["value"]);
-	}   */
-	$msg_content = preg_replace($search, $replace, $options['email_content']);
-	
+	  $search = array ('/%username%/', '/%userlogin%/','/%useremail%/', '/%postlink%/', '/%posttitle%/','/%blogurl%/','/%n%/');
+	  
+	  $replace = array ($user_displayname, $user_login,( $user_email == "" ? "no email" : $user_email ), $permalink, $post_title,$blog_url, "\n");
+	  /*foreach ( $userdata_fields as $userdata_key => $userdata_field ) {
+	  
+	  $ind = 1 + $userdata_key;
+	  array_push($search, '/%userdata'.$ind.'%/');
+	  
+	  array_push($replace, $userdata_field["value"]);
+	  }
+	  */
+	  $msg_content = preg_replace($search, $replace, $options['email_content']);
+	  
 	  //echo $msg_content;
-	
+	  
 	  $success = wp_mail( $multiple_to_recipients, $msg_object, $msg_content, $headers );
-
-	// Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
+	  
+	  // Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
 	  //remove_filter( 'wp_mail_content_type', 'set_html_content_type' );
-
-  
+	  
+	  
 	  // send confirmation for ajax callback
-	 $message_to_user = $success ? __('Email sent successfully','chief-editor') : __('Problem sending email...','chief-editor') . "\n" 
-	   . $multiple_to_recipients . "\n" .$msg_object ."\n" . $msg_content ."\n"."From ".$sender_name."<".$sender_email.">";
+	  $message_to_user = $success ? __('Email sent successfully','chief-editor') : __('Problem sending email...','chief-editor') . "\n" 
+		. $multiple_to_recipients . "\n" .$msg_object ."\n" . $msg_content ."\n"."From ".$sender_name."<".$sender_email.">";
 	  //. $multiple_to_recipients .'\n' . $msg_object.'\n' . $headers'\n' . $msg_content;
-	 
+	  
 	  
 	  echo $message_to_user;
 	}
@@ -218,14 +240,15 @@ if(!class_exists('ChiefEditorSettings')) {
 	function ce_process_ajax() {
 	  
 	  //print_r($_POST);
-	  	  
+	  
 	  $pID = htmlspecialchars($_POST['postID']);
 	  $aID = htmlspecialchars($_POST['authorID']);
 	  $bID = htmlspecialchars($_POST['blogID']);
 	  
 	  switch_to_blog( $bID );
-
-	  $current_post = get_post($pID); 
+	  
+	  $current_post = get_post($pID);
+	  
 	  $title = $current_post->post_title;
 	  
 	  $user_info = get_userdata($aID);
@@ -242,7 +265,8 @@ if(!class_exists('ChiefEditorSettings')) {
 	  echo $user_email. '<br/>';
 	  echo '<input type="hidden" id="postID" name="postID" value="'.$pID.'">';
 	  echo '<input type="hidden" id="blogID" name="blogID" value="'. $bID .'">';
-	  echo '<input type="submit" id="chief-editor-bat-send-confirm" name="chief-editor-bat-send-confirm" class="chief-editor-bat-send-confirm button-primary" value="'.__('Send','chief-editor').'"/>';  
+	  echo '<input type="submit" id="chief-editor-bat-send-confirm" name="chief-editor-bat-send-confirm" class="chief-editor-bat-send-confirm button-primary" value="'.__('Send','chief-editor').'"/>';
+	  
 	  echo '</div></form>';
 	  
 	  die();
@@ -270,11 +294,16 @@ if(!class_exists('ChiefEditorSettings')) {
 	  }
 	  
 	  //wp_enqueue_script('','');
+	  $this->register_plugin_styles();
 	}
 	
 	function register_general_settings() {
 	  $this->chief_editor_settings_tabs[$this->general_settings_key] = __('Posts','chief-editor');
 	  
+	}
+	
+	function register_calendar_tab() {
+	  $this->chief_editor_settings_tabs[$this->calendar_settings_key] = __('Calendar','chief-editor');
 	}
 	
 	function section_general_desc() {
@@ -322,7 +351,8 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $tab = isset( $_GET['tab'] ) ? $_GET['tab'] : $this->general_settings_key;
 ?>
 <div class="wrap">
-  <?php $this->chief_editor_options_tabs(); ?>
+  <?php $this->chief_editor_options_tabs();
+  ?>
 </div>
 <?php
 	}
@@ -348,6 +378,11 @@ if(!class_exists('ChiefEditorSettings')) {
 		$this->recent_mu_posts();
 		
 	  }
+	  elseif ($current_tab == 'chief_editor_calendar_tab') {
+		
+		$this->create_calendar_table();
+		
+	  }
 	  elseif ($current_tab == 'chief_editor_comments_tab') {
 		
 		//$this->recent_multisite_comments();
@@ -355,9 +390,12 @@ if(!class_exists('ChiefEditorSettings')) {
 		$last_month = mktime(0, 0, 0, date("m")-1, date("d"),   date("Y"));
 		$start_date = date('Y-m-d H:i:s', $last_month );
 		$end_date = date('Y-m-d H:i:s');
-		$intro_text = __('All comments accross the network since ','chief-editor').$start_date.'<br/>';
+		$intro_text = '<h3>'.__('All comments accross the network since ','chief-editor').$start_date.'</h3><br/>';
 		
 		if ( is_multisite() ) {
+		 
+		  $mostCommentedPosts = $this->getMostCommentedPosts();
+		  echo '<h3>'.__('Most commented posts').'</h3><br/>'.$mostCommentedPosts;
 		  $allComments = $this->getAllCommentsMultisite('1000',$start_date,$end_date);
 		}
 		else {
@@ -370,30 +408,27 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		  
 		}
 		
-		
 		echo $intro_text . ' ' . count($allComments). __(' item(s)','chief-editor');
 		echo $this->formatCommentsFromArray($allComments);
-		// $merged = 
-		//echo $this->formatCommentsFromArray($merged);
+		
 	  }
 	  elseif ($current_tab == 'chief_editor_stats_tab') {
 		$this->bm_author_stats("alltime");
-	  } elseif ($current_tab == 'chief_editor_settings_tab') {
+	  }
+	  elseif ($current_tab == 'chief_editor_settings_tab') {
 		
-		//$this->settings_page_init();
-	  	// Set class property
-        $this->options = get_option( 'chief_editor_option' );
+		$this->options = get_option( 'chief_editor_option' );
 		//echo $this->options;
-        echo '<div class="wrap">'.screen_icon();
+		echo '<div class="wrap">'.screen_icon();
 		echo '<h2>'.__('Chief Editor','chief-editor').' '.__('Settings','chief-editor').'</h2>';
 		echo '<form method="post" action="options.php">';
 		// This prints out all hidden setting fields';
 		settings_fields( 'chief_editor_option_group' );   
 		do_settings_sections( 'chief_editor_plugin_options' );
-        submit_button(); 
-           
-        echo '</form></div>';
-        
+		submit_button(); 
+		
+		echo '</form></div>';
+		
 	  }
 	  echo '<div style="text-align:right;">';
 	  // echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">Visit Plugin Site</a>  <a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">Rate This Plugin</a>';
@@ -401,123 +436,272 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  echo '</div> ';
 	}
 	
-	/**
-     * Register and add settings
-     */
-    public function settings_page_init()
-    {        
-        register_setting(
-            'chief_editor_option_group', // Option group
-            'chief_editor_option', // Option name
-            array( $this, 'sanitize' ) // Sanitize
-        );
-
-        add_settings_section(
-            'setting_section_id', // ID
-            __('Automatic Email to authors','chief-editor'), // Title
-            array( $this, 'ce_print_section_info' ), // Callback
-            'chief_editor_plugin_options' // Page
-        );  
-
-	  add_settings_field(
-            'sender_email', // ID
-            __('Sender email address','chief-editor'), // Title 
-            array( $this, 'ce_sender_email_address_callback' ), // Callback
-            'chief_editor_plugin_options', // Page
-            'setting_section_id' // Section           
-        );  
-	  add_settings_field(
-            'sender_name', // ID
-            __('Sender name','chief-editor'), // Title 
-            array( $this, 'ce_sender_name_callback' ), // Callback
-            'chief_editor_plugin_options', // Page
-            'setting_section_id' // Section           
-        ); 
+	
+	function getAllPostsOfAllBlogs() {
 	  
-        add_settings_field(
-            'email_recipients', // ID
-            __('Email recipients addresses','chief-editor'), // Title 
-            array( $this, 'ce_email_addresses_callback' ), // Callback
-            'chief_editor_plugin_options', // Page
-            'setting_section_id' // Section           
-        );      
-
-        add_settings_field(
-            'email_content', 
-            __('Email content','chief-editor'), 
-            array( $this, 'ce_email_content_callback' ), 
-            'chief_editor_plugin_options', 
-            'setting_section_id'
-        );      
+	  $network_sites = wp_get_sites();
+	  
+	  $result = array();
+	  foreach ( $network_sites as $network_site ) {
+		
+		$blog_id = $network_site['blog_id'];
+		
+		switch_to_blog($blog_id);
+		
+		$result = array_merge($result, get_posts(array(
+		  'numberposts' => -1, 
+		  'post_type' => 'post',
+		  'post_status' => array('publish','future')
+		)));
+		
+		// Switch back to the main blog
+		restore_current_blog();
+	  }
+	  
+	  
+	  return $result;
+	}
+	
+	public function getMostCommentedPosts() {
+	
+		$posts = $this->getAllPostsOfAllBlogs();
+		  $postCommentsArray = [];
+	
+		  foreach ($posts as $post) {
+			$nbOfComments = get_comments_number( $post->ID );
+			$postCommentsArray[$post->post_title] = $nbOfComments;
+		  }
+		  $result = 'Total number of posts : '.count($postCommentsArray);
+		  $sortResult = arsort($postCommentsArray);
+		
+		  if ($sortResult) {
+			
+			$postComments = '<ol>';
+			foreach ($postCommentsArray as $key => $value) {
+			
+			  if ($value) {
+				$postComments .= '<li>'.$key . ' | #comments : '.$value.'</li>';
+			  }
+			}
+			$postComments .= '</ol>';
+			$result .= $postComments;
+		  }
+		  else {
+			$result .= 'problem sorting...';
+		  }
+	  
+	  return $result;
+	}
+	
+	
+	/**
+	* Register and add settings
+	*/
+	public function settings_page_init()
+	{
+	  
+	  register_setting(
+		'chief_editor_option_group', // Option group
+		'chief_editor_option', // Option name
+		array( $this, 'sanitize' ) // Sanitize
+	  );
+	  
+	  add_settings_section(
+		'setting_section_id', // ID
+		__('Automatic Email to authors','chief-editor'), // Title
+		array( $this, 'ce_print_section_info' ), // Callback
+		'chief_editor_plugin_options' // Page
+	  );
+	  
+	  
+	  add_settings_field(
+		'sender_email', // ID
+		__('Sender email address','chief-editor'), // Title 
+		array( $this, 'ce_sender_email_address_callback' ), // Callback
+		'chief_editor_plugin_options', // Page
+		'setting_section_id' // Section           
+	  );
+	  
+	  add_settings_field(
+		'sender_name', // ID
+		__('Sender name','chief-editor'), // Title 
+		array( $this, 'ce_sender_name_callback' ), // Callback
+		'chief_editor_plugin_options', // Page
+		'setting_section_id' // Section           
+	  );
+	  
+	  
+	  add_settings_field(
+		'email_recipients', // ID
+		__('Email recipients addresses','chief-editor'), // Title 
+		array( $this, 'ce_email_addresses_callback' ), // Callback
+		'chief_editor_plugin_options', // Page
+		'setting_section_id' // Section           
+	  );
+	  
+	  
+	  add_settings_field(
+		'email_content', 
+		__('Email content','chief-editor'), 
+		array( $this, 'ce_email_content_callback' ), 
+		'chief_editor_plugin_options', 
+		'setting_section_id'
+	  );
+	  
+	  // -----------------------------------
+	  
+	  /*
+	  
+	  add_settings_section(
+		'chief_editors_section_id', // ID
+		__('Set users as Chief Editors','chief-editor'), // Title
+		array( $this, 'ce_print_section_editors_info' ), // Callback
+		'chief_editor_plugin_options' // Page
+	  );
+	  
+	  
+	  
+	  
+	  // Iterate through your list of blogs
+	  foreach (wp_get_sites() as $blog) {
+		//foreach ($blog_ids as $blog_id){
+		$blog_id = $blog['blog_id'];
+		
+		// Switch to the next blog in the loop.
+		// This will start at $id == 1 because of your ORDER BY statement.
+		switch_to_blog($blog_id);
+		
+		// Get the 5 latest posts for the blog and store them in the $globalquery variable.
+		//$globalquery = get_posts('numberposts=5&post_type=any');
+		$blog_details = get_blog_details($blog_id);
+		$setting_id = "blog_" . $blog_id . '_chief_editor';
+		$args     = array (
+		  'blog_id' => $blog_id,
+		  'setting_id' => $setting_id
+		);
+		add_settings_field(
+		  $setting_id, // ID
+		  __($blog_details->blogname,'chief-editor'), // Title 
+		  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
+		  'chief_editor_plugin_options', // Page
+		  'chief_editors_section_id', // Section   
+		  $args
+		);
+		
+		
+		// Switch back to the main blog
+		restore_current_blog();
+	  }
+	  
+	  */
 	  
 	  $this->options = get_option( 'chief_editor_option' );
-    }
+	
+	  //print_r($this->options);
+	}
 	
 	/**
-     * Sanitize each setting field as needed
-     *
-     * @param array $input Contains all settings fields as array keys
-     */
+	* Sanitize each setting field as needed
+	*
+	* @param array $input Contains all settings fields as array keys
+	*/
 	
-    public function sanitize( $input )
-    {
-        $new_input = array();
+	public function sanitize( $input )
+	{
+	  $new_input = array();
 	  if( isset( $input['sender_email'] ) )
-            $new_input['sender_email'] = sanitize_text_field( $input['sender_email'] );
-
+		$new_input['sender_email'] = sanitize_text_field( $input['sender_email'] );
+	  
 	  if( isset( $input['sender_name'] ) )
-            $new_input['sender_name'] = sanitize_text_field( $input['sender_name'] );
-
-        if( isset( $input['email_recipients'] ) )
-            $new_input['email_recipients'] = sanitize_text_field( $input['email_recipients'] );
-
-        if( isset( $input['email_content'] ) )
-            $new_input['email_content'] = $input['email_content'];
-
-        return $new_input;
-    }
+		$new_input['sender_name'] = sanitize_text_field( $input['sender_name'] );
+	  
+	  if( isset( $input['email_recipients'] ) )
+		$new_input['email_recipients'] = sanitize_text_field( $input['email_recipients'] );
+	  
+	  if( isset( $input['email_content'] ) )
+		$new_input['email_content'] = $input['email_content'];
+	  
+	  return $new_input;
+	}
 	
-    /** 
-     * Print the Section text
-     */
-    public function ce_print_section_info()
-    {
-        print __('The following settings are used to send pre-formatted email to post authors, in order for them to validate it online before publishing','chief-editor');
-    }
-
+	/** 
+	* Print the Section text
+	*/
+	public function ce_print_section_info()
+	{
+	  print __('The following settings are used to send pre-formatted email to post authors, in order for them to validate it online before publishing','chief-editor');
+	}
+	
+	public function ce_blog_chief_editor_callback(array $args){
+	  
+	  $blog_id  = $args['blog_id'];
+	  $setting_id = $args['setting_id'];
+	  echo $setting_id;
+	  $chief_editors_role = 'contributor';
+	  
+	  $blogusers = get_users( 'blog_id='.$blog_id.'&orderby=nicename&role='.$chief_editors_role );
+	  
+	  echo count($blogusers) . ' '.$chief_editors_role. ' : ';
+	  /*
+	  echo isset($this->options[$setting_id]) ? $this->options[$setting_id] : 'not set<br/>';
+	  $chief_editor_array = $this->options[$setting_id];
+	  
+	  echo count($chief_editor_array) . '<ul>';
+	  foreach ($chief_editor_array as $chief_editor) {  
+		echo '<li>'.$chief_editor.'</li>';
+	  }
+	  echo '</ul>';
+	  */
+	  $ouput_string = '<select id="chief_editors_selector_'.$blog_id.'" name="chief_editor_option['.$setting_id.']">';
+	  
+	  // Array of WP_User objects.
+	  $idx = 1;
+	  foreach ( $blogusers as $user ) {
+		//$option_selected = in_array( $user->ID, $chief_editor_array ) ? 'selected="selected"' : '';
+		echo $this->options[$setting_id] . ' ' . $user->ID;
+		$ouput_string .= '<option '. selected( $this->options[$setting_id], $user->ID ) .' value="'.$user->ID.'">' . esc_html( $user->user_login ) . ' - '.esc_html( $user->user_nicename ).' - (' . esc_html( $user->user_email ) . ')</option>';
+	  	$idx += 1;
+	  }
+	  
+	  $ouput_string .= '</select>';
+	  print( $ouput_string);
+	  
+	  var_dump($_POST);
+	}
 	
 	
-	  public function ce_sender_email_address_callback()
-    {
-        printf(
-		  '<input type="text" id="sender_email" name="chief_editor_option[sender_email]" value="%s" />',
-            isset( $this->options['sender_email'] ) ? esc_attr( $this->options['sender_email']) : ''
-        );
-    }
-	 public function ce_sender_name_callback()
-    {
-        printf(
-		  '<input type="text" id="sender_name" name="chief_editor_option[sender_name]" value="%s" />',
-            isset( $this->options['sender_name'] ) ? esc_attr( $this->options['sender_name']) : ''
-        );
-    }
+	public function ce_sender_email_address_callback()
+	{
+	  printf(
+		'<input type="text" id="sender_email" name="chief_editor_option[sender_email]" value="%s" />',
+		isset( $this->options['sender_email'] ) ? esc_attr( $this->options['sender_email']) : ''
+	  );
+	  
+	}
+	public function ce_sender_name_callback()
+	{
+	  printf(
+		'<input type="text" id="sender_name" name="chief_editor_option[sender_name]" value="%s" />',
+		isset( $this->options['sender_name'] ) ? esc_attr( $this->options['sender_name']) : ''
+	  );
+	}
 	
-    /** 
-     * Get the settings option array and print one of its values
-     */
-    public function ce_email_addresses_callback()
-    {
-        printf(
-		  '<input type="text" id="email_recipients" name="chief_editor_option[email_recipients]" value="%s" />',
-            isset( $this->options['email_recipients'] ) ? esc_attr( $this->options['email_recipients']) : ''
-        );
-    }
-
-    /** 
-     * Get the settings option array and print one of its values
-     */
-    public function ce_email_content_callback()
-    {
+	/** 
+	* Get the settings option array and print one of its values
+	*/
+	public function ce_email_addresses_callback()
+	{
+	  printf(
+		'<input type="text" id="email_recipients" name="chief_editor_option[email_recipients]" value="%s" />',
+		isset( $this->options['email_recipients'] ) ? esc_attr( $this->options['email_recipients']) : ''
+	  );
+	}
+	
+	/** 
+	* Get the settings option array and print one of its values
+	*/
+	public function ce_email_content_callback()
+	{
 	  $ce_default_mail_content = 'Cher %username%,<br/>
 Voici la prévisualisation de votre article pour obtention d\'un Bon A Tirer : <br/>
 
@@ -546,16 +730,173 @@ c\'est que vous n\'êtes pas connecté au site.
 <li>(optionnel) une photo de vous</li>
 </ol>
 
-<br/>Cordialement, L\'équipe
-';
+<br/>Cordialement, L\'équipe';
 	  
-        printf(
-            '<textarea type="text" id="email_content" rows="25" cols="110" name="chief_editor_option[email_content]" value="%s">%s</textarea>',
-            isset( $this->options['email_content'] ) ? esc_attr( $this->options['email_content']) : $ce_default_mail_content,
-		  isset( $this->options['email_content'] ) ? esc_attr( $this->options['email_content']) : $ce_default_mail_content
-		  
-        );	 
+	  printf(
+		'<textarea type="text" id="email_content" rows="25" cols="110" name="chief_editor_option[email_content]" value="%s">%s</textarea>',
+		isset( $this->options['email_content'] ) ? esc_attr( $this->options['email_content']) : $ce_default_mail_content,
+		isset( $this->options['email_content'] ) ? esc_attr( $this->options['email_content']) : $ce_default_mail_content
+		
+	  );
+	  
 	}
+	
+	
+	public function create_calendar_table() {
+	  // Set up global variables. Great
+	  //global $wpdb, $blog_id, $post;
+	  $sumsArray = [];
+	  
+	  // Get a list of blogs in your multisite network
+	  //$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
+	  $weekNumber = date("W");
+	  $weeksInPast = 6;
+	  $weeksInFuture = 4;
+	  $thisWeekColor = "#F5B800";
+	  $backgroundColor = "#6B6B6B";
+	  $lightGreyColor = "#E0E0E0";
+	  $startingWeek = max($weekNumber - $weeksInPast,1);
+	  $currentYear = date("Y");
+	  echo '<table class="sortable" id="calendar_table" style="border:solid #6B6B6B 1px;width:100%;">';
+	  //$color_bool = true;
+	  $chief_editor_table_header = '<tr style="background-color:'.$backgroundColor.';color:#FFFFFF">';
+	  $chief_editor_table_header .= '<td>#</td>';
+	  $chief_editor_table_header .= '<td>'.__('Blog','chief-editor').'</td>';
+	  for ($week = $startingWeek; $week <= $weekNumber + $weeksInFuture; $week++) {
+		
+		$sumsArray[$week] = 0;
+		$weekArray = $this->getStartAndEndDate($week,$currentYear);
+		$color='';
+		if ($week == $weekNumber) {
+		  $color = $thisWeekColor;
+		}
+		else {
+		  $color = $backgroundColor;
+		}
+		
+		$chief_editor_table_header .= '<td style="background-color:'.$color.';">'.$weekArray['week_start'].' => '.$weekArray['week_end'].'</td>';
+	  }
+	  $chief_editor_table_header .= '</tr>';
+	  
+	  echo $chief_editor_table_header;
+	  
+	  $idx = 0;
+	  
+	  // Iterate through your list of blogs
+	  foreach (wp_get_sites() as $blog) {
+		//foreach ($blog_ids as $blog_id){
+		$blog_id = $blog['blog_id'];
+		
+		$idx += 1;
+		// Switch to the next blog in the loop.
+		// This will start at $id == 1 because of your ORDER BY statement.
+		switch_to_blog($blog_id);
+		//$posts_of_current_blog = array();
+		$posts_of_current_blog = get_posts(array(
+		  'numberposts' => -1, 
+		  'post_type' => 'post',
+		  'post_status' => array('publish','future')
+		));
+		
+		// Get the 5 latest posts for the blog and store them in the $globalquery variable.
+		//$globalquery = get_posts('numberposts=5&post_type=any');
+		$blog_details = get_blog_details($blog_id);
+		
+		$new_line = '<tr>';
+		$new_line .= '<td>'.$idx.'</td>';
+		$new_line .= '<td>'.$blog_details->blogname.'</td>';
+		
+		for ($week = $startingWeek; $week <= $weekNumber + $weeksInFuture; $week++) {
+		  
+		  $weekArray = $this->getStartAndEndDate($week,$currentYear);
+		  $startDate = $weekArray['week_start'];
+		  $endDate = $weekArray['week_end'];
+		  //echo 'New Week ' . $startDate . ' ' . $endDate;
+		  $currentWeekPosts = [];
+		  
+		  //echo '<ul>';
+		  foreach ( $posts_of_current_blog as $new_post ) {
+			$format = 'Y-m-d';
+			$postDate = get_the_time($format,$new_post->ID);
+			$post_date = new DateTime($postDate);
+			$start_date = new DateTime($startDate);
+			$end_date = new DateTime($endDate);
+
+			if ($post_date >= $start_date && $post_date <= $end_date) {
+			  
+			  $currentWeekPosts[] = $new_post;
+			}
+		  }
+		  
+		  
+		  $numberOfPosts = count($currentWeekPosts);
+		  //echo $numberOfPosts;
+		  if ($numberOfPosts) {
+			
+			if ($week < $weekNumber) {
+			  // post published
+			  $color = CE_PUBLISHED_COLOR;
+			}
+			else {
+			  $color = CE_SCHEDULED_COLOR;
+			}
+			
+			
+			$sumsArray[$week] += $numberOfPosts;
+			$new_line .= '<td style="background-color:'.$color.';">';
+			$new_line .= '<ol>';
+			foreach ($currentWeekPosts as $weekPost) {
+			
+			  $permalink = get_blog_permalink( $blog_id, $weekPost->ID );
+			  $new_line .= '<li>';
+			  $new_line .= '<a href="'.$permalink.'" target="_blank">'.$weekPost->post_title.'</a>';
+			  $new_line .= '</li>';
+			  
+			}
+			$new_line .= '</ol>';
+			$new_line .= '</td>';
+			
+		  }
+		  else {
+			$new_line .= '<td class="empty-cell"></td>';
+		  }
+		  
+		  
+		}
+		
+		$new_line .= '</tr>';
+		echo $new_line;
+		
+		
+		
+	  }
+	  // Switch back to the main blog
+	  restore_current_blog();
+	  
+	  $last_line = '<tr>';
+	  $last_line .= '<td>#blogs : '.$idx.'</td>';
+	  $last_line .= '<td>Total:</td>';
+	  for ($week = $startingWeek; $week <= $weekNumber + $weeksInFuture; $week++) {
+		
+		
+		$last_line .= '<td class="table_footer">'.$sumsArray[$week].'</td>';
+	  }
+	  $last_line .= '</tr>';
+	  
+	  echo $last_line;
+	  echo '</table>';
+	  
+	}
+	
+	function getStartAndEndDate($week, $year) {
+	  $dto = new DateTime();
+	  $dto->setISODate($year, $week);
+	  $ret['week_start'] = $dto->format('Y-m-d');
+	  $dto->modify('+6 days');
+	  $ret['week_end'] = $dto->format('Y-m-d');
+	  return $ret;
+	}
+	
 	
 	public function get_all_writers_over_network() {
 	  // Set up global variables. Great
@@ -918,7 +1259,7 @@ c\'est que vous n\'êtes pas connecté au site.
 	}
 	// end register_admin_scripts
 	
-		
+	
 	public function recent_mu_posts( $howMany = 10 ) {
 	  
 	  //global $blog_id;
@@ -996,7 +1337,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  $title = $new_post->post_title;
 		  
 		  $post_thumbnail = '';
-		  $post_thumbnail .= '<a href="' . $permalink . '" title="' . esc_attr( $title) . '">';
+		  $post_thumbnail .= '<a class="ce_post_thumbnail" target="_blank" href="' . $permalink . '" title="' . esc_attr( $title) . '">';
 		  //$post_thumbnail .= '<img src="'.$this->multisite_get_thumb($post_id,100,100,$blog_id,true,true).'"/>';
 		  if ( is_multisite() ) {
 			$post_thumbnail .= $this->get_the_post_thumbnail_by_blog($blog_id,$post_id,array(100,100));
@@ -1125,13 +1466,13 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 	}
 	
 	function get_post_color_from_status ($post_state) {
-	  $futureColor = '#91FEFF';
-	  $draftColor = '#EDEDED';
-	  $pendingColor = '#CFF09E';
-	  $pitchColor = '#FDD87F';
-	  $assignedColor = '#FFADFB';
-	  $inProgressColor = '#f3f5b1';
-	  $BATColor = '#69D947';
+	  $futureColor = CE_SCHEDULED_COLOR;
+	  $draftColor = CE_DRAFT_COLOR;
+	  $pendingColor = CE_INPRESS_COLOR;
+	  $pitchColor = CE_NEW_COLOR;
+	  $assignedColor = CE_ASSIGNED_COLOR;//'#FFADFB';
+	  $inProgressColor = CE_INPRESS_SENT_COLOR;//'#f3f5b1';
+	  $BATColor = CE_INPRESS_COLOR;//'#69D947';
 	  $result = $draftColor;
 	  if ($post_state == 'future') {
 		$result = $futureColor;
@@ -1200,39 +1541,39 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 	  $network_sites = wp_get_sites();
 	  $number_of_items = '1000';
 	  $result = array();
-	  foreach ( $network_sites as $network_site ) :
-	  //echo '<hr>';
-	  $blog_path = $network_site['path'];
-	  $blog_id = $network_site['blog_id'];
-	  echo '<h2><b><u>Blog '.$blog_id.' : '.$blog_path.'</u></b></h2<br/>';
-	  
-	  switch_to_blog($blog_id);
-	  
-	  // $result = array_merge($result, (array)$this->getAllComments());
-	  //add_filter('comments_clauses', 'mp_comments_last_week_filter' );
-	  //$commentsFromLastWeek = $this->getCommentsFromLastWeek();
-	  
-	  //$comments = get_comments();
-	  
-	  
-	  
-	  echo '<h3>Pending</h3>';
-	  echo $this->formatCommentsFromArray($this->getAllComments('hold',$number_of_items));
-	  
-	  echo '<h3>Approved</h3>';
-	  echo $this->formatCommentsFromArray($this->getAllComments('approve',$number_of_items));
-	  
-	  echo '<h3>Spam</h3>';
-	  echo $this->formatCommentsFromArray($this->getAllComments('spam',$number_of_items));
-	  
-	  echo '<h3>Trash</h3>';
-	  echo $this->formatCommentsFromArray($this->getAllComments('trash',$number_of_items));
-	  
-	  echo '<hr>';
-	  
-	  //remove_filter( 'comments_clauses', 'mp_comments_last_week_filter' );
-	  restore_current_blog();
-	  endforeach;
+	  foreach ( $network_sites as $network_site ) {
+		//echo '<hr>';
+		$blog_path = $network_site['path'];
+		$blog_id = $network_site['blog_id'];
+		echo '<h2><b><u>Blog '.$blog_id.' : '.$blog_path.'</u></b></h2<br/>';
+		
+		switch_to_blog($blog_id);
+		
+		// $result = array_merge($result, (array)$this->getAllComments());
+		//add_filter('comments_clauses', 'mp_comments_last_week_filter' );
+		//$commentsFromLastWeek = $this->getCommentsFromLastWeek();
+		
+		//$comments = get_comments();
+		
+		
+		
+		echo '<h3>Pending</h3>';
+		echo $this->formatCommentsFromArray($this->getAllComments('hold',$number_of_items));
+		
+		echo '<h3>Approved</h3>';
+		echo $this->formatCommentsFromArray($this->getAllComments('approve',$number_of_items));
+		
+		echo '<h3>Spam</h3>';
+		echo $this->formatCommentsFromArray($this->getAllComments('spam',$number_of_items));
+		
+		echo '<h3>Trash</h3>';
+		echo $this->formatCommentsFromArray($this->getAllComments('trash',$number_of_items));
+		
+		echo '<hr>';
+		
+		//remove_filter( 'comments_clauses', 'mp_comments_last_week_filter' );
+		restore_current_blog();
+	  }
 	  
 	  
 	  return $result;
@@ -1250,9 +1591,8 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 	
 	
 	
-  	function getAllCommentsMultisite($number,$start_date,$end_date) {
+	function getAllCommentsMultisite($number,$start_date,$end_date) {
 	  
-	  //echo $number . ' comments, between ' . $start_date . ' and ' . $end_date;
 	  global $wpdb;
 	  $selects = array();
 	  
@@ -1260,9 +1600,11 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 	  if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
 		//echo $table_name . 'EXISTS !';
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, 0 as blog_id FROM {$table_name}
-				WHERE comment_date >= '{$start_date}'
-				AND comment_date < '{$end_date}'
-				ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
+WHERE comment_date >= '{
+$start_date}'
+AND comment_date < '{
+$end_date}'
+ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 		
 	  } else {
 		//echo $table_name . 'DOES NOT EXISTS !';
@@ -1286,9 +1628,11 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 		AND comment_approved = '1'*/
 		// select only the fields you need here!
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, {$blog['blog_id']} as blog_id FROM {$wpdb->base_prefix}{$blog['blog_id']}_comments
-				WHERE comment_date >= '{$start_date}'
-				AND comment_date < '{$end_date}'
-				ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
+WHERE comment_date >= '{
+$start_date}'
+AND comment_date < '{
+$end_date}'
+ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 	  }
 	  
 	  //echo $selects;
@@ -1501,13 +1845,7 @@ text-align:center;">';
 	  if( $iurl ){
 		$img = $iurl;
 		$out .= $img;
-		/*
-		if( $link )
-		$out .= '';
-		$out .= '';
-		if( $link ) 
-		$out .= '';
-		*/
+		
 	  }
 	  
 	  restore_current_blog();
@@ -1519,7 +1857,7 @@ text-align:center;">';
 	  }
 	}
 	
-	//if( !function_exists( 'get_the_post_thumbnail_by_blog' ) ) {
+	
 	function get_the_post_thumbnail_by_blog($blog_id=NULL,$post_id=NULL,$size='thumbnail',$attrs=NULL) {
 	  global $current_blog;
 	  $sameblog = false;

@@ -2,13 +2,13 @@
 Contributors: munger41
 Donate link: http://www.maxizone.fr/?page_id=560
 Tags: editor, chief, draft, multisite, author, stat
-Requires at least: 3.0.1
+Requires at least: 3.5
 Tested up to: 4.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Helps wp multisite "chief editor" to manage all drafts, comments, authors and "for press" sends across the network. Also includes full authors stats.
+Helps wp multisite "chief editor" to manage all drafts, comments, authors and "for press" sends across the network. Also includes a calendar and full authors stats.
 
 == Description ==
 
@@ -17,6 +17,7 @@ All posts across all sites in the network are shown with a link to the article f
 All recent comments accross the network are also visible and a link allow the user to answer directly.
 The Authors tab allow you to compare all authors efficiency accross the network.
 "For Press" automatic email is now possible.
+Calendar for global view is available for chief editor of blog network.
 Only editors (or higher roles) can use the plugin.
 
 == Installation ==
@@ -38,6 +39,11 @@ Only editors (or higher roles) can use the plugin.
 5. Pie Chart
 
 == Changelog ==
+
+= 2.9.1 =
+* Calendar added in order to easy scheduling of posts
+* CSS image zoom
+* preparing per blog chief editors
 
 = 2.9 =
 * bug fix for comments
