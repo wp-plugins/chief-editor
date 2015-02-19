@@ -20,3 +20,7 @@ a.ce_post_thumbnail > img:hover {
 .empty-cell {
 	 background-color:#E0E0E0; 
 	}
+
+.ce_calendar_post_title {
+	font-size:0.5em;
+  }

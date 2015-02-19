@@ -703,34 +703,34 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	public function ce_email_content_callback()
 	{
 	  $ce_default_mail_content = 'Cher %username%,<br/>
-Voici la pr√©visualisation de votre article pour obtention d\'un Bon A Tirer : <br/>
+Voici la prévisualisation de votre article pour obtention d\'un Bon A Tirer : <br/>
 
 <h2><a href="%postlink%" target="_blank">%posttitle%</a></h2><br/>
 
-Vous devez √™tre authentifi√© avec vos identifiants personnels <a href="%blogurl%">sur le site</a> pour visualiser cet article en ligne:
+Vous devez être authentifié avec vos identifiants personnels <a href="%blogurl%">sur le site</a> pour visualiser cet article en ligne:
 <ul><li>Utiliser votre login : <strong>%userlogin%</strong></li>
-<li>et votre mot de passe (si vous l\'avez oubli√©, demandez-en un nouveau en cliquant ici : <a href="http://www.idweblogs.com/wp-login.php?action=lostpassword">Service de r√©cup√©ration de mot de passe</a>)
+<li>et votre mot de passe (si vous l\'avez oublié, demandez-en un nouveau en cliquant ici : <a href="http://www.idweblogs.com/wp-login.php?action=lostpassword">Service de récupération de mot de passe</a>)
 </ul>
 Si le message suivant apparait:<br/>
-<em>D√©sol√©, mais la page demand√© ne peut √™tre trouv√©e.</em>
-c\'est que vous n\'√™tes pas connect√© au site.
-<h2>En cas de probl√®me</h2>Merci de suivre la proc√©dure suivante pour visualiser votre post en ligne:<br/>
+<em>Désolé, mais la page demandé ne peut être trouvée.</em>
+c\'est que vous n\'êtes pas connecté au site.
+<h2>En cas de problème</h2>Merci de suivre la procédure suivante pour visualiser votre post en ligne:<br/>
 <ol><li>Se connecter avec vos identifiants <a href="%blogurl%">sur le site idweblogs</a>.</li>
-<li>V√©rifier que votre nom (ou pseudo) apparait bien en haut √† droite de l\'√©cran, ce qui confirme votre connexion au site.</li>
-<li>Ouvrir un nouvel onglet dans le m√™me navigateur (Chrome, Firefox, Internet Explorer,etc...).</li>
+<li>Vérifier que votre nom (ou pseudo) apparait bien en haut à droite de l\'écran, ce qui confirme votre connexion au site.</li>
+<li>Ouvrir un nouvel onglet dans le même navigateur (Chrome, Firefox, Internet Explorer,etc...).</li>
 <li>Copier/coller le lien ci dessus dans ce nouvel onglet et valider.</li>
-<li>Votre post doit s\'afficher correctement, en cas de probl√®me, merci de nous contacter √† : <a href="mailto:aide@idweblogs.com">aide@idweblogs.com</a></li>
+<li>Votre post doit s\'afficher correctement, en cas de problème, merci de nous contacter à : <a href="mailto:aide@idweblogs.com">aide@idweblogs.com</a></li>
 </ol> 
-<h2>Merci de pr√©ciser</h2> dans votre mail de r√©ponse, si ce n\'est d√©j√† fait, les √©l√©ments suivants:
-<ol><li>Vos liens d\'int√©r√™t √©ventuels pour ce post</li>
-<li>Les mots cl√©s qui permettent d\'indexer au mieux votre post</li>
+<h2>Merci de préciser</h2> dans votre mail de réponse, si ce n\'est déjà fait, les éléments suivants:
+<ol><li>Vos liens d\'intérêt éventuels pour ce post</li>
+<li>Les mots clés qui permettent d\'indexer au mieux votre post</li>
 <li>L\'image de Une du post</li>
-<li>La cat√©gorie (ou les cat√©gories) du blog dans laquelle doit √™tre publi√© votre article</li>
-<li>Les liens web √©ventuels √† rajouter vers des sites externes ou de la bibliographie</li>
+<li>La catégorie (ou les catégories) du blog dans laquelle doit être publié votre article</li>
+<li>Les liens web éventuels à rajouter vers des sites externes ou de la bibliographie</li>
 <li>(optionnel) une photo de vous</li>
 </ol>
 
-<br/>Cordialement, L\'√©quipe';
+<br/>Cordialement, L\'équipe';
 	  
 	  printf(
 		'<textarea type="text" id="email_content" rows="25" cols="110" name="chief_editor_option[email_content]" value="%s">%s</textarea>',
@@ -750,7 +750,7 @@ c\'est que vous n\'√™tes pas connect√© au site.
 	  // Get a list of blogs in your multisite network
 	  //$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
 	  $weekNumber = date("W");
-	  $weeksInPast = 6;
+	  $weeksInPast = 4;
 	  $weeksInFuture = 4;
 	  $thisWeekColor = "#F5B800";
 	  $backgroundColor = "#6B6B6B";
@@ -849,7 +849,7 @@ c\'est que vous n\'√™tes pas connect√© au site.
 			
 			  $permalink = get_blog_permalink( $blog_id, $weekPost->ID );
 			  $new_line .= '<li>';
-			  $new_line .= '<a href="'.$permalink.'" target="_blank">'.$weekPost->post_title.'</a>';
+			  $new_line .= '<a title="'.__('published on ','chief-editor').$weekPost->post_date.'" class="ce_calendar_post_title" href="'.$permalink.'" target="_blank">'.$weekPost->post_title.'</a>';
 			  $new_line .= '</li>';
 			  
 			}
@@ -874,7 +874,7 @@ c\'est que vous n\'√™tes pas connect√© au site.
 	  restore_current_blog();
 	  
 	  $last_line = '<tr>';
-	  $last_line .= '<td>#blogs : '.$idx.'</td>';
+	  $last_line .= '<td></td>';
 	  $last_line .= '<td>Total:</td>';
 	  for ($week = $startingWeek; $week <= $weekNumber + $weeksInFuture; $week++) {
 		
