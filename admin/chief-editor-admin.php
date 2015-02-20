@@ -394,7 +394,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		
 		if ( is_multisite() ) {
 		 
-		  $mostCommentedPosts = $this->getMostCommentedPosts();
+		  $mostCommentedPosts = $this->getMostCommentedPosts(10);
 		  echo '<h3>'.__('Most commented posts').'</h3><br/>'.$mostCommentedPosts;
 		  $allComments = $this->getAllCommentsMultisite('1000',$start_date,$end_date);
 		}
@@ -462,7 +462,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  return $result;
 	}
 	
-	public function getMostCommentedPosts() {
+	public function getMostCommentedPosts($maxResults) {
 	
 		$posts = $this->getAllPostsOfAllBlogs();
 		  $postCommentsArray = [];
@@ -477,11 +477,17 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		  if ($sortResult) {
 			
 			$postComments = '<ol>';
+			$idx = 1;
 			foreach ($postCommentsArray as $key => $value) {
 			
 			  if ($value) {
 				$postComments .= '<li>'.$key . ' | #comments : '.$value.'</li>';
+				if ($idx == $maxResults) {
+					break;
+				}
+				$idx += 1;
 			  }
+			
 			}
 			$postComments .= '</ol>';
 			$result .= $postComments;
@@ -784,7 +790,11 @@ c\'est que vous n\'êtes pas connecté au site.
 	  
 	  // Iterate through your list of blogs
 	  foreach (wp_get_sites() as $blog) {
-		//foreach ($blog_ids as $blog_id){
+		$public = $blog['public'];
+		if ($public == 0) {
+		  
+			continue;
+		}
 		$blog_id = $blog['blog_id'];
 		
 		$idx += 1;
@@ -801,6 +811,10 @@ c\'est que vous n\'êtes pas connecté au site.
 		// Get the 5 latest posts for the blog and store them in the $globalquery variable.
 		//$globalquery = get_posts('numberposts=5&post_type=any');
 		$blog_details = get_blog_details($blog_id);
+		/*
+		if ($this->noPostPublishedBetweenDates($posts_of_current_blog,$startingWeek,$weekNumber + $weeksInFuture)) {
+			continue;
+			}*/
 		
 		$new_line = '<tr>';
 		$new_line .= '<td>'.$idx.'</td>';
@@ -843,17 +857,20 @@ c\'est que vous n\'êtes pas connecté au site.
 			
 			
 			$sumsArray[$week] += $numberOfPosts;
-			$new_line .= '<td style="background-color:'.$color.';">';
+			$new_line .= '<td class="ce_calendar_post_cell" style="background-color:'.$color.';">';
+			$new_ling .= '<div class="ce_calendar_post_title">';
 			$new_line .= '<ol>';
 			foreach ($currentWeekPosts as $weekPost) {
 			
 			  $permalink = get_blog_permalink( $blog_id, $weekPost->ID );
 			  $new_line .= '<li>';
-			  $new_line .= '<a title="'.__('published on ','chief-editor').$weekPost->post_date.'" class="ce_calendar_post_title" href="'.$permalink.'" target="_blank">'.$weekPost->post_title.'</a>';
+			  $new_line .= '<a title="'.__('published on ','chief-editor').$weekPost->post_date.'" href="'.$permalink.'" target="_blank">'.$weekPost->post_title.'</a>';
 			  $new_line .= '</li>';
 			  
 			}
 			$new_line .= '</ol>';
+			$new_line .= '</div>';
+			
 			$new_line .= '</td>';
 			
 		  }
@@ -885,6 +902,35 @@ c\'est que vous n\'êtes pas connecté au site.
 	  
 	  echo $last_line;
 	  echo '</table>';
+	  
+	}
+	
+	function noPostPublishedBetweenDates($posts,$startW,$endW) {
+	  //echo "count($posts) posts between $startW and $endW";
+	  $currentYear = date("Y");
+		$weekArray1 = $this->getStartAndEndDate($startW,$currentYear);
+		  $startDate = $weekArray['week_start'];
+	  //$endDate = $weekArray['week_end'];
+	  
+	  $weekArray1 = $this->getStartAndEndDate($endW,$currentYear);
+	  //$startDate = $weekArray['week_start'];
+		  $endDate = $weekArray['week_end'];
+	  
+	  foreach ($posts as $post) {
+		//if ($post->post_date)
+		  $format = 'Y-m-d';
+			$postDate = get_the_time($format,$post->ID);
+			$post_date = new DateTime($postDate);
+			$start_date = new DateTime($startDate);
+			$end_date = new DateTime($endDate);
+
+			if ($post_date >= $start_date && $post_date <= $end_date) {
+			  
+			  return 1;
+			}
+	  }
+	  
+	  return 0;
 	  
 	}
 	
@@ -1600,10 +1646,8 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 	  if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
 		//echo $table_name . 'EXISTS !';
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, 0 as blog_id FROM {$table_name}
-WHERE comment_date >= '{
-$start_date}'
-AND comment_date < '{
-$end_date}'
+WHERE comment_date >= '{$start_date}'
+AND comment_date < '{$end_date}'
 ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 		
 	  } else {
@@ -1628,10 +1672,8 @@ ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # 
 		AND comment_approved = '1'*/
 		// select only the fields you need here!
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, {$blog['blog_id']} as blog_id FROM {$wpdb->base_prefix}{$blog['blog_id']}_comments
-WHERE comment_date >= '{
-$start_date}'
-AND comment_date < '{
-$end_date}'
+WHERE comment_date >= '{$start_date}'
+AND comment_date < '{$end_date}'
 ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 	  }
 	  

@@ -21,6 +21,15 @@ a.ce_post_thumbnail > img:hover {
 	 background-color:#E0E0E0; 
 	}
 
+.ce_calendar_post_cell {
+	font-size:6px;
+ 
+  }
+
 .ce_calendar_post_title {
-	font-size:0.5em;
+
+  width:100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   }
