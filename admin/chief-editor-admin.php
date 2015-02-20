@@ -448,11 +448,11 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		
 		switch_to_blog($blog_id);
 		
-		$result = array_merge($result, get_posts(array(
+		$result[$blog_id] = get_posts(array(
 		  'numberposts' => -1, 
 		  'post_type' => 'post',
 		  'post_status' => array('publish','future')
-		)));
+		));
 		
 		// Switch back to the main blog
 		restore_current_blog();
@@ -466,10 +466,16 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	
 		$posts = $this->getAllPostsOfAllBlogs();
 		  $postCommentsArray = [];
+	  		$postCommentsTitles = [];
+		$postCommentsPermalinks = [];
 	
-		  foreach ($posts as $post) {
+		  foreach ($posts as $blogid => $postsOfBlog) {
+			foreach ($postsOfBlog as $post) {
 			$nbOfComments = get_comments_number( $post->ID );
-			$postCommentsArray[$post->post_title] = $nbOfComments;
+			$postCommentsArray[$post->ID] = $nbOfComments;
+			$postCommentsTitles[$post->ID] = $post->post_title;
+			$postCommentsPermalinks[$post->ID] = get_blog_permalink( $blogid, $post->ID );
+			}
 		  }
 		  $result = 'Total number of posts : '.count($postCommentsArray);
 		  $sortResult = arsort($postCommentsArray);
@@ -481,7 +487,10 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 			foreach ($postCommentsArray as $key => $value) {
 			
 			  if ($value) {
-				$postComments .= '<li>'.$key . ' | #comments : '.$value.'</li>';
+				
+				
+				
+				$postComments .= '<li><a target="_blank" href="'.$postCommentsPermalinks[$key].'">'.$postCommentsTitles[$key]. '</a> | #comments : '.$value.'</li>';
 				if ($idx == $maxResults) {
 					break;
 				}
