@@ -40,6 +40,9 @@ Only editors (or higher roles) can use the plugin.
 
 == Changelog ==
 
+= 2.9.2 =
+* Roles changed : Admin can see settings, Editors can see all but Settings, and special users with edit_others_posts, can review posts before published.
+
 = 2.9.1 =
 * Calendar added in order to easy scheduling of posts
 * CSS image zoom

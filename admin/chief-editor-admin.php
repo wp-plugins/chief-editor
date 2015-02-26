@@ -343,7 +343,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	
 	function add_admin_menus() {
 	  global $chief_editor_settings;
-	  $chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'delete_others_pages', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
+	  $chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'edit_posts', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
 	}
 	
 	
@@ -373,17 +373,17 @@ if(!class_exists('ChiefEditorSettings')) {
 	  }
 	  echo '</h2>';
 	  
-	  if ($current_tab == 'chief_editor_posts_tab') {
+	  if ($current_tab == 'chief_editor_posts_tab' && current_user_can('edit_others_posts') ) {
 		
 		$this->recent_mu_posts();
 		
 	  }
-	  elseif ($current_tab == 'chief_editor_calendar_tab') {
+	  elseif ($current_tab == 'chief_editor_calendar_tab' && current_user_can('delete_others_pages')) {
 		
 		$this->create_calendar_table();
 		
 	  }
-	  elseif ($current_tab == 'chief_editor_comments_tab') {
+	  elseif ($current_tab == 'chief_editor_comments_tab' && current_user_can('delete_others_pages')) {
 		
 		//$this->recent_multisite_comments();
 		global $wpdb;
@@ -412,10 +412,10 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		echo $this->formatCommentsFromArray($allComments);
 		
 	  }
-	  elseif ($current_tab == 'chief_editor_stats_tab') {
+	  elseif ($current_tab == 'chief_editor_stats_tab' && current_user_can('delete_others_pages')) {
 		$this->bm_author_stats("alltime");
 	  }
-	  elseif ($current_tab == 'chief_editor_settings_tab') {
+	  elseif ($current_tab == 'chief_editor_settings_tab' && current_user_can('edit_users')) {
 		
 		$this->options = get_option( 'chief_editor_option' );
 		//echo $this->options;
@@ -1452,19 +1452,27 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 			$edit_post_link .= get_edit_post_link( $post_id);
 		  }
 		  
-		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span> (<a href="'.$edit_post_link.'" target="_blank">Edit</a>)</td>';
+		  // current_user_can('delete_others_pages')
+		  
+		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span>';
+		  if (current_user_can('delete_others_pages')) {
+		  	$complete_new_table_line .= '(<a href="'.$edit_post_link.'" target="_blank">Edit</a>)';
+		  }
+	 	  $complete_new_table_line .= '</td>';
 		  $complete_new_table_line .= '<td>'.$creation_date.'</td>';
 		  $status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
 		  $status_meaning = $this->get_post_status_meaning_from_status($post_state);
 		  $complete_new_table_line .= '<td>'.$status_meaning.'<br/><img src="'.$status_image.'"/></td>';
 		  $complete_new_table_line .= '<td>'.$abstract.'</td>';
 		  $complete_new_table_line .= '<td>'.$userdisplayname.' ('.$userlogin.')';
+		   if (current_user_can('delete_others_pages')) {
 		  $complete_new_table_line .= '<div class="wrap"><form id="'.$post_id.'_chief-editor-bat-form" class="chief-editor-bat-form" action="" method="POST">';
 		  $complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send BAT to author','chief-editor').'"/>';
 		  $complete_new_table_line .= '<input type="hidden" id="postID" name="postID" value="'.$post_id.'">';
 		  $complete_new_table_line .= '<input type="hidden" id="blogID" name="blogID" value="'.$blog_id.'">';
 		  $complete_new_table_line .= '<input type="hidden" id="authorID" name="authorID" value="'.$author.'">';
 		  $complete_new_table_line .= '</div></form><div id="ce_dialog_email" class="ce_dialog_email" title="Dialog Title" style="display:none">Some text</div></div>';
+		   }
 		  $complete_new_table_line .= '</td>';
 		  
 		  if ($post_state == 'future') {
