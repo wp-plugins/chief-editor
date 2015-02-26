@@ -474,9 +474,9 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	public function getMostCommentedPosts($maxResults) {
 	
 		$blog_posts_array = $this->getAllPostsOfAllBlogs();
-		  $postCommentsArray = [];
-	  		$postCommentsTitles = [];
-		$postCommentsPermalinks = [];
+		  $postCommentsArray = array();
+	  		$postCommentsTitles = array();
+		$postCommentsPermalinks = array();
 	  //echo 'count($blog_posts_array) '.count($blog_posts_array) ;
 		  foreach ($blog_posts_array as $blogid => $postsOfBlog) {
 			
@@ -769,7 +769,7 @@ c\'est que vous n\'êtes pas connecté au site.
 	public function create_calendar_table() {
 	  // Set up global variables. Great
 	  //global $wpdb, $blog_id, $post;
-	  $sumsArray = [];
+	  $sumsArray = array();
 	  
 	  // Get a list of blogs in your multisite network
 	  //$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
@@ -844,7 +844,7 @@ c\'est que vous n\'êtes pas connecté au site.
 		  $startDate = $weekArray['week_start'];
 		  $endDate = $weekArray['week_end'];
 		  //echo 'New Week ' . $startDate . ' ' . $endDate;
-		  $currentWeekPosts = [];
+		  $currentWeekPosts = array();
 		  
 		  //echo '<ul>';
 		  foreach ( $posts_of_current_blog as $new_post ) {
