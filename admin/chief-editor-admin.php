@@ -343,7 +343,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	
 	function add_admin_menus() {
 	  global $chief_editor_settings;
-	  $chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'edit_posts', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
+	  $chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'read', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
 	}
 	
 	
