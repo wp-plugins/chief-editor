@@ -1748,10 +1748,8 @@ ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # 
 		AND comment_approved = '1'*/
 		// select only the fields you need here!
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, {$blog['blog_id']} as blog_id FROM {$wpdb->base_prefix}{$blog['blog_id']}_comments
-WHERE comment_date >= '{
-$start_date}'
-AND comment_date < '{
-$end_date}'
+WHERE comment_date >= '{$start_date}'
+AND comment_date < '{$end_date}'
 ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 	  }
 	  
