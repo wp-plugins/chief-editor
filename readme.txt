@@ -13,9 +13,9 @@ Helps wp multisite "chief editor" to manage all drafts, comments, authors and "f
 == Description ==
 
 This plugin is aimed to help the multisite wordpress editor-in-chief in order to plan publication of posts.
-All posts across all sites in the network are shown with a link to the article for quick reviewing or editing.
-All recent comments accross the network are also visible and a link allow the user to answer directly.
-The Authors tab allow you to compare all authors efficiency accross the network.
+Chief editor can manage all posts across all sites in the network. They are shown with a link to the article for quick reviewing or editing.
+Chief editor can see all recent comments accross the network of a multisite install, a link allow the user to answer directly.
+The Authors tab allow you to compare all authors efficiency accross the network. And give much more stats.
 "For Press" automatic email is now possible.
 Calendar for global view is available for chief editor of blog network.
 Only editors (or higher roles) can use the plugin.
@@ -39,6 +39,9 @@ Only editors (or higher roles) can use the plugin.
 5. Pie Chart
 
 == Changelog ==
+
+= 3.0 =
+* Most commented posts ever and most commented posts last month added
 
 = 2.9.2 =
 * Roles changed : Admin can see settings, Editors can see all but Settings, and special users with edit_others_posts, can review posts before published.

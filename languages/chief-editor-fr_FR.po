@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Chief Editor\n"
-"POT-Creation-Date: 2015-02-19 10:25+0100\n"
-"PO-Revision-Date: 2015-02-19 10:26+0100\n"
+"POT-Creation-Date: 2015-03-02 13:37+0100\n"
+"PO-Revision-Date: 2015-03-02 13:38+0100\n"
 "Last-Translator: \n"
 "Language-Team: termel <admin@termel.fr>\n"
 "Language: Français\n"
@@ -33,7 +33,7 @@ msgstr "Voulez-vous vraiment envoyer un email de BAT ?"
 msgid "Send"
 msgstr "Envoyer"
 
-#: admin/chief-editor-admin.php:301 admin/chief-editor-admin.php:937
+#: admin/chief-editor-admin.php:301 admin/chief-editor-admin.php:1049
 msgid "Posts"
 msgstr "Articles"
 
@@ -41,7 +41,7 @@ msgstr "Articles"
 msgid "Calendar"
 msgstr "Calendrier"
 
-#: admin/chief-editor-admin.php:321 admin/chief-editor-admin.php:938
+#: admin/chief-editor-admin.php:321 admin/chief-editor-admin.php:1050
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -49,7 +49,7 @@ msgstr "Commentaires"
 msgid "Authors"
 msgstr "Auteurs"
 
-#: admin/chief-editor-admin.php:330 admin/chief-editor-admin.php:423
+#: admin/chief-editor-admin.php:330 admin/chief-editor-admin.php:441
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -65,39 +65,47 @@ msgstr "Votez!"
 msgid "All comments accross the network since "
 msgstr "Tous les commentaires sur tous les blogs depuis "
 
-#: admin/chief-editor-admin.php:398
-msgid "Most commented posts"
-msgstr "Posts les + commentés"
+#: admin/chief-editor-admin.php:401
+msgid "Most commented posts ever"
+msgstr "Posts les + commentés depuis toujours"
 
-#: admin/chief-editor-admin.php:411
+#: admin/chief-editor-admin.php:410
+msgid "Most commented posts last month"
+msgstr "Posts les + commentés le dernier mois"
+
+#: admin/chief-editor-admin.php:429
 msgid " item(s)"
 msgstr " élément(s)"
 
-#: admin/chief-editor-admin.php:423
+#: admin/chief-editor-admin.php:441
 msgid "Chief Editor"
 msgstr "Chief Editor"
 
-#: admin/chief-editor-admin.php:511
+#: admin/chief-editor-admin.php:538
+msgid "Total number of posts accross network: "
+msgstr "Nombre total de posts à travers le réseau:"
+
+#: admin/chief-editor-admin.php:582
 msgid "Automatic Email to authors"
 msgstr "Courriel automatique aux auteurs"
 
-#: admin/chief-editor-admin.php:519
+#: admin/chief-editor-admin.php:590
 msgid "Sender email address"
 msgstr "Adresse email de l'expéditeur"
 
-#: admin/chief-editor-admin.php:527
+#: admin/chief-editor-admin.php:598
 msgid "Sender name"
 msgstr "Nom de l'expéditeur"
 
-#: admin/chief-editor-admin.php:536
+#: admin/chief-editor-admin.php:607
 msgid "Email recipients addresses"
 msgstr "Adresses email des destinataires (en plus de l'auteur du post)"
 
-#: admin/chief-editor-admin.php:545
+#: admin/chief-editor-admin.php:616
 msgid "Email content"
 msgstr "Contenu du mail"
 
-#: admin/chief-editor-admin.php:632
+#: admin/chief-editor-admin.php:703
 msgid ""
 "The following settings are used to send pre-formatted email to post authors, "
 "in order for them to validate it online before publishing"
@@ -106,94 +114,98 @@ msgstr ""
 "auteurs des posts, dans le but d'obtenir le Bon-à-tirer (BAT) de leur part "
 "après validation."
 
-#: admin/chief-editor-admin.php:764
+#: admin/chief-editor-admin.php:835
 msgid "Blog"
 msgstr "Blog"
 
-#: admin/chief-editor-admin.php:931 admin/chief-editor-admin.php:1016
+#: admin/chief-editor-admin.php:933
+msgid "published on "
+msgstr "publié le"
+
+#: admin/chief-editor-admin.php:1043 admin/chief-editor-admin.php:1128
 msgid "Trace graph for sorted column"
 msgstr "Visualiser les données de la colonne triée"
 
-#: admin/chief-editor-admin.php:936
+#: admin/chief-editor-admin.php:1048
 msgid "Name"
 msgstr "Nom"
 
-#: admin/chief-editor-admin.php:936
+#: admin/chief-editor-admin.php:1048
 msgid "login"
 msgstr "identifiant"
 
-#: admin/chief-editor-admin.php:936
+#: admin/chief-editor-admin.php:1048
 msgid "Month blogging"
 msgstr "Ancienneté"
 
-#: admin/chief-editor-admin.php:937
+#: admin/chief-editor-admin.php:1049
 msgid "Posts/month"
 msgstr "Articles/mois"
 
-#: admin/chief-editor-admin.php:938
+#: admin/chief-editor-admin.php:1050
 msgid "Words/post"
 msgstr "Mots/articles"
 
-#: admin/chief-editor-admin.php:939
+#: admin/chief-editor-admin.php:1051
 msgid "Comments/post"
 msgstr "Commentaires/article"
 
-#: admin/chief-editor-admin.php:939
+#: admin/chief-editor-admin.php:1051
 msgid "Words/comment"
 msgstr "Mots/commentaire"
 
-#: admin/chief-editor-admin.php:939
+#: admin/chief-editor-admin.php:1051
 msgid "Comments/month"
 msgstr "Commentaires/mois"
 
-#: admin/chief-editor-admin.php:1308
+#: admin/chief-editor-admin.php:1420
 msgid "Blog Title"
 msgstr "Titre du blog"
 
-#: admin/chief-editor-admin.php:1308
+#: admin/chief-editor-admin.php:1420
 msgid "Featured image"
 msgstr "Image de chapo"
 
-#: admin/chief-editor-admin.php:1309
+#: admin/chief-editor-admin.php:1421
 msgid "Submission date"
 msgstr "Date de soumission"
 
-#: admin/chief-editor-admin.php:1309
+#: admin/chief-editor-admin.php:1421
 msgid "Status"
 msgstr "Status"
 
-#: admin/chief-editor-admin.php:1310
+#: admin/chief-editor-admin.php:1422
 msgid "Excerpt"
 msgstr "Résumé"
 
-#: admin/chief-editor-admin.php:1310
+#: admin/chief-editor-admin.php:1422
 msgid "Author (login)"
 msgstr "Auteur (identifiant)"
 
-#: admin/chief-editor-admin.php:1311
+#: admin/chief-editor-admin.php:1423
 msgid "Scheduled for date"
 msgstr "Planifié pour le "
 
-#: admin/chief-editor-admin.php:1399
+#: admin/chief-editor-admin.php:1518
 msgid "Send BAT to author"
 msgstr "Envoyer le BAT à l'auteur"
 
-#: admin/chief-editor-admin.php:1410
+#: admin/chief-editor-admin.php:1530
 msgid "not scheduled"
 msgstr "non planifié"
 
-#: admin/chief-editor-admin.php:1434
+#: admin/chief-editor-admin.php:1554
 msgid "Scheduled posts : "
 msgstr "Articles planifiés : "
 
-#: admin/chief-editor-admin.php:1435
+#: admin/chief-editor-admin.php:1555
 msgid "Pending posts : "
 msgstr "Articles BAT : "
 
-#: admin/chief-editor-admin.php:1436
+#: admin/chief-editor-admin.php:1556
 msgid "Draft posts : "
 msgstr "Brouillons : "
 
-#: admin/chief-editor-admin.php:1437
+#: admin/chief-editor-admin.php:1557
 msgid "Total unpublished posts : "
 msgstr "Nombre total de posts non publiés : "

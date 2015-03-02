@@ -393,9 +393,27 @@ if(!class_exists('ChiefEditorSettings')) {
 		$intro_text = '<h3>'.__('All comments accross the network since ','chief-editor').$start_date.'</h3><br/>';
 		
 		if ( is_multisite() ) {
-		 
-		  $mostCommentedPosts = $this->getMostCommentedPosts(10);
-		  echo '<h3>'.__('Most commented posts').'</h3><br/>'.$mostCommentedPosts;
+		  
+		  echo '<table>';
+		  echo '<tr>';
+		  echo '<td>';
+		  //$mostCommentedPosts = $this->getMostCommentedPosts(10);
+		  echo '<h3>'.__('Most commented posts ever').'</h3><br/>'.$this->getMostCommentedPosts(10);
+		  echo '</td>';
+		  echo '<td>';
+		  //$lastMonthIdx = date('m', strtotime('-1 month'));
+		  $last_month_most_commented = mktime(0, 0, 0, date("m")-1, date("d"), date("Y"));
+		  $current_month = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
+		  $startDate = date('Y-m-01 H:i:s', $last_month_most_commented );
+		  $endDate = date('Y-m-01 H:i:s', $current_month);
+		  $mostCommentedPosts = $this->getMostCommentedPosts(10,$startDate,$endDate);
+		  echo '<h3>'.__('Most commented posts last month').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
+		  echo '</td>';
+		  echo '</tr>';
+		  echo '</table>';
+		  
+		  
+		  
 		  $allComments = $this->getAllCommentsMultisite('1000',$start_date,$end_date);
 		}
 		else {
@@ -438,7 +456,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	
 	
 	public function get_comments_number_for_blog($blogid, $postid ){
-	
+	  
 	  //echo "get_comments_number_for_blog : $blogid, $postid ";
 	  switch_to_blog($blogid);
 	  $result = get_comments_number( $postid );
@@ -446,7 +464,24 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  return $result;
 	}
 	
-	function getAllPostsOfAllBlogs() {
+	function postBetweenDates($post,$startDate,$endDate){
+	
+	  //$post_date = $post->post_date;
+	  	$format = 'Y-m-d';
+		$postDate = get_the_time($format,$post->ID);
+		$post_date = new DateTime($postDate);
+		$start_date = new DateTime($startDate);
+		$end_date = new DateTime($endDate);
+			
+		if ($post_date >= $start_date && $post_date <= $end_date) {
+			  
+			  return true;
+		} else {
+			return false;
+		}
+	}
+	
+	function getAllPostsOfAllBlogs($startDate = NULL, $endDate = NULL) {
 	  
 	  $network_sites = wp_get_sites();
 	  
@@ -457,11 +492,22 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		
 		switch_to_blog($blog_id);
 		
-		$result[$blog_id] = get_posts(array(
+		$allPostsOfCurrentBlog = get_posts(array(
 		  'numberposts' => -1, 
 		  'post_type' => 'post',
 		  'post_status' => array('publish','future')
 		));
+		
+		if ($startDate != NULL && $endDate != NULL) {
+		
+		foreach ($allPostsOfCurrentBlog as $post) {
+		  if ($this->postBetweenDates($post,$startDate,$endDate)) {
+		  	$result[$blog_id][] = $post;
+		  } 
+		}
+		} else {
+			$result[$blog_id] = $allPostsOfCurrentBlog;
+		}
 		
 		// Switch back to the main blog
 		restore_current_blog();
@@ -471,48 +517,49 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  return $result;
 	}
 	
-	public function getMostCommentedPosts($maxResults) {
-	
-		$blog_posts_array = $this->getAllPostsOfAllBlogs();
-		  $postCommentsArray = array();
-	  		$postCommentsTitles = array();
-		$postCommentsPermalinks = array();
+	public function getMostCommentedPosts($maxResults,$startDate = NULL,$endDate = NULL) {
+	  
+	  
+	  $blog_posts_array = $this->getAllPostsOfAllBlogs($startDate,$endDate);
+	  $postCommentsArray = array();
+	  $postCommentsTitles = array();
+	  $postCommentsPermalinks = array();
 	  //echo 'count($blog_posts_array) '.count($blog_posts_array) ;
-		  foreach ($blog_posts_array as $blogid => $postsOfBlog) {
-			
-			foreach ($postsOfBlog as $post) {
-			  //echo "<br/>$blogid, $post->ID";
-			  $nbOfComments = $this->get_comments_number_for_blog($blogid, $post->ID );
-			$postCommentsArray[$blogid .'_'.$post->ID] = $nbOfComments;
-			$postCommentsTitles[$blogid .'_'.$post->ID] = $post->post_title;
-			$postCommentsPermalinks[$blogid .'_'.$post->ID] = get_blog_permalink( $blogid, $post->ID );
-			}
-		  }
+	  foreach ($blog_posts_array as $blogid => $postsOfBlog) {
+		
+		foreach ($postsOfBlog as $post) {
+		  //echo "<br/>$blogid, $post->ID";
+		  $nbOfComments = $this->get_comments_number_for_blog($blogid, $post->ID );
+		  $postCommentsArray[$blogid .'_'.$post->ID] = $nbOfComments;
+		  $postCommentsTitles[$blogid .'_'.$post->ID] = $post->post_title;
+		  $postCommentsPermalinks[$blogid .'_'.$post->ID] = get_blog_permalink( $blogid, $post->ID );
+		}
+	  }
 	  $result = '<h4>'.__('Total number of posts accross network: ','chief-editor').count($postCommentsArray).'</h4>';
-		  $sortResult = arsort($postCommentsArray);
+	  $sortResult = arsort($postCommentsArray);
 	  //echo '$sorted : '.count($postCommentsArray);
-		  if ($sortResult) {
+	  if ($sortResult) {
+		
+		$postComments = '<ol>';
+		$idx = 1;
+		foreach ($postCommentsArray as $key => $value) {
+		  
+		  if ($value) {
 			
-			$postComments = '<ol>';
-			$idx = 1;
-			foreach ($postCommentsArray as $key => $value) {
-			
-			  if ($value) {
-				
-				$postComments .= '<li><a target="_blank" href="'.$postCommentsPermalinks[$key].'">'.$postCommentsTitles[$key]. '</a> | #comments : '.$value.'</li>';
-				if ($idx == $maxResults) {
-					break;
-				}
-				$idx += 1;
-			  }
-			
+			$postComments .= '<li><a target="_blank" href="'.$postCommentsPermalinks[$key].'">'.$postCommentsTitles[$key]. '</a> | #comments : '.$value.'</li>';
+			if ($idx == $maxResults) {
+			  break;
 			}
-			$postComments .= '</ol>';
-			$result .= $postComments;
+			$idx += 1;
 		  }
-		  else {
-			$result .= 'problem sorting...';
-		  }
+		  
+		}
+		$postComments .= '</ol>';
+		$result .= $postComments;
+	  }
+	  else {
+		$result .= 'problem sorting...';
+	  }
 	  
 	  return $result;
 	}
@@ -577,10 +624,10 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  /*
 	  
 	  add_settings_section(
-		'chief_editors_section_id', // ID
-		__('Set users as Chief Editors','chief-editor'), // Title
-		array( $this, 'ce_print_section_editors_info' ), // Callback
-		'chief_editor_plugin_options' // Page
+	  'chief_editors_section_id', // ID
+	  __('Set users as Chief Editors','chief-editor'), // Title
+	  array( $this, 'ce_print_section_editors_info' ), // Callback
+	  'chief_editor_plugin_options' // Page
 	  );
 	  
 	  
@@ -588,39 +635,39 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  
 	  // Iterate through your list of blogs
 	  foreach (wp_get_sites() as $blog) {
-		//foreach ($blog_ids as $blog_id){
-		$blog_id = $blog['blog_id'];
-		
-		// Switch to the next blog in the loop.
-		// This will start at $id == 1 because of your ORDER BY statement.
-		switch_to_blog($blog_id);
-		
-		// Get the 5 latest posts for the blog and store them in the $globalquery variable.
-		//$globalquery = get_posts('numberposts=5&post_type=any');
-		$blog_details = get_blog_details($blog_id);
-		$setting_id = "blog_" . $blog_id . '_chief_editor';
-		$args     = array (
-		  'blog_id' => $blog_id,
-		  'setting_id' => $setting_id
-		);
-		add_settings_field(
-		  $setting_id, // ID
-		  __($blog_details->blogname,'chief-editor'), // Title 
-		  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
-		  'chief_editor_plugin_options', // Page
-		  'chief_editors_section_id', // Section   
-		  $args
-		);
-		
-		
-		// Switch back to the main blog
-		restore_current_blog();
+	  //foreach ($blog_ids as $blog_id){
+	  $blog_id = $blog['blog_id'];
+	  
+	  // Switch to the next blog in the loop.
+	  // This will start at $id == 1 because of your ORDER BY statement.
+	  switch_to_blog($blog_id);
+	  
+	  // Get the 5 latest posts for the blog and store them in the $globalquery variable.
+	  //$globalquery = get_posts('numberposts=5&post_type=any');
+	  $blog_details = get_blog_details($blog_id);
+	  $setting_id = "blog_" . $blog_id . '_chief_editor';
+	  $args     = array (
+	  'blog_id' => $blog_id,
+	  'setting_id' => $setting_id
+	  );
+	  add_settings_field(
+	  $setting_id, // ID
+	  __($blog_details->blogname,'chief-editor'), // Title 
+	  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
+	  'chief_editor_plugin_options', // Page
+	  'chief_editors_section_id', // Section   
+	  $args
+	  );
+	  
+	  
+	  // Switch back to the main blog
+	  restore_current_blog();
 	  }
 	  
 	  */
 	  
 	  $this->options = get_option( 'chief_editor_option' );
-	
+	  
 	  //print_r($this->options);
 	}
 	
@@ -672,7 +719,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  
 	  echo count($chief_editor_array) . '<ul>';
 	  foreach ($chief_editor_array as $chief_editor) {  
-		echo '<li>'.$chief_editor.'</li>';
+	  echo '<li>'.$chief_editor.'</li>';
 	  }
 	  echo '</ul>';
 	  */
@@ -684,7 +731,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		//$option_selected = in_array( $user->ID, $chief_editor_array ) ? 'selected="selected"' : '';
 		echo $this->options[$setting_id] . ' ' . $user->ID;
 		$ouput_string .= '<option '. selected( $this->options[$setting_id], $user->ID ) .' value="'.$user->ID.'">' . esc_html( $user->user_login ) . ' - '.esc_html( $user->user_nicename ).' - (' . esc_html( $user->user_email ) . ')</option>';
-	  	$idx += 1;
+		$idx += 1;
 	  }
 	  
 	  $ouput_string .= '</select>';
@@ -743,7 +790,7 @@ c\'est que vous n\'etes pas connecte au site.
 <li>Verifier que votre nom (ou pseudo) apparait bien en haut a droite de l\'ecran, ce qui confirme votre connexion au site.</li>
 <li>Ouvrir un nouvel onglet dans le meme navigateur (Chrome, Firefox, Internet Explorer,etc...).</li>
 <li>Copier/coller le lien ci dessus dans ce nouvel onglet et valider.</li>
-<li>Votre post doit s\'afficher correctement, en cas de probleme, merci de nous contacter a : <a href="mailto:aide@idweblogs.com">aide@idweblogs.com</a></li>
+<li>Votre post doit s\'afficher correctement, en cas de probleme, merci de nous contacter : <a href="mailto:aide@idweblogs.com">aide@idweblogs.com</a></li>
 </ol> 
 <h2>Merci de preciser</h2> dans votre mail de reponse, si ce n\'est deja fait, les elements suivants:
 <ol><li>Vos liens d\'interet eventuels pour ce post</li>
@@ -811,7 +858,7 @@ c\'est que vous n\'etes pas connecte au site.
 		$public = $blog['public'];
 		if ($public == 0) {
 		  
-			continue;
+		  continue;
 		}
 		$blog_id = $blog['blog_id'];
 		
@@ -831,8 +878,9 @@ c\'est que vous n\'etes pas connecte au site.
 		$blog_details = get_blog_details($blog_id);
 		/*
 		if ($this->noPostPublishedBetweenDates($posts_of_current_blog,$startingWeek,$weekNumber + $weeksInFuture)) {
-			continue;
-			}*/
+		continue;
+		}
+		*/
 		
 		$new_line = '<tr>';
 		$new_line .= '<td>'.$idx.'</td>';
@@ -853,7 +901,7 @@ c\'est que vous n\'etes pas connecte au site.
 			$post_date = new DateTime($postDate);
 			$start_date = new DateTime($startDate);
 			$end_date = new DateTime($endDate);
-
+			
 			if ($post_date >= $start_date && $post_date <= $end_date) {
 			  
 			  $currentWeekPosts[] = $new_post;
@@ -879,7 +927,7 @@ c\'est que vous n\'etes pas connecte au site.
 			$new_ling .= '<div class="ce_calendar_post_title">';
 			$new_line .= '<ol>';
 			foreach ($currentWeekPosts as $weekPost) {
-			
+			  
 			  $permalink = get_blog_permalink( $blog_id, $weekPost->ID );
 			  $new_line .= '<li>';
 			  $new_line .= '<a title="'.__('published on ','chief-editor').$weekPost->post_date.'" href="'.$permalink.'" target="_blank">'.$weekPost->post_title.'</a>';
@@ -926,26 +974,26 @@ c\'est que vous n\'etes pas connecte au site.
 	function noPostPublishedBetweenDates($posts,$startW,$endW) {
 	  //echo "count($posts) posts between $startW and $endW";
 	  $currentYear = date("Y");
-		$weekArray1 = $this->getStartAndEndDate($startW,$currentYear);
-		  $startDate = $weekArray['week_start'];
+	  $weekArray1 = $this->getStartAndEndDate($startW,$currentYear);
+	  $startDate = $weekArray['week_start'];
 	  //$endDate = $weekArray['week_end'];
 	  
 	  $weekArray1 = $this->getStartAndEndDate($endW,$currentYear);
 	  //$startDate = $weekArray['week_start'];
-		  $endDate = $weekArray['week_end'];
+	  $endDate = $weekArray['week_end'];
 	  
 	  foreach ($posts as $post) {
 		//if ($post->post_date)
-		  $format = 'Y-m-d';
-			$postDate = get_the_time($format,$post->ID);
-			$post_date = new DateTime($postDate);
-			$start_date = new DateTime($startDate);
-			$end_date = new DateTime($endDate);
-
-			if ($post_date >= $start_date && $post_date <= $end_date) {
-			  
-			  return 1;
-			}
+		$format = 'Y-m-d';
+		$postDate = get_the_time($format,$post->ID);
+		$post_date = new DateTime($postDate);
+		$start_date = new DateTime($startDate);
+		$end_date = new DateTime($endDate);
+		
+		if ($post_date >= $start_date && $post_date <= $end_date) {
+		  
+		  return 1;
+		}
 	  }
 	  
 	  return 0;
@@ -1456,23 +1504,23 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span>';
 		  if (current_user_can('delete_others_pages')) {
-		  	$complete_new_table_line .= '(<a href="'.$edit_post_link.'" target="_blank">Edit</a>)';
+			$complete_new_table_line .= '(<a href="'.$edit_post_link.'" target="_blank">Edit</a>)';
 		  }
-	 	  $complete_new_table_line .= '</td>';
+		  $complete_new_table_line .= '</td>';
 		  $complete_new_table_line .= '<td>'.$creation_date.'</td>';
 		  $status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
 		  $status_meaning = $this->get_post_status_meaning_from_status($post_state);
 		  $complete_new_table_line .= '<td>'.$status_meaning.'<br/><img src="'.$status_image.'"/></td>';
 		  $complete_new_table_line .= '<td>'.$abstract.'</td>';
 		  $complete_new_table_line .= '<td>'.$userdisplayname.' ('.$userlogin.')';
-		   if (current_user_can('delete_others_pages')) {
-		  $complete_new_table_line .= '<div class="wrap"><form id="'.$post_id.'_chief-editor-bat-form" class="chief-editor-bat-form" action="" method="POST">';
-		  $complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send BAT to author','chief-editor').'"/>';
-		  $complete_new_table_line .= '<input type="hidden" id="postID" name="postID" value="'.$post_id.'">';
-		  $complete_new_table_line .= '<input type="hidden" id="blogID" name="blogID" value="'.$blog_id.'">';
-		  $complete_new_table_line .= '<input type="hidden" id="authorID" name="authorID" value="'.$author.'">';
-		  $complete_new_table_line .= '</div></form><div id="ce_dialog_email" class="ce_dialog_email" title="Dialog Title" style="display:none">Some text</div></div>';
-		   }
+		  if (current_user_can('delete_others_pages')) {
+			$complete_new_table_line .= '<div class="wrap"><form id="'.$post_id.'_chief-editor-bat-form" class="chief-editor-bat-form" action="" method="POST">';
+			$complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send BAT to author','chief-editor').'"/>';
+			$complete_new_table_line .= '<input type="hidden" id="postID" name="postID" value="'.$post_id.'">';
+			$complete_new_table_line .= '<input type="hidden" id="blogID" name="blogID" value="'.$blog_id.'">';
+			$complete_new_table_line .= '<input type="hidden" id="authorID" name="authorID" value="'.$author.'">';
+			$complete_new_table_line .= '</div></form><div id="ce_dialog_email" class="ce_dialog_email" title="Dialog Title" style="display:none">Some text</div></div>';
+		  }
 		  $complete_new_table_line .= '</td>';
 		  
 		  if ($post_state == 'future') {
@@ -1672,8 +1720,10 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 	  if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
 		//echo $table_name . 'EXISTS !';
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, 0 as blog_id FROM {$table_name}
-WHERE comment_date >= '{$start_date}'
-AND comment_date < '{$end_date}'
+WHERE comment_date >= '{
+$start_date}'
+AND comment_date < '{
+$end_date}'
 ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 		
 	  } else {
@@ -1698,8 +1748,10 @@ ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # 
 		AND comment_approved = '1'*/
 		// select only the fields you need here!
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, {$blog['blog_id']} as blog_id FROM {$wpdb->base_prefix}{$blog['blog_id']}_comments
-WHERE comment_date >= '{$start_date}'
-AND comment_date < '{$end_date}'
+WHERE comment_date >= '{
+$start_date}'
+AND comment_date < '{
+$end_date}'
 ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 	  }
 	  
