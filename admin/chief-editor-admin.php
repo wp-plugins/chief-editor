@@ -1720,10 +1720,8 @@ public = '1' AND archived = '0' AND mature = '0' AND spam = '0' AND deleted = '0
 	  if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
 		//echo $table_name . 'EXISTS !';
 		$selects[] = "(SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date, comment_date_gmt, comment_content, 0 as blog_id FROM {$table_name}
-WHERE comment_date >= '{
-$start_date}'
-AND comment_date < '{
-$end_date}'
+WHERE comment_date >= '{$start_date}'
+AND comment_date < '{$end_date}'
 ORDER BY comment_date_gmt DESC LIMIT {$number})"; // real number is (number * # of blogs)
 		
 	  } else {
