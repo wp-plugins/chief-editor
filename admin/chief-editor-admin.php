@@ -727,34 +727,34 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	public function ce_email_content_callback()
 	{
 	  $ce_default_mail_content = 'Cher %username%,<br/>
-Voici la prévisualisation de votre article pour obtention d\'un Bon A Tirer : <br/>
+Voici la previsualisation de votre article pour obtention d\'un Bon A Tirer : <br/>
 
 <h2><a href="%postlink%" target="_blank">%posttitle%</a></h2><br/>
 
-Vous devez être authentifié avec vos identifiants personnels <a href="%blogurl%">sur le site</a> pour visualiser cet article en ligne:
+Vous devez etre authentifie avec vos identifiants personnels <a href="%blogurl%">sur le site</a> pour visualiser cet article en ligne:
 <ul><li>Utiliser votre login : <strong>%userlogin%</strong></li>
-<li>et votre mot de passe (si vous l\'avez oublié, demandez-en un nouveau en cliquant ici : <a href="http://www.idweblogs.com/wp-login.php?action=lostpassword">Service de récupération de mot de passe</a>)
+<li>et votre mot de passe (si vous l\'avez oublie, demandez-en un nouveau en cliquant ici : <a href="http://www.idweblogs.com/wp-login.php?action=lostpassword">Service de recuperation de mot de passe</a>)
 </ul>
 Si le message suivant apparait:<br/>
-<em>Désolé, mais la page demandé ne peut être trouvée.</em>
-c\'est que vous n\'êtes pas connecté au site.
-<h2>En cas de problème</h2>Merci de suivre la procédure suivante pour visualiser votre post en ligne:<br/>
+<em>Desole, mais la page demande ne peut etre trouvee.</em>
+c\'est que vous n\'etes pas connecte au site.
+<h2>En cas de probleme</h2>Merci de suivre la procedure suivante pour visualiser votre post en ligne:<br/>
 <ol><li>Se connecter avec vos identifiants <a href="%blogurl%">sur le site idweblogs</a>.</li>
-<li>Vérifier que votre nom (ou pseudo) apparait bien en haut à droite de l\'écran, ce qui confirme votre connexion au site.</li>
-<li>Ouvrir un nouvel onglet dans le même navigateur (Chrome, Firefox, Internet Explorer,etc...).</li>
+<li>Verifier que votre nom (ou pseudo) apparait bien en haut a droite de l\'ecran, ce qui confirme votre connexion au site.</li>
+<li>Ouvrir un nouvel onglet dans le meme navigateur (Chrome, Firefox, Internet Explorer,etc...).</li>
 <li>Copier/coller le lien ci dessus dans ce nouvel onglet et valider.</li>
-<li>Votre post doit s\'afficher correctement, en cas de problème, merci de nous contacter à : <a href="mailto:aide@idweblogs.com">aide@idweblogs.com</a></li>
+<li>Votre post doit s\'afficher correctement, en cas de probleme, merci de nous contacter a : <a href="mailto:aide@idweblogs.com">aide@idweblogs.com</a></li>
 </ol> 
-<h2>Merci de préciser</h2> dans votre mail de réponse, si ce n\'est déjà fait, les éléments suivants:
-<ol><li>Vos liens d\'intérêt éventuels pour ce post</li>
-<li>Les mots clés qui permettent d\'indexer au mieux votre post</li>
+<h2>Merci de preciser</h2> dans votre mail de reponse, si ce n\'est deja fait, les elements suivants:
+<ol><li>Vos liens d\'interet eventuels pour ce post</li>
+<li>Les mots cles qui permettent d\'indexer au mieux votre post</li>
 <li>L\'image de Une du post</li>
-<li>La catégorie (ou les catégories) du blog dans laquelle doit être publié votre article</li>
-<li>Les liens web éventuels à rajouter vers des sites externes ou de la bibliographie</li>
+<li>La categorie (ou les categories) du blog dans laquelle doit etre publie votre article</li>
+<li>Les liens web eventuels a rajouter vers des sites externes ou de la bibliographie</li>
 <li>(optionnel) une photo de vous</li>
 </ol>
 
-<br/>Cordialement, L\'équipe';
+<br/>Cordialement, L\'equipe';
 	  
 	  printf(
 		'<textarea type="text" id="email_content" rows="25" cols="110" name="chief_editor_option[email_content]" value="%s">%s</textarea>',
