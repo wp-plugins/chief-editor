@@ -298,12 +298,16 @@ if(!class_exists('ChiefEditorSettings')) {
 	}
 	
 	function register_general_settings() {
+	  if (current_user_can('edit_others_posts')){
 	  $this->chief_editor_settings_tabs[$this->general_settings_key] = __('Posts','chief-editor');
+	  }
 	  
 	}
 	
 	function register_calendar_tab() {
+	  if (current_user_can('delete_others_pages')){
 	  $this->chief_editor_settings_tabs[$this->calendar_settings_key] = __('Calendar','chief-editor');
+	  }
 	}
 	
 	function section_general_desc() {
@@ -317,17 +321,22 @@ if(!class_exists('ChiefEditorSettings')) {
 									}
 	
 	function register_advanced_settings() {
-	  
+	  if (current_user_can('delete_others_pages')){
 	  $this->chief_editor_settings_tabs[$this->advanced_settings_key] = __('Comments','chief-editor');
+	  }
 	  
 	}
 	
 	function register_stats_tab() {
+	  if (current_user_can('delete_others_pages')){
 	  $this->chief_editor_settings_tabs[$this->stats_key] = __('Authors','chief-editor');
+	  }
 	}
 	
 	function register_options_tab() {
+	  if (current_user_can('edit_users')){
 	  $this->chief_editor_settings_tabs[$this->chief_editor_options_key] = __('Settings','chief-editor');
+	  }
 	}
 	
 	function section_advanced_desc() {
@@ -343,8 +352,10 @@ if(!class_exists('ChiefEditorSettings')) {
 	
 	function add_admin_menus() {
 	  global $chief_editor_settings;
-	  $chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'read', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
-	}
+	  if (current_user_can('edit_others_posts')){
+	  	$chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'read', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
+	  }
+	 }
 	
 	
 	function chief_editor_options_page() {
@@ -363,9 +374,13 @@ if(!class_exists('ChiefEditorSettings')) {
 	  //screen_icon();
 	  echo '<div style="text-align:center;padding:5px;">';
 	  echo screen_icon() . '<h1>Chief Editor</h1>';
-	  echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">'.__('Visit Plugin Site','chief-editor').'</a>  <a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">'.__('Rate!','chief-editor').'</a>';
+	  if (current_user_can('delete_others_pages')){
+	  echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">'.__('Visit Plugin Site','chief-editor').'</a>';
+		echo '<a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">'.__('Rate!','chief-editor').'</a>';
 	  //echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
-	  echo '</div> ';
+	  }
+		echo '</div> ';
+		
 	  echo '<h2 class="nav-tab-wrapper">';
 	  foreach ( $this->chief_editor_settings_tabs as $tab_key => $tab_caption ) {
 		$active = $current_tab == $tab_key ? 'nav-tab-active' : '';
@@ -373,17 +388,17 @@ if(!class_exists('ChiefEditorSettings')) {
 	  }
 	  echo '</h2>';
 	  
-	  if ($current_tab == 'chief_editor_posts_tab' && current_user_can('edit_others_posts') ) {
+	  if ($current_tab == 'chief_editor_posts_tab') {
 		
 		$this->recent_mu_posts();
 		
 	  }
-	  elseif ($current_tab == 'chief_editor_calendar_tab' && current_user_can('delete_others_pages')) {
+	  elseif ($current_tab == 'chief_editor_calendar_tab') {
 		
 		$this->create_calendar_table();
 		
 	  }
-	  elseif ($current_tab == 'chief_editor_comments_tab' && current_user_can('delete_others_pages')) {
+	  elseif ($current_tab == 'chief_editor_comments_tab') {
 		
 		//$this->recent_multisite_comments();
 		global $wpdb;
@@ -430,10 +445,10 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		echo $this->formatCommentsFromArray($allComments);
 		
 	  }
-	  elseif ($current_tab == 'chief_editor_stats_tab' && current_user_can('delete_others_pages')) {
+	  elseif ($current_tab == 'chief_editor_stats_tab') {
 		$this->bm_author_stats("alltime");
 	  }
-	  elseif ($current_tab == 'chief_editor_settings_tab' && current_user_can('edit_users')) {
+	  elseif ($current_tab == 'chief_editor_settings_tab' ) {
 		
 		$this->options = get_option( 'chief_editor_option' );
 		//echo $this->options;
@@ -448,10 +463,11 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		echo '</form></div>';
 		
 	  }
+	  if (current_user_can('delete_others_pages')){
 	  echo '<div style="text-align:right;">';
-	  // echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">Visit Plugin Site</a>  <a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">Rate This Plugin</a>';
 	  echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
 	  echo '</div> ';
+	  }
 	}
 	
 	
