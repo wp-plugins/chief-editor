@@ -1,9 +1,8 @@
 === Plugin Name ===
 Contributors: munger41
-Donate link: http://www.maxizone.fr/?page_id=560
 Tags: editor, chief, draft, multisite, author, stat
 Requires at least: 3.5
-Tested up to: 4.1
+Tested up to: 4.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
