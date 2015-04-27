@@ -8,6 +8,9 @@ Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
 */
+if ( ! defined( 'ABSPATH' ) ) { 
+    exit; // Exit if accessed directly
+}
 
 // Initialize Settings
 include_once(sprintf("%s/admin/chief-editor-admin.php", dirname(__FILE__)));

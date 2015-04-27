@@ -1,5 +1,11 @@
 <?php 
 
+if ( ! defined( 'ABSPATH' ) ) {
+  
+  exit;
+  // Exit if accessed directly
+}
+
 if (isset($_POST['submitDate'])) {
   
   echo $_POST["datepicker"] . '_' .$_POST["blog_id"]. '_'.$_POST["post_id"];
@@ -21,6 +27,9 @@ define("CE_INPRESS_SENT_COLOR", "#f3f5b1");
 define("CE_ASSIGNED_COLOR", "#FFADFB");
 define("CE_PUBLISHED_COLOR","#BAADFB");
 
+$ordered_statuses_array = array('future','pending','in-progress','draft','assigned','pitch');
+
+
 if (!defined('CHIEF_EDITOR_PLUGIN_NAME'))
   define('CHIEF_EDITOR_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
 
@@ -29,6 +38,17 @@ if (!defined('CHIEF_EDITOR_PLUGIN_DIR'))
 
 if (!defined('CHIEF_EDITOR_PLUGIN_URL'))
   define('CHIEF_EDITOR_PLUGIN_URL', WP_PLUGIN_URL . '/' . CHIEF_EDITOR_PLUGIN_NAME);
+
+function log_me($message) {
+  if ( WP_DEBUG === true ) {
+	if ( is_array($message) || is_object($message) ) {
+	  error_log( print_r($message, true) );
+	}
+	else {
+	  error_log( $message );
+	}
+  }
+}
 
 
 function updatePostDate($blog_id, $post_id, $post_date) {
@@ -111,6 +131,37 @@ function unschedulePost($blog_id, $post_id) {
   
 }
 
+class Sort_Posts {
+  var $order, $orderby;
+  
+  function __construct( $orderby, $order ) {
+	$this->orderby = $orderby;
+	$this->order = ( 'desc' == strtolower( $order ) ) ? 'DESC' : 'ASC';
+  }
+  
+  function sort( $a, $b ) {
+	if ( $a->{
+	  $this->orderby}
+		== $b->{
+		  $this->orderby}
+	   ) {
+	  return 0;
+	}
+	
+	if ( $a->{
+	  $this->orderby}
+		< $b->{
+		  $this->orderby}
+	   ) {
+	  return ( 'ASC' == $this->order ) ? -1 : 1;
+	}
+	else {
+	  return ( 'ASC' == $this->order ) ? 1 : -1;
+	}
+  }
+}
+
+
 if(!class_exists('ChiefEditorSettings')) {
   
   class ChiefEditorSettings
@@ -121,6 +172,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	private $options;
 	private $lang_domain = 'chief-editor';
 	private $general_settings_key = 'chief_editor_posts_tab';
+	private $custom_post_type_keys = array();
 	private $calendar_settings_key = 'chief_editor_calendar_tab';
 	private $advanced_settings_key = 'chief_editor_comments_tab';
 	private $stats_key = 'chief_editor_stats_tab';
@@ -132,17 +184,20 @@ if(!class_exists('ChiefEditorSettings')) {
 	*/
 	public function __construct()
 	{
-	  add_action( 'admin_init', array( &$this, 'register_general_settings' ) );
-	  add_action( 'admin_init', array (&$this, 'register_calendar_tab'));
-	  add_action( 'admin_init', array( &$this, 'register_advanced_settings' ) );
-	  add_action( 'admin_init', array (&$this, 'register_stats_tab'));
-	  add_action( 'admin_init', array (&$this, 'register_options_tab'));
-	  add_action( 'admin_init', array (&$this, 'settings_page_init'));
 	  
-	  add_action( 'admin_menu', array( &$this, 'add_admin_menus' ));
-	  add_action( 'admin_enqueue_scripts',array( &$this,'chief_editor_load_scripts'));
-	  add_action( 'wp_ajax_ce_send_author_std_validation_email', array( &$this,'ce_process_ajax'));
-	  add_action( 'wp_ajax_ce_send_author_std_validation_email_confirmed', array( &$this,'ce_process_ajax_bat_confirm'));
+	  
+	  add_action( 'admin_init', array( $this, 'register_general_settings' ) );
+	  
+	  add_action( 'admin_init', array ($this, 'register_calendar_tab'));
+	  add_action( 'admin_init', array( $this, 'register_advanced_settings' ) );
+	  add_action( 'admin_init', array ($this, 'register_stats_tab'));
+	  add_action( 'admin_init', array ($this, 'register_options_tab'));
+	  add_action( 'admin_init', array ($this, 'settings_page_init'));
+	  
+	  add_action( 'admin_menu', array( $this, 'add_admin_menus' ));
+	  add_action( 'admin_enqueue_scripts',array( $this,'chief_editor_load_scripts'));
+	  add_action( 'wp_ajax_ce_send_author_std_validation_email', array( $this,'ce_process_ajax'));
+	  add_action( 'wp_ajax_ce_send_author_std_validation_email_confirmed', array( $this,'ce_process_ajax_bat_confirm'));
 	  
 	}
 	
@@ -187,11 +242,25 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $user_displayname = $user_info->display_name;
 	  $user_email = $user_info->user_email;
 	  
+	  $chief_editor_option_name = 'blog_'.$blogID.'_chief_editor';
+	  $editors_in_chief_concerned = $options[$chief_editor_option_name];
+	  
+	  
+	  
 	  restore_current_blog();
+	  
+	  log_me('send_confirmation_email_to_author_of_post::');
+	  log_me($editors_in_chief_concerned);
 	  
 	  // build mail content with std text
 	  $multiple_to_recipients = $user_email.','.$options['email_recipients'];
-	  $msg_object = "BAT : ".$post_title;
+	  foreach ($editors_in_chief_concerned as $new_user_id) {
+	  	$user_info = get_userdata($new_user_id);
+		$user_email = $user_info->user_email;
+		$multiple_to_recipients .= ','.$user_email;
+	  }
+	  log_me($multiple_to_recipients);
+	  $msg_object = __("BAT",'chief-editor').' : '.$post_title;
 	  //$msg_content = $options['email_content'];
 	  //echo $msg_object;
 	  //echo $multiple_to_recipients;
@@ -298,15 +367,48 @@ if(!class_exists('ChiefEditorSettings')) {
 	}
 	
 	function register_general_settings() {
-	  if (current_user_can('edit_others_posts')){
-	  $this->chief_editor_settings_tabs[$this->general_settings_key] = __('Posts','chief-editor');
+	  if (current_user_can('edit_others_posts')) {
+		$this->chief_editor_settings_tabs[$this->general_settings_key] = __('Posts','chief-editor');
+	  }
+	  
+	  if (current_user_can('delete_others_pages')) {
+		$this->options = get_option( 'chief_editor_option' );
+		
+		$args = array(
+		  /*'public'   => false,*/
+		  '_builtin' => false
+		);
+		
+		$output = 'names';
+		// names or objects, note names is the default
+		$operator = 'and';
+		// 'and' or 'or'
+		
+		$post_types = get_post_types( $args, $output, $operator );
+		
+		
+		foreach ( $post_types  as $post_type ) {
+		  
+		  //echo '<p>' . $post_type . '</p>';
+		  //log_me($post_type );
+		  $element_name = 'checkbox_'.$post_type;
+		  $checked = ($this->options[$element_name] == 1);
+		  //log_me('"'.$this->options[$element_name].'"');
+		  //log_me($post_type .' => '.$element_name. ' : '.$this->options[$element_name] . ' ' .$checked);
+		  if ($checked) {
+			$this->custom_post_type_keys[] = $post_type;
+			$this->chief_editor_settings_tabs[$post_type] = __($post_type,'chief-editor');
+		  }
+		}
+		
+		
 	  }
 	  
 	}
 	
 	function register_calendar_tab() {
 	  if (current_user_can('delete_others_pages')){
-	  $this->chief_editor_settings_tabs[$this->calendar_settings_key] = __('Calendar','chief-editor');
+		$this->chief_editor_settings_tabs[$this->calendar_settings_key] = __('Calendar','chief-editor');
 	  }
 	}
 	
@@ -322,20 +424,20 @@ if(!class_exists('ChiefEditorSettings')) {
 	
 	function register_advanced_settings() {
 	  if (current_user_can('delete_others_pages')){
-	  $this->chief_editor_settings_tabs[$this->advanced_settings_key] = __('Comments','chief-editor');
+		$this->chief_editor_settings_tabs[$this->advanced_settings_key] = __('Comments','chief-editor');
 	  }
 	  
 	}
 	
 	function register_stats_tab() {
 	  if (current_user_can('delete_others_pages')){
-	  $this->chief_editor_settings_tabs[$this->stats_key] = __('Authors','chief-editor');
+		$this->chief_editor_settings_tabs[$this->stats_key] = __('Authors','chief-editor');
 	  }
 	}
 	
 	function register_options_tab() {
 	  if (current_user_can('edit_users')){
-	  $this->chief_editor_settings_tabs[$this->chief_editor_options_key] = __('Settings','chief-editor');
+		$this->chief_editor_settings_tabs[$this->chief_editor_options_key] = __('Settings','chief-editor');
 	  }
 	}
 	
@@ -353,9 +455,9 @@ if(!class_exists('ChiefEditorSettings')) {
 	function add_admin_menus() {
 	  global $chief_editor_settings;
 	  if (current_user_can('edit_others_posts')){
-	  	$chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'read', $this->chief_editor_admin_page_name, array( &$this, 'chief_editor_options_page' ) );
+		$chief_editor_settings = add_options_page( 'Chief Editor Settings', 'Chief Editor', 'read', $this->chief_editor_admin_page_name, array( $this, 'chief_editor_options_page' ) );
 	  }
-	 }
+	}
 	
 	
 	function chief_editor_options_page() {
@@ -368,6 +470,9 @@ if(!class_exists('ChiefEditorSettings')) {
 <?php
 	}
 	
+	
+	
+	
 	function chief_editor_options_tabs() {
 	  
 	  $current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : $this->general_settings_key;
@@ -375,12 +480,12 @@ if(!class_exists('ChiefEditorSettings')) {
 	  echo '<div style="text-align:center;padding:5px;">';
 	  echo screen_icon() . '<h1>Chief Editor</h1>';
 	  if (current_user_can('delete_others_pages')){
-	  echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">'.__('Visit Plugin Site','chief-editor').'</a>';
+		echo '<a class="button-primary" href="http://wordpress.org/plugins/chief-editor/" target="_blank">'.__('Visit Plugin Site','chief-editor').'</a>';
 		echo '<a  class="button-primary" style="color:#FFF600;" href="http://wordpress.org/support/view/plugin-reviews/chief-editor" target="_blank">'.__('Rate!','chief-editor').'</a>';
-	  //echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
+		//echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
 	  }
-		echo '</div> ';
-		
+	  echo '</div> ';
+	  
 	  echo '<h2 class="nav-tab-wrapper">';
 	  foreach ( $this->chief_editor_settings_tabs as $tab_key => $tab_caption ) {
 		$active = $current_tab == $tab_key ? 'nav-tab-active' : '';
@@ -390,7 +495,23 @@ if(!class_exists('ChiefEditorSettings')) {
 	  
 	  if ($current_tab == 'chief_editor_posts_tab') {
 		
-		$this->recent_mu_posts();
+		log_me('chief_editor_posts_tab');
+		$allPosts = $this->recent_mu_posts();
+		if (count($allPosts) == 0) {
+		  echo '<p>'.__('No custom posts of type ','chief-editor').'<b>'.$current_tab.'</b></p>';
+		  echo '<p>'.__('or','chief-editor').'</p>';
+		  echo '<p>'.__('all of them are published','chief-editor').'</p>';
+		}
+		
+	  }
+	  elseif (in_array ($current_tab, $this->custom_post_type_keys)) {
+		//echo $current_tab;
+		$allPosts = $this->recent_mu_posts($current_tab);
+		if (count($allPosts) == 0) {
+		  echo '<p>'.__('No custom posts of type ','chief-editor').'<b>'.$current_tab.'</b></p>';
+		  echo '<p>'.__('or','chief-editor').'</p>';
+		  echo '<p>'.__('all of them are published','chief-editor').'</p>';
+		}
 		
 	  }
 	  elseif ($current_tab == 'chief_editor_calendar_tab') {
@@ -413,7 +534,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  echo '<tr>';
 		  echo '<td>';
 		  //$mostCommentedPosts = $this->getMostCommentedPosts(10);
-		  echo '<h3>'.__('Most commented posts ever').'</h3><br/>'.$this->getMostCommentedPosts(10);
+		  echo '<h3>'.__('Most commented posts ever', 'chief-editor').'</h3><br/>'.$this->getMostCommentedPosts(10);
 		  echo '</td>';
 		  echo '<td>';
 		  //$lastMonthIdx = date('m', strtotime('-1 month'));
@@ -422,7 +543,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  $startDate = date('Y-m-01 H:i:s', $last_month_most_commented );
 		  $endDate = date('Y-m-01 H:i:s', $current_month);
 		  $mostCommentedPosts = $this->getMostCommentedPosts(10,$startDate,$endDate);
-		  echo '<h3>'.__('Most commented posts last month').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
+		  echo '<h3>'.__('Most commented posts last month', 'chief-editor').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
 		  echo '</td>';
 		  echo '</tr>';
 		  echo '</table>';
@@ -464,9 +585,9 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		
 	  }
 	  if (current_user_can('delete_others_pages')){
-	  echo '<div style="text-align:right;">';
-	  echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
-	  echo '</div> ';
+		echo '<div style="text-align:right;">';
+		echo 'by <a href="http://www.maxiblog.fr" target="_blank">max</a>, a <a href="http://www.maxizone.fr" target="_blank">music lover</a>';
+		echo '</div> ';
 	  }
 	}
 	
@@ -481,20 +602,20 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	}
 	
 	function postBetweenDates($post,$startDate,$endDate){
-	
+	  
 	  //$post_date = $post->post_date;
-	  	$format = 'Y-m-d';
-		$postDate = get_the_time($format,$post->ID);
-		$post_date = new DateTime($postDate);
-		$start_date = new DateTime($startDate);
-		$end_date = new DateTime($endDate);
-			
-		if ($post_date >= $start_date && $post_date <= $end_date) {
-			  
-			  return true;
-		} else {
-			return false;
-		}
+	  $format = 'Y-m-d';
+	  $postDate = get_the_time($format,$post->ID);
+	  $post_date = new DateTime($postDate);
+	  $start_date = new DateTime($startDate);
+	  $end_date = new DateTime($endDate);
+	  
+	  if ($post_date >= $start_date && $post_date <= $end_date) {
+		
+		return true;
+	  } else {
+		return false;
+	  }
 	}
 	
 	function getAllPostsOfAllBlogs($startDate = NULL, $endDate = NULL) {
@@ -515,14 +636,14 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		));
 		
 		if ($startDate != NULL && $endDate != NULL) {
-		
-		foreach ($allPostsOfCurrentBlog as $post) {
-		  if ($this->postBetweenDates($post,$startDate,$endDate)) {
-		  	$result[$blog_id][] = $post;
-		  } 
-		}
+		  
+		  foreach ($allPostsOfCurrentBlog as $post) {
+			if ($this->postBetweenDates($post,$startDate,$endDate)) {
+			  $result[$blog_id][] = $post;
+			} 
+		  }
 		} else {
-			$result[$blog_id] = $allPostsOfCurrentBlog;
+		  $result[$blog_id] = $allPostsOfCurrentBlog;
 		}
 		
 		// Switch back to the main blog
@@ -635,15 +756,58 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		'setting_section_id'
 	  );
 	  
+	  
 	  // -----------------------------------
 	  
-	  /*
+	  add_settings_section(
+		'custom_posts_section_id', // ID
+		__('Custom post types','chief-editor'), // Title
+		array( $this, 'ce_print_section_custom_post' ), // Callback
+		'chief_editor_plugin_options' // Page
+	  );
+	  
+	  $args = array(
+		/*'public'   => false,*/
+		'_builtin' => false
+	  );
+	  
+	  $output = 'names';
+	  // names or objects, note names is the default
+	  $operator = 'and';
+	  // 'and' or 'or'
+	  
+	  $post_types = get_post_types( $args, $output, $operator );
+	  
+	  
+	  foreach ( $post_types as $post_type ) {
+		$args     = array (
+		  'post_type' => $post_type
+		);
+		$element_name = 'checkbox_'.$post_type;
+		add_settings_field(  
+		  $element_name,  
+		  $post_type,  
+		  array( $this, 'checkbox_element_callback'),  // callback
+		  'chief_editor_plugin_options',   // page
+		  'custom_posts_section_id',  //section
+		  $args
+		);
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
+	  // -----------------------------------
+	  
+	  
 	  
 	  add_settings_section(
-	  'chief_editors_section_id', // ID
-	  __('Set users as Chief Editors','chief-editor'), // Title
-	  array( $this, 'ce_print_section_editors_info' ), // Callback
-	  'chief_editor_plugin_options' // Page
+		'chief_editors_section_id', // ID
+		__('Set users as Chief Editors','chief-editor'), // Title
+		array( $this, 'ce_print_section_editors_info' ), // Callback
+		'chief_editor_plugin_options' // Page
 	  );
 	  
 	  
@@ -651,36 +815,40 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  
 	  // Iterate through your list of blogs
 	  foreach (wp_get_sites() as $blog) {
-	  //foreach ($blog_ids as $blog_id){
-	  $blog_id = $blog['blog_id'];
-	  
-	  // Switch to the next blog in the loop.
-	  // This will start at $id == 1 because of your ORDER BY statement.
-	  switch_to_blog($blog_id);
-	  
-	  // Get the 5 latest posts for the blog and store them in the $globalquery variable.
-	  //$globalquery = get_posts('numberposts=5&post_type=any');
-	  $blog_details = get_blog_details($blog_id);
-	  $setting_id = "blog_" . $blog_id . '_chief_editor';
-	  $args     = array (
-	  'blog_id' => $blog_id,
-	  'setting_id' => $setting_id
-	  );
-	  add_settings_field(
-	  $setting_id, // ID
-	  __($blog_details->blogname,'chief-editor'), // Title 
-	  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
-	  'chief_editor_plugin_options', // Page
-	  'chief_editors_section_id', // Section   
-	  $args
-	  );
-	  
-	  
-	  // Switch back to the main blog
-	  restore_current_blog();
+		//foreach ($blog_ids as $blog_id){
+		$blog_id = $blog['blog_id'];
+		
+		// Switch to the next blog in the loop.
+		// This will start at $id == 1 because of your ORDER BY statement.
+		switch_to_blog($blog_id);
+		
+		// Get the 5 latest posts for the blog and store them in the $globalquery variable.
+		//$globalquery = get_posts('numberposts=5&post_type=any');
+		$blog_details = get_blog_details($blog_id);
+		$blog_name = $blog_details->blogname;
+		$setting_id = "blog_" . $blog_id . '_chief_editor';
+		$args     = array (
+		  'blog_id' => $blog_id,
+		  'setting_id' => $setting_id
+		);
+		
+		//log_me('Adding setting for blog '.$blog_name.' id '.$blog_id.' and setting id '.$setting_id);
+		
+		add_settings_field(
+		  $setting_id, // ID
+		  $blog_name, // Title 
+		  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
+		  'chief_editor_plugin_options', // Page
+		  'chief_editors_section_id', // Section   
+		  $args // args
+		);
+		
+		
+		// Switch back to the main blog
+		restore_current_blog();
 	  }
 	  
-	  */
+	  
 	  
 	  $this->options = get_option( 'chief_editor_option' );
 	  
@@ -708,6 +876,39 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  if( isset( $input['email_content'] ) )
 		$new_input['email_content'] = $input['email_content'];
 	  
+	  
+	  $args = array(
+		/*'public'   => false,*/
+		'_builtin' => false
+	  );
+	  
+	  $output = 'names';
+	  // names or objects, note names is the default
+	  $operator = 'and';
+	  // 'and' or 'or'
+	  
+	  $post_types = get_post_types( $args, $output, $operator );
+	  
+	  
+	  foreach ( $post_types as $post_type ) {
+		$element_name = 'checkbox_'.$post_type;
+		if( isset( $input[$element_name] ) )
+		  $new_input[$element_name] = $input[$element_name];
+	  }
+	  
+	  foreach (wp_get_sites() as $blog) {
+		
+		$blog_id = $blog['blog_id'];
+		//switch_to_blog($blog_id);
+		$setting_id = "blog_" . $blog_id . '_chief_editor';
+		if( isset( $input[$setting_id] ) ){
+		  $new_input[$setting_id] = $input[$setting_id];
+		}
+	  }
+	  
+	  
+	  log_me($new_input);
+	  
 	  return $new_input;
 	}
 	
@@ -719,16 +920,54 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  print __('The following settings are used to send pre-formatted email to post authors, in order for them to validate it online before publishing','chief-editor');
 	}
 	
+	public function ce_print_section_custom_post()
+	{
+	  print __('This section allow you to select which custom post types are going to presented in a separate tab for scheduling','chief-editor');
+	}
+	
+	public function ce_print_section_editors_info()
+	{
+	print __('Attribute Chief editors to each blog in order for them to receive','chief-editor').' '.__('all','chief-editor').' '.__('in press','chief-editor').' '.__('notifications','chief-editor');
+
+	}
+	
+	function checkbox_element_callback(array $args) {
+	  
+	  $post_type  = $args['post_type'];
+	  $options = get_option( 'checkbox_element_callback' );
+	  $element_name = 'checkbox_'.$post_type;
+	  //if (in_array($element_name,$this->options)) {
+	  $checked = checked( 1, $this->options[$element_name], false );
+	  /*} else {
+	  $checked = '';
+	  }*/
+	  //log_me('$checked '.$checked);
+	  $html = '<input type="checkbox" id="'.$element_name.'" name="chief_editor_option['.$element_name.']" value="1"' . $checked . '/>';
+	  $html .= '<label for="'.$element_name.'"></label>';
+	  
+	  print __( $html,'chief-editor');
+	}
+	
 	public function ce_blog_chief_editor_callback(array $args){
 	  
 	  $blog_id  = $args['blog_id'];
 	  $setting_id = $args['setting_id'];
-	  echo $setting_id;
-	  $chief_editors_role = 'contributor';
+	  log_me( $setting_id);
+	  $chief_editors_roles = array('contributor','author','editor');
+	  $blogusers = array();
 	  
-	  $blogusers = get_users( 'blog_id='.$blog_id.'&orderby=nicename&role='.$chief_editors_role );
 	  
-	  echo count($blogusers) . ' '.$chief_editors_role. ' : ';
+	  foreach ($chief_editors_roles as $role) {
+		
+		$other_blogusers = get_users( 'blog_id='.$blog_id.'&orderby=nicename&role='.$role );
+		if ($other_blogusers){
+		  $blogusers = array_merge($blogusers, $other_blogusers);
+		}
+	  }
+	  
+	  
+	  
+	  log_me( count($blogusers) . ' '.count($chief_editors_roles). ' : ');
 	  /*
 	  echo isset($this->options[$setting_id]) ? $this->options[$setting_id] : 'not set<br/>';
 	  $chief_editor_array = $this->options[$setting_id];
@@ -739,21 +978,39 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  }
 	  echo '</ul>';
 	  */
-	  $ouput_string = '<select id="chief_editors_selector_'.$blog_id.'" name="chief_editor_option['.$setting_id.']">';
+	  $fieldID = 'chief_editors_selector_'.$blog_id;
+	  $fieldName = 'chief_editor_option['.$setting_id.']';
 	  
-	  // Array of WP_User objects.
-	  $idx = 1;
-	  foreach ( $blogusers as $user ) {
-		//$option_selected = in_array( $user->ID, $chief_editor_array ) ? 'selected="selected"' : '';
-		echo $this->options[$setting_id] . ' ' . $user->ID;
-		$ouput_string .= '<option '. selected( $this->options[$setting_id], $user->ID ) .' value="'.$user->ID.'">' . esc_html( $user->user_login ) . ' - '.esc_html( $user->user_nicename ).' - (' . esc_html( $user->user_email ) . ')</option>';
-		$idx += 1;
+	  
+	  
+	  printf (
+		'<select multiple="multiple" name="%s[]" id="%s" class="widefat" size="5" style="margin-bottom:10px">',
+		$fieldName,
+		$fieldID
+	  );
+	  
+	  // Each individual option
+	  foreach( $blogusers as $user )
+	  {
+		$id = $user->ID;
+		$userEmail = $user->user_email;
+		$userLogin = $user->user_login;
+		$userNicename = $user->display_name;
+		log_me("$id : $userEmail = ");
+		$checkedOptions =  $this->options[$setting_id];
+		log_me( $checkedOptions);
+		
+		printf(
+		  '<option value="%s" %s style="margin-bottom:3px;">%s</option>',
+		  $id,
+		  in_array( $id, $checkedOptions) ? 'selected="selected"' : '',
+		  $id .' - '.$userLogin.' - '.$userNicename . ' (' . $userEmail .')'
+		);
 	  }
 	  
-	  $ouput_string .= '</select>';
-	  print( $ouput_string);
+	  echo '</select>';
 	  
-	  var_dump($_POST);
+	  
 	}
 	
 	
@@ -940,7 +1197,7 @@ c\'est que vous n\'etes pas connecte au site.
 			
 			$sumsArray[$week] += $numberOfPosts;
 			$new_line .= '<td class="ce_calendar_post_cell" style="background-color:'.$color.';">';
-			$new_ling .= '<div class="ce_calendar_post_title">';
+			$new_line .= '<div class="ce_calendar_post_title">';
 			$new_line .= '<ol>';
 			foreach ($currentWeekPosts as $weekPost) {
 			  
@@ -1031,7 +1288,7 @@ c\'est que vous n\'etes pas connecte au site.
 	  global $wpdb, $blog_id, $post;
 	  
 	  // Get a list of blogs in your multisite network
-	  $blogs = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM wp_blogs ORDER BY blog_id" ) );
+	  $blogs = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM wp_blogs ORDER BY $s",'blog_id' ) );
 	  
 	  $globalcontainer = array();
 	  foreach( $blogs as $blog ) {
@@ -1086,7 +1343,7 @@ c\'est que vous n\'etes pas connecte au site.
 	  global $wpdb, $blog_id, $post;
 	  
 	  // Get a list of blogs in your multisite network
-	  $blogs = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM wp_blogs ORDER BY blog_id" ) );
+	  $blogs = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM wp_blogs ORDER BY %d",$blog_id ) );
 	  
 	  $globalcontainer = array();
 	  foreach( $blogs as $blog ) {
@@ -1387,8 +1644,16 @@ c\'est que vous n\'etes pas connecte au site.
 	}
 	// end register_admin_scripts
 	
+	private function findBlogIdFromPostId($postId, $postTable){
+	  
+	  foreach ($postTable as $key => $value) {
+		if (in_array($postId,$value)) {
+		  return $key;
+		}
+	  }
+	}
 	
-	public function recent_mu_posts( $howMany = 10 ) {
+	public function recent_mu_posts( $post_type = 'post', $howMany = 10 ) {
 	  
 	  //global $blog_id;
 	  // get an array of the table names that our posts will be in
@@ -1409,13 +1674,19 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		
 		$rows = $wpdb->get_results($querystr, OBJECT);
 		
-		//echo 'count($rows) '.count($rows);
+		log_me('!is_multisite :: count($rows) '.count($rows));
 		
 	  }
 	  else {
 		
-		$rows = $this->get_all_pending_posts_multisite();
-		//echo 'MULTISITE :: count($rows) '.count($rows);
+		//$rows = $this->get_all_pending_posts_multisite();
+		
+		$resultsArray = $this->getAllPostsOfAllBlogsOfType($post_type);
+		
+		$rows = $resultsArray[0];
+		$resultTable = $resultsArray[1];
+		
+		log_me('MULTISITE :: count($rows) '.count($rows));
 		
 	  }
 	  // now we need to get each of our posts into an array and return them
@@ -1445,11 +1716,12 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  $data = $row->ID;
 		  
 		  if ( is_multisite() ) {
-			$blog_id = $row->blog_id;
+			$blog_id = $this->findBlogIdFromPostId($data,$resultTable);
 			$current_blog_details = get_blog_details( $blog_id );
 			$blog_path = $current_blog_details->path;
 			$blog_name = $current_blog_details->blogname;
 			$permalink = get_blog_permalink( $blog_id, $data );
+			log_me('Find post '.$data.' on blog '.$blog_id);
 			$new_post = get_blog_post( $blog_id, $data );
 		  }
 		  else {
@@ -1463,7 +1735,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $post_id = $new_post->ID;
 		  $title = $new_post->post_title;
-		  
+		  log_me($post_id .' : '.$title);
 		  $post_thumbnail = '';
 		  $post_thumbnail .= '<a class="ce_post_thumbnail" target="_blank" href="' . $permalink . '" title="' . esc_attr( $title) . '">';
 		  //$post_thumbnail .= '<img src="'.$this->multisite_get_thumb($post_id,100,100,$blog_id,true,true).'"/>';
@@ -1474,19 +1746,15 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 			$post_thumbnail .= get_the_post_thumbnail( $post_id, array(100,100));
 		  }
 		  $post_thumbnail .=  '</a>';
-		  //echo $post_thumbnail;
-		  //} else {
-		  //echo 'no thumbnail... for post '.$post_id;
-		  //}
 		  $abstract = $new_post->post_excerpt;
-		  
 		  $author = $new_post->post_author;
-		  $user_info = get_userdata($author);
+		  
+		  
+		  $user_info = $this->get_userdata_for_blog($author,$blog_id);//get_userdata($author);
+		  //log_me( $user_info);
 		  $userlogin = $user_info->user_login;
 		  $userdisplayname = $user_info->display_name;
-		  #echo 'Username: ' . $user_info->user_login . "\n";
-		  #echo 'User roles: ' . implode(', ', $user_info->roles) . "\n";
-		  #echo 'User ID: ' . $user_info->ID . "\n";
+		  
 		  $date_format = 'l, jS F Y';
 		  $creation_date = get_the_time( $date_format, $new_post );
 		  $date = $new_post->post_date;
@@ -1520,7 +1788,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span>';
 		  if (current_user_can('delete_others_pages')) {
-			$complete_new_table_line .= '(<a href="'.$edit_post_link.'" target="_blank">Edit</a>)';
+			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit', 'chief-editor').'</a>)';
 		  }
 		  $complete_new_table_line .= '</td>';
 		  $complete_new_table_line .= '<td>'.$creation_date.'</td>';
@@ -1562,7 +1830,8 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $posts[] = $new_post;
 		  
-		}
+		} 
+		
 		
 		echo '</table>';
 		echo '<hr>';
@@ -1630,8 +1899,95 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 	  
 	}
 	
+	function getAllPostsOfAllBlogsOfType($post_type = 'post', $startDate = NULL, $endDate = NULL) {
+	  global  $ordered_statuses_array;
+	  $network_sites = wp_get_sites();
+	  $resultTable = array();
+	  $result = array();
+	  log_me('Network has '.count($network_sites).' blog(s)');
+	  
+	  foreach ( $network_sites as $network_site ) {
+		
+		$blog_id = $network_site['blog_id'];
+		
+		switch_to_blog($blog_id);
+		
+		log_me('get_posts of type ' . $post_type . ' on blog '.$blog_id);
+		
+		$allPostsOfCurrentBlog = get_posts(array(
+		  'numberposts' => -1, 
+		  'post_type' => $post_type,
+		  'post_status' =>  $ordered_statuses_array
+		));
+		
+		// (post_status != 'publish' AND post_status != 'inherit' AND post_status != 'auto-draft' AND post_status != 'trash') AND post_type = 'post'
+		// ORDER BY post_status='pitch',post_status='assigned',post_status='draft',post_status='in-progress',post_status='pending',post_status='future', post_date DESC";
+		
+		/*
+		if ($startDate != NULL && $endDate != NULL) {
+		
+		foreach ($allPostsOfCurrentBlog as $post) {
+		if ($this->postBetweenDates($post,$startDate,$endDate)) {
+		$result[$blog_id][] = $post;
+		} 
+		}
+		} else {
+		$result[$blog_id] = $allPostsOfCurrentBlog;
+		}
+		*/
+		foreach ($allPostsOfCurrentBlog as $post) {
+		  log_me($post->ID . ' : '.$post->post_title);
+		  $resultTable[$blog_id][] = $post->ID;
+		}
+		
+		
+		log_me($post_type . ' Before merge '.count($result));
+		$result = array_merge($result,$allPostsOfCurrentBlog);
+		log_me($post_type . ' After merge '.count($result));
+		
+		// Switch back to the main blog
+		restore_current_blog();
+	  }
+	  
+	  //$this->sort_posts($result,'post_status','ASC',false);
+	  
+	  usort($result, array($this,'status_cmp')); 
+	  
+	  return array($result,$resultTable);
+	}
 	
-	function get_all_pending_posts_multisite() {
+	//custom function for comparing the data we want to sort by
+	function status_cmp($a, $b){
+	  global $ordered_statuses_array;
+	  if ($a->post_status == $b->post_status) {
+		return 0;
+	  }
+	  
+	  $a_key = array_search ($a->post_status, $ordered_statuses_array);
+	  $b_key = array_search ($b->post_status, $ordered_statuses_array);
+	  return ( $a_key > $b_key) ? 1 : -1;
+	}
+	
+	
+	
+	function sort_posts( $posts, $orderby, $order = 'ASC', $unique = true ) {
+	  if ( ! is_array( $posts ) ) {
+		return false;
+	  }
+	  
+	  usort( $posts, array( new Sort_Posts( $orderby, $order ), 'sort' ) );
+	  
+	  // use post ids as the array keys
+	  if ( $unique && count( $posts ) ) {
+		$posts = array_combine( wp_list_pluck( $posts, 'ID' ), $posts );
+	  }
+	  
+	  return $posts;
+	}
+	
+	
+	
+	function get_all_pending_posts_multisite($post_type = 'post') {
 	  
 	  global $wpdb;
 	  global $table_prefix;
@@ -1932,7 +2288,8 @@ text-align:center;">';
 		  $out .= '</tr>';
 		}
 		$out .= '</table>';
-	  } else {
+	  }
+	  else {
 		$out = 'No comments found.';
 	  }
 	  return $out;
@@ -1958,7 +2315,8 @@ text-align:center;">';
 	  
 	  if( $thumbnail = get_post_meta($postID, 'thumbnail', true) ){
 		$iurl = '/wp-content/iptv/img/'.$thumbnail;
-	  } else {
+	  }
+	  else {
 		
 		//$images = get_children( array( 'post_parent' => $postID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order', 'order' => 'ASC', 'numberposts' => 999 ) );
 		
@@ -1984,11 +2342,21 @@ text-align:center;">';
 	  
 	  if($return) {
 		return $out;
-	  } else {
+	  }
+	  else {
 		echo $out;
 	  }
 	}
 	
+	function get_userdata_for_blog($author,$blog_id) {
+	  switch_to_blog($blog_id);
+	  
+	  $result = get_userdata($author);
+	  
+	  restore_current_blog();
+	  return $result;
+	  
+	}
 	
 	function get_the_post_thumbnail_by_blog($blog_id=NULL,$post_id=NULL,$size='thumbnail',$attrs=NULL) {
 	  global $current_blog;
