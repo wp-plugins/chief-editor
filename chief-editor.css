@@ -1,0 +1,35 @@
+a.ce_post_thumbnail > img {
+	width: 50px;
+	height: auto;
+  	/*padding:2px;*/
+  	border:1px solid black;
+  
+   transition: all .2s ease-in-out;
+}
+
+
+a.ce_post_thumbnail > img:hover {
+	
+    width: 200px;
+  	height:auto;
+  padding:0px;
+  border:10px solid black;
+	z-index: 10000;
+  	}
+
+.empty-cell {
+	 background-color:#E0E0E0; 
+	}
+
+.ce_calendar_post_cell {
+	font-size:6px;
+ 
+  }
+
+.ce_calendar_post_title {
+
+  width:100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  }
