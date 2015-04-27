@@ -534,7 +534,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  echo '<tr>';
 		  echo '<td>';
 		  //$mostCommentedPosts = $this->getMostCommentedPosts(10);
-		  echo '<h3>'.__('Most commented posts ever').'</h3><br/>'.$this->getMostCommentedPosts(10);
+		  echo '<h3>'.__('Most commented posts ever', 'chief-editor').'</h3><br/>'.$this->getMostCommentedPosts(10);
 		  echo '</td>';
 		  echo '<td>';
 		  //$lastMonthIdx = date('m', strtotime('-1 month'));
@@ -543,7 +543,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  $startDate = date('Y-m-01 H:i:s', $last_month_most_commented );
 		  $endDate = date('Y-m-01 H:i:s', $current_month);
 		  $mostCommentedPosts = $this->getMostCommentedPosts(10,$startDate,$endDate);
-		  echo '<h3>'.__('Most commented posts last month').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
+		  echo '<h3>'.__('Most commented posts last month', 'chief-editor').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
 		  echo '</td>';
 		  echo '</tr>';
 		  echo '</table>';
@@ -1788,7 +1788,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span>';
 		  if (current_user_can('delete_others_pages')) {
-			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit').'</a>)';
+			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit', 'chief-editor').'</a>)';
 		  }
 		  $complete_new_table_line .= '</td>';
 		  $complete_new_table_line .= '<td>'.$creation_date.'</td>';
