@@ -39,6 +39,10 @@ Only editors (or higher roles) can use the plugin.
 
 == Changelog ==
 
+= 3.3 =
+* date order fixed
+* scheduled text readability improved
+
 = 3.2 =
 * security improvments
 * custom post types management

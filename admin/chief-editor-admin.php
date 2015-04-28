@@ -534,7 +534,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  echo '<tr>';
 		  echo '<td>';
 		  //$mostCommentedPosts = $this->getMostCommentedPosts(10);
-		  echo '<h3>'.__('Most commented posts ever', 'chief-editor').'</h3><br/>'.$this->getMostCommentedPosts(10);
+		  echo '<h3>'.__('Most commented posts ever').'</h3><br/>'.$this->getMostCommentedPosts(10);
 		  echo '</td>';
 		  echo '<td>';
 		  //$lastMonthIdx = date('m', strtotime('-1 month'));
@@ -543,7 +543,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  $startDate = date('Y-m-01 H:i:s', $last_month_most_commented );
 		  $endDate = date('Y-m-01 H:i:s', $current_month);
 		  $mostCommentedPosts = $this->getMostCommentedPosts(10,$startDate,$endDate);
-		  echo '<h3>'.__('Most commented posts last month', 'chief-editor').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
+		  echo '<h3>'.__('Most commented posts last month').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
 		  echo '</td>';
 		  echo '</tr>';
 		  echo '</table>';
@@ -1703,10 +1703,11 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		//echo '<h4>Total non published post(s) found : '. count($rows).'</h4>';
 		echo '<br/>';
 		$chief_editor_table_header = '<table class="sortable" style="border:solid #6B6B6B 1px;width:100%;">';
-		$chief_editor_table_header = $chief_editor_table_header . '<tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
-		$chief_editor_table_header = $chief_editor_table_header . '<td>#</td><td>' . __('Blog Title','chief-editor') . '</td><td>' . __('Featured image','chief-editor') . '</td>';
-		$chief_editor_table_header = $chief_editor_table_header . '<td>Post</td><td>'.__('Submission date','chief-editor').'</td><td>'.__('Status','chief-editor').'</td>';
-		$chief_editor_table_header = $chief_editor_table_header . '<td>'.__('Excerpt','chief-editor').'</td><td>'.__('Author (login)','chief-editor').'</td>';
+		$chief_editor_table_header .= '<tr style="background-color:'.$tableHeaderColor.';color:#FFFFFF">';
+		$chief_editor_table_header .= '<td>#</td><td>' . __('Blog Title','chief-editor') . '</td><td>' . __('Featured image','chief-editor') . '</td>';
+		$chief_editor_table_header .= '<td>Post</td><td>'.__('Submission date','chief-editor').'</td><td>'.__('Status','chief-editor').'</td>';
+		//$chief_editor_table_header .= '<td>'.__('Excerpt','chief-editor').'</td>';
+		$chief_editor_table_header .= '<td>'.__('Author (login)','chief-editor').'</td>';
 		$chief_editor_table_header = $chief_editor_table_header . '<td>'.__('Scheduled for date','chief-editor').'</td></tr>';
 		echo $chief_editor_table_header;
 		$posts = array();
@@ -1788,14 +1789,14 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span>';
 		  if (current_user_can('delete_others_pages')) {
-			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit', 'chief-editor').'</a>)';
+			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit').'</a>)';
 		  }
 		  $complete_new_table_line .= '</td>';
 		  $complete_new_table_line .= '<td>'.$creation_date.'</td>';
 		  $status_image = CHIEF_EDITOR_PLUGIN_URL . '/images/'.$post_state.'.png';
 		  $status_meaning = $this->get_post_status_meaning_from_status($post_state);
 		  $complete_new_table_line .= '<td>'.$status_meaning.'<br/><img src="'.$status_image.'"/></td>';
-		  $complete_new_table_line .= '<td>'.$abstract.'</td>';
+		  //$complete_new_table_line .= '<td>'.$abstract.'</td>';
 		  $complete_new_table_line .= '<td>'.$userdisplayname.' ('.$userlogin.')';
 		  if (current_user_can('delete_others_pages')) {
 			$complete_new_table_line .= '<div class="wrap"><form id="'.$post_id.'_chief-editor-bat-form" class="chief-editor-bat-form" action="" method="POST">';
@@ -1808,7 +1809,8 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  $complete_new_table_line .= '</td>';
 		  
 		  if ($post_state == 'future') {
-			$complete_new_table_line .= '<td><h3>' . $date . '</h3></td>';
+			$complete_new_table_line .= '<td><h3 style="color:#002EB8">' . date_i18n( get_option( 'date_format' ) , strtotime( $date ) ) . '</h3>';
+			$complete_new_table_line .= '<h4 style="color:#B8008A">'.date_i18n( 'G:i', strtotime( $date ) ).'</h4></td>';
 		  }
 		  else {
 			$complete_new_table_line .= '<td>'.__('not scheduled','chief-editor').'</td>';
@@ -1960,7 +1962,11 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 	function status_cmp($a, $b){
 	  global $ordered_statuses_array;
 	  if ($a->post_status == $b->post_status) {
-		return 0;
+		$a_schedule_date = strtotime($a->post_date);
+		$b_schedule_date = strtotime($b->post_date);
+		
+		
+		return ( $a_schedule_date < $b_schedule_date) ? 1 : -1;
 	  }
 	  
 	  $a_key = array_search ($a->post_status, $ordered_statuses_array);

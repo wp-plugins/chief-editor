@@ -3,7 +3,7 @@
 Plugin Name: Chief Editor
 Plugin URI: http://www.termel.fr
 Description: Manage all posts, comments and authors accross the network. The Chief Editor toolbox.
-Version: 3.2
+Version: 3.3
 Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
