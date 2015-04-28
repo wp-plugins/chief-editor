@@ -1,211 +1,281 @@
+# Copyright (C) 2015 Chief Editor
+# This file is distributed under the same license as the Chief Editor package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Chief Editor\n"
-"POT-Creation-Date: 2015-03-02 13:37+0100\n"
-"PO-Revision-Date: 2015-03-02 13:38+0100\n"
-"Last-Translator: \n"
-"Language-Team: termel <admin@termel.fr>\n"
-"Language: Français\n"
+"Project-Id-Version: Chief Editor 3.1\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/chief-editor\n"
+"POT-Creation-Date: 2015-04-27 17:03:19+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2015-04-28 14:35+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <info@termel.fr>\n"
 "X-Generator: Poedit 1.5.5\n"
-"X-Poedit-KeywordsList: _;gettext;gettext_noop;__\n"
-"X-Poedit-Basepath: ..\n"
-"X-Poedit-SearchPath-0: ../admin\n"
-"X-Poedit-SearchPath-1: .\n"
 
-#: admin/chief-editor-admin.php:231
+#: admin/chief-editor-admin.php:263
+msgid "BAT"
+msgstr "In press"
+
+#: admin/chief-editor-admin.php:300
 msgid "Email sent successfully"
-msgstr "Courriel envoyé avec succès! :)"
+msgstr "Email correctement envoyé"
 
-#: admin/chief-editor-admin.php:231
+#: admin/chief-editor-admin.php:300
 msgid "Problem sending email..."
-msgstr ""
-"Un petit problème est survenu lors de l'envoi du courriel... merci de "
-"contacter votre hébergeur."
+msgstr "Problème pour envoyer l'email..."
 
-#: admin/chief-editor-admin.php:262
+#: admin/chief-editor-admin.php:331
 msgid "Are you sure you want to sent BAT email?"
-msgstr "Voulez-vous vraiment envoyer un email de BAT ?"
+msgstr "Etes-vous sur(e) de vouloir envoyer le BAT par email ?"
 
-#: admin/chief-editor-admin.php:268
+#: admin/chief-editor-admin.php:337
 msgid "Send"
 msgstr "Envoyer"
 
-#: admin/chief-editor-admin.php:301 admin/chief-editor-admin.php:1049
+#: admin/chief-editor-admin.php:371 admin/chief-editor-admin.php:1322
 msgid "Posts"
 msgstr "Articles"
 
-#: admin/chief-editor-admin.php:306
+#: admin/chief-editor-admin.php:411
 msgid "Calendar"
 msgstr "Calendrier"
 
-#: admin/chief-editor-admin.php:321 admin/chief-editor-admin.php:1050
+#: admin/chief-editor-admin.php:427 admin/chief-editor-admin.php:1323
 msgid "Comments"
 msgstr "Commentaires"
 
-#: admin/chief-editor-admin.php:326
+#: admin/chief-editor-admin.php:434
 msgid "Authors"
 msgstr "Auteurs"
 
-#: admin/chief-editor-admin.php:330 admin/chief-editor-admin.php:441
+#: admin/chief-editor-admin.php:440 admin/chief-editor-admin.php:577
 msgid "Settings"
 msgstr "Paramètres"
 
-#: admin/chief-editor-admin.php:366
+#: admin/chief-editor-admin.php:483
 msgid "Visit Plugin Site"
-msgstr "Visiter la page du plugin"
+msgstr "Vister la page du plugin"
 
-#: admin/chief-editor-admin.php:366
+#: admin/chief-editor-admin.php:484
 msgid "Rate!"
-msgstr "Votez!"
+msgstr "Voter!"
 
-#: admin/chief-editor-admin.php:393
+#: admin/chief-editor-admin.php:501 admin/chief-editor-admin.php:511
+msgid "No custom posts of type "
+msgstr "Aucun post de type"
+
+#: admin/chief-editor-admin.php:502 admin/chief-editor-admin.php:512
+msgid "or"
+msgstr "ou"
+
+#: admin/chief-editor-admin.php:503 admin/chief-editor-admin.php:513
+msgid "all of them are published"
+msgstr "tous sont publiés"
+
+#: admin/chief-editor-admin.php:529
 msgid "All comments accross the network since "
-msgstr "Tous les commentaires sur tous les blogs depuis "
+msgstr "Tous les commentaires sur le réseau de blogs depuis"
 
-#: admin/chief-editor-admin.php:401
+#: admin/chief-editor-admin.php:537
 msgid "Most commented posts ever"
-msgstr "Posts les + commentés depuis toujours"
+msgstr "Le plus commenté depuis toujours"
 
-#: admin/chief-editor-admin.php:410
+#: admin/chief-editor-admin.php:546
 msgid "Most commented posts last month"
-msgstr "Posts les + commentés le dernier mois"
+msgstr "Le plus commenté les 30 derniers jours"
 
-#: admin/chief-editor-admin.php:429
+#: admin/chief-editor-admin.php:565
 msgid " item(s)"
-msgstr " élément(s)"
+msgstr " item(s)"
 
-#: admin/chief-editor-admin.php:441
+#. #-#-#-#-#  plugin.pot (Chief Editor 3.1)  #-#-#-#-#
+#. Plugin Name of the plugin/theme
+#: admin/chief-editor-admin.php:577
 msgid "Chief Editor"
 msgstr "Chief Editor"
 
-#: admin/chief-editor-admin.php:538
+#: admin/chief-editor-admin.php:675
 msgid "Total number of posts accross network: "
-msgstr "Nombre total de posts à travers le réseau:"
+msgstr "Nombre total de post sur le réseau de blogs:"
 
-#: admin/chief-editor-admin.php:582
+#: admin/chief-editor-admin.php:719
 msgid "Automatic Email to authors"
-msgstr "Courriel automatique aux auteurs"
+msgstr "Email automatique aux auteurs"
 
-#: admin/chief-editor-admin.php:590
+#: admin/chief-editor-admin.php:727
 msgid "Sender email address"
-msgstr "Adresse email de l'expéditeur"
+msgstr "Adresse email expéditeur"
 
-#: admin/chief-editor-admin.php:598
+#: admin/chief-editor-admin.php:735
 msgid "Sender name"
 msgstr "Nom de l'expéditeur"
 
-#: admin/chief-editor-admin.php:607
+#: admin/chief-editor-admin.php:744
 msgid "Email recipients addresses"
-msgstr "Adresses email des destinataires (en plus de l'auteur du post)"
+msgstr "envoyer aussi à"
 
-#: admin/chief-editor-admin.php:616
+#: admin/chief-editor-admin.php:753
 msgid "Email content"
-msgstr "Contenu du mail"
+msgstr "Contenu de l'email"
 
-#: admin/chief-editor-admin.php:703
+#: admin/chief-editor-admin.php:764
+msgid "Custom post types"
+msgstr "Posts de type specifique"
+
+#: admin/chief-editor-admin.php:808
+msgid "Set users as Chief Editors"
+msgstr "Indiquer les utilisateurs rédacteurs en chef"
+
+#: admin/chief-editor-admin.php:920
 msgid ""
 "The following settings are used to send pre-formatted email to post authors, "
 "in order for them to validate it online before publishing"
 msgstr ""
-"Les réglages suivants sont utilisés pour l'envoi d'un email pré-formatté aux "
-"auteurs des posts, dans le but d'obtenir le Bon-à-tirer (BAT) de leur part "
-"après validation."
+"Le paramètrage suivant est utilisé pour envoyer un email pre-formaté aux "
+"auteurs, dans le but pour eux de le valider en ligne avant publication"
 
-#: admin/chief-editor-admin.php:835
+#: admin/chief-editor-admin.php:925
+msgid ""
+"This section allow you to select which custom post types are going to "
+"presented in a separate tab for scheduling"
+msgstr ""
+"Selectionner ici quels sont les types de post à afficher pour planification"
+
+#: admin/chief-editor-admin.php:930
+msgid "Attribute Chief editors to each blog in order for them to receive"
+msgstr ""
+"Associer les rédacteurs en chef aux blogs, pour qu'ils reçoivent les emails "
+"correspondants"
+
+#: admin/chief-editor-admin.php:930
+msgid "all"
+msgstr "tout"
+
+#: admin/chief-editor-admin.php:930
+msgid "in press"
+msgstr "BAT"
+
+#: admin/chief-editor-admin.php:930
+msgid "notifications"
+msgstr "notifications"
+
+#: admin/chief-editor-admin.php:1108
 msgid "Blog"
 msgstr "Blog"
 
-#: admin/chief-editor-admin.php:933
+#: admin/chief-editor-admin.php:1206
 msgid "published on "
 msgstr "publié le"
 
-#: admin/chief-editor-admin.php:1043 admin/chief-editor-admin.php:1128
+#: admin/chief-editor-admin.php:1316 admin/chief-editor-admin.php:1401
 msgid "Trace graph for sorted column"
-msgstr "Visualiser les données de la colonne triée"
+msgstr "Tracer la colonne triée"
 
-#: admin/chief-editor-admin.php:1048
+#: admin/chief-editor-admin.php:1321
 msgid "Name"
 msgstr "Nom"
 
-#: admin/chief-editor-admin.php:1048
+#: admin/chief-editor-admin.php:1321
 msgid "login"
-msgstr "identifiant"
+msgstr "login"
 
-#: admin/chief-editor-admin.php:1048
+#: admin/chief-editor-admin.php:1321
 msgid "Month blogging"
-msgstr "Ancienneté"
+msgstr "Depuis (mois)"
 
-#: admin/chief-editor-admin.php:1049
+#: admin/chief-editor-admin.php:1322
 msgid "Posts/month"
-msgstr "Articles/mois"
+msgstr "Posts/mois"
 
-#: admin/chief-editor-admin.php:1050
+#: admin/chief-editor-admin.php:1323
 msgid "Words/post"
-msgstr "Mots/articles"
+msgstr "Mots/post"
 
-#: admin/chief-editor-admin.php:1051
+#: admin/chief-editor-admin.php:1324
 msgid "Comments/post"
-msgstr "Commentaires/article"
+msgstr "Commentaires/post"
 
-#: admin/chief-editor-admin.php:1051
+#: admin/chief-editor-admin.php:1324
 msgid "Words/comment"
 msgstr "Mots/commentaire"
 
-#: admin/chief-editor-admin.php:1051
+#: admin/chief-editor-admin.php:1324
 msgid "Comments/month"
 msgstr "Commentaires/mois"
 
-#: admin/chief-editor-admin.php:1420
+#: admin/chief-editor-admin.php:1707
 msgid "Blog Title"
 msgstr "Titre du blog"
 
-#: admin/chief-editor-admin.php:1420
+#: admin/chief-editor-admin.php:1707
 msgid "Featured image"
-msgstr "Image de chapo"
+msgstr "Image de Une"
 
-#: admin/chief-editor-admin.php:1421
+#: admin/chief-editor-admin.php:1708
 msgid "Submission date"
-msgstr "Date de soumission"
+msgstr "Date de création"
 
-#: admin/chief-editor-admin.php:1421
+#: admin/chief-editor-admin.php:1708
 msgid "Status"
 msgstr "Status"
 
-#: admin/chief-editor-admin.php:1422
+#: admin/chief-editor-admin.php:1709
 msgid "Excerpt"
 msgstr "Résumé"
 
-#: admin/chief-editor-admin.php:1422
+#: admin/chief-editor-admin.php:1709
 msgid "Author (login)"
-msgstr "Auteur (identifiant)"
+msgstr "Auteur (login)"
 
-#: admin/chief-editor-admin.php:1423
+#: admin/chief-editor-admin.php:1710
 msgid "Scheduled for date"
-msgstr "Planifié pour le "
+msgstr "Planifié pour"
 
-#: admin/chief-editor-admin.php:1518
+#: admin/chief-editor-admin.php:1791
+msgid "Edit"
+msgstr "Editer"
+
+#: admin/chief-editor-admin.php:1802
 msgid "Send BAT to author"
 msgstr "Envoyer le BAT à l'auteur"
 
-#: admin/chief-editor-admin.php:1530
+#: admin/chief-editor-admin.php:1814
 msgid "not scheduled"
-msgstr "non planifié"
+msgstr "pas encore planifié"
 
-#: admin/chief-editor-admin.php:1554
+#: admin/chief-editor-admin.php:1839
 msgid "Scheduled posts : "
-msgstr "Articles planifiés : "
+msgstr "Posts planifiés :"
 
-#: admin/chief-editor-admin.php:1555
+#: admin/chief-editor-admin.php:1840
 msgid "Pending posts : "
-msgstr "Articles BAT : "
+msgstr "Posts en attente :"
 
-#: admin/chief-editor-admin.php:1556
+#: admin/chief-editor-admin.php:1841
 msgid "Draft posts : "
-msgstr "Brouillons : "
+msgstr "Brouillons :"
 
-#: admin/chief-editor-admin.php:1557
+#: admin/chief-editor-admin.php:1842
 msgid "Total unpublished posts : "
-msgstr "Nombre total de posts non publiés : "
+msgstr "Nombre total de posts non publié :"
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.termel.fr"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Manage all posts, comments and authors accross the network. The Chief Editor "
+"toolbox."
+msgstr ""
+"Gérer tous les posts, commentaires et auteurs à travers le réseau de blogs. "
+"La boite à outil du rédac chef sous Wordpress!"
+
+#. Author of the plugin/theme
+msgid "Max UNGER"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://www.maxizone.fr"
+msgstr ""
