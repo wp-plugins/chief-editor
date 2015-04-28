@@ -39,6 +39,11 @@ Only editors (or higher roles) can use the plugin.
 
 == Changelog ==
 
+= 3.2 =
+* security improvments
+* custom post types management
+* chief editors management for in-press sends
+
 = 3.0 =
 * Most commented posts ever and most commented posts last month added
 
