@@ -265,10 +265,11 @@ if(!class_exists('ChiefEditorSettings')) {
 		log_me('Adding chief editor : '.$user_email);
 	  }
 	  
+	  $recipients_array = array_unique($recipients_array);
 	  log_me($recipients_array);
 	  $multiple_to_recipients = implode(',', $recipients_array);
 	  log_me('All recipients of ready for printing email : '.$multiple_to_recipients);
-	  $msg_object = __("Ready for printing",'chief-editor').' : '.$post_title;
+	  $msg_object = __("In Press",'chief-editor').' : '.$post_title;
 	  
 	  // add other email recipients
 	  $sender_email = get_site_option('sender_email');
@@ -287,7 +288,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $success = wp_mail( $recipients_array, $msg_object, $msg_content, $headers );
 	  	  
 	  // send confirmation for ajax callback
-	  $message_to_user = $success ? __('Email sent successfully','chief-editor') .__(' to ', 'chief-editor')."\n".$multiple_to_recipients : __('Problem sending email...','chief-editor') . "\n" 
+	  $message_to_user = $success ? __('Email sent successfully','chief-editor') .__(' to ')."\n".$multiple_to_recipients : __('Problem sending email...','chief-editor') . "\n" 
 		. $multiple_to_recipients . "\n" .$msg_object ."\n" . $msg_content ."\n"."From ".$sender_name."<".$sender_email.">";
 	  //. $multiple_to_recipients .'\n' . $msg_object.'\n' . $headers'\n' . $msg_content;
 	  
@@ -362,7 +363,16 @@ if(!class_exists('ChiefEditorSettings')) {
 	  }
 	  
 	  if (current_user_can('delete_others_pages')) {
-		$this->options = get_option( 'chief_editor_option' );
+		//$this->options = get_option( 'chief_editor_option' );
+		
+		 $network_sites = wp_get_sites();
+	  
+	$post_types = array();
+	  foreach ( $network_sites as $network_site ) {
+		
+		$blog_id = $network_site['blog_id'];
+		
+		switch_to_blog($blog_id);
 		
 		$args = array(
 		  /*'public'   => false,*/
@@ -374,8 +384,15 @@ if(!class_exists('ChiefEditorSettings')) {
 		$operator = 'and';
 		// 'and' or 'or'
 		
-		$post_types = get_post_types( $args, $output, $operator );
+		$post_types = array_merge($post_types,get_post_types( $args, $output, $operator ));
 		
+	
+		
+		// Switch back to the main blog
+		restore_current_blog();
+	  }
+		
+		$post_types = array_unique($post_types);
 		
 		foreach ( $post_types  as $post_type ) {
 		  
@@ -524,7 +541,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  echo '<tr>';
 		  echo '<td>';
 		  //$mostCommentedPosts = $this->getMostCommentedPosts(10);
-		  echo '<h3>'.__('Most commented posts ever', 'chief-editor').'</h3><br/>'.$this->getMostCommentedPosts(10);
+		  echo '<h3>'.__('Most commented posts ever').'</h3><br/>'.$this->getMostCommentedPosts(10);
 		  echo '</td>';
 		  echo '<td>';
 		  //$lastMonthIdx = date('m', strtotime('-1 month'));
@@ -533,7 +550,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  $startDate = date('Y-m-01 H:i:s', $last_month_most_commented );
 		  $endDate = date('Y-m-01 H:i:s', $current_month);
 		  $mostCommentedPosts = $this->getMostCommentedPosts(10,$startDate,$endDate);
-		  echo '<h3>'.__('Most commented posts last month', 'chief-editor').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
+		  echo '<h3>'.__('Most commented posts last month').'</h3><br/>'.$startDate.' -> '.$endDate.'<br/>'.$mostCommentedPosts;
 		  echo '</td>';
 		  echo '</tr>';
 		  echo '</table>';
@@ -759,7 +776,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
     public static function show_network_settings() {
         $settings = self::get_network_settings();
     ?>
-        <h3><?php _e( 'Chief Editor Settings' , 'chief-editor'); ?></h3>
+        <h3><?php _e( 'Chief Editor Settings' ); ?></h3>
         <table id="menu" class="form-table">
             <?php
                 foreach ( $settings as $setting ) :
@@ -871,24 +888,24 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
  
         $settings[] = array(
                     'id'   => 'sender_email',
-                    'name' => __('Sender email address', 'chief-editor'),
-                    'desc' => __( 'Email address used for sendings' , 'chief-editor'),
+                    'name' => __('Sender email address'),
+                    'desc' => __( 'Email address used for sendings' ),
                     'type' => 'text',
                     'size' => 'regular'
         );
  
         $settings[] = array(
                     'id'   => 'sender_name',
-                    'name' => __( 'Sender name' , 'chief-editor'),
-                    'desc' => __( 'Name, as it will be seen by recipients' , 'chief-editor'),
+                    'name' => __( 'Sender name' ),
+                    'desc' => __( 'Name, as it will be seen by recipients' ),
                     'std'  => 'regular',
                     'type' => 'text'
         );
 	  
 	  $settings[] = array(
                     'id'   => 'email_recipients',
-                    'name' => __( 'Recipients emails' , 'chief-editor'),
-                    'desc' => __( 'Addresses to which all email will be sent to' , 'chief-editor'),
+                    'name' => __( 'Recipients emails' ),
+                    'desc' => __( 'Addresses to which all email will be sent to (use , as separator)' ),
                     'std'  => 'regular',
 					'size' => '50',
                     'type' => 'text'
@@ -900,10 +917,10 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 					'rows' => '20',
 					'cols' => '110',
 					'id'   => 'email_content-textarea',
-                    'name' => __( 'Email content' , 'chief-editor'),
-					'desc' => __( 'This is the standard email sent for to authors in order to validate the post' , 'chief-editor').
+                    'name' => __( 'Email content' ),
+					'desc' => __( 'This is the standard email sent for to authors in order to validate the post' ).
 		'<br/>'.
-		__( 'You can use the following tags inside:', 'chief-editor').
+		__( 'You can use the following tags inside:').
 		'<br/>'.
 		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%username%</span>'.
 		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%userlogin%</span>'.
@@ -938,8 +955,8 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		$element_name = 'checkbox_'.$post_type;
 		$settings[] = array(
                     'id'   => $element_name,
-		  'name' => __( 'Show posts of type ' , 'chief-editor').'<br/><em>'.$post_type.'</em>',
-                    'desc' => __( 'give you ability to manage posts of this type in a specific tab' , 'chief-editor'),
+		  'name' => __( 'Show posts of type ' ).'<br/><em>'.$post_type.'</em>',
+                    'desc' => __( 'give you ability to manage posts of this type in a specific tab' ),
                     'std'  => 'regular',
 		  //'size' => '50',
                     'type' => 'checkbox'
@@ -984,7 +1001,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		$settings[] = array(
                     'id'   => $setting_id,
 		  			'name' => $blog_name,
-                    'desc' => __( 'Set chief editor(s) for this blog' , 'chief-editor'),
+                    'desc' => __( 'Set chief editor(s) for this blog' ),
                     'std'  => 'regular',
 		  			//'size' => '50',
                     'type' => 'select',
@@ -2102,7 +2119,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  
 		  $complete_new_table_line .= '<td><span style="font-size:16px;"><a href="'.$permalink.'" target="blank_" title="'.$title.'">'.$title.'</a></span>';
 		  if (current_user_can('delete_others_pages')) {
-			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit', 'chief-editor').'</a>)';
+			$complete_new_table_line .= ' (<a href="'.$edit_post_link.'" target="_blank">'.__('Edit').'</a>)';
 		  }
 		  $complete_new_table_line .= '</td>';
 		  $complete_new_table_line .= '<td>'.$creation_date.'</td>';
@@ -2113,7 +2130,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  $complete_new_table_line .= '<td>'.$userdisplayname.' ('.$userlogin.')';
 		  if (current_user_can('delete_others_pages')) {
 			$complete_new_table_line .= '<div class="wrap"><form id="'.$post_id.'_chief-editor-bat-form" class="chief-editor-bat-form" action="" method="POST">';
-			$complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send RFP to author','chief-editor').'"/>';
+			$complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send BAT to author','chief-editor').'"/>';
 			$complete_new_table_line .= '<input type="hidden" id="postID" name="postID" value="'.$post_id.'">';
 			$complete_new_table_line .= '<input type="hidden" id="blogID" name="blogID" value="'.$blog_id.'">';
 			$complete_new_table_line .= '<input type="hidden" id="authorID" name="authorID" value="'.$author.'">';
