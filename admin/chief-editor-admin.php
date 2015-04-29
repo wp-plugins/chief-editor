@@ -363,36 +363,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  }
 	  
 	  if (current_user_can('delete_others_pages')) {
-		//$this->options = get_option( 'chief_editor_option' );
-		
-		 $network_sites = wp_get_sites();
-	  
-	$post_types = array();
-	  foreach ( $network_sites as $network_site ) {
-		
-		$blog_id = $network_site['blog_id'];
-		
-		switch_to_blog($blog_id);
-		
-		$args = array(
-		  /*'public'   => false,*/
-		  '_builtin' => false
-		);
-		
-		$output = 'names';
-		// names or objects, note names is the default
-		$operator = 'and';
-		// 'and' or 'or'
-		
-		$post_types = array_merge($post_types,get_post_types( $args, $output, $operator ));
-		
-	
-		
-		// Switch back to the main blog
-		restore_current_blog();
-	  }
-		
-		$post_types = array_unique($post_types);
+		$post_types = self::getAllCustomPostTypes();
 		
 		foreach ( $post_types  as $post_type ) {
 		  
@@ -934,18 +905,8 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  
 	  
 	  
-	  
-	  $args = array(
-		/*'public'   => false,*/
-		'_builtin' => false
-	  );
-	  
-	  $output = 'names';
-	  // names or objects, note names is the default
-	  $operator = 'and';
-	  // 'and' or 'or'
-	  
-	  $post_types = get_post_types( $args, $output, $operator );
+		  
+	  $post_types = self::getAllCustomPostTypes();
 	  
 	  
 	  foreach ( $post_types as $post_type ) {
@@ -961,16 +922,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		  //'size' => '50',
                     'type' => 'checkbox'
         );
-		/*
-		add_settings_field(  
-		  $element_name,  
-		  $post_type,  
-		  array( $this, 'checkbox_element_callback'),  // callback
-		  'chief_editor_plugin_options',   // page
-		  'custom_posts_section_id',  //section
-		  $args
-		);
-		*/
+		
 	  }
 	  
 	  
@@ -1008,29 +960,48 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		  			'callback' => 'ce_blog_chief_editor_callback',
 					'blog_id' =>  $blog_id
 		);
-		/*
-		add_settings_field(
-		  $setting_id, // ID
-		  $blog_name, // Title 
-		  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
-		  'chief_editor_plugin_options', // Page
-		  'chief_editors_section_id', // Section   
-		  $args // args
-		);
-		*/
-		
+				
 		// Switch back to the main blog
 		restore_current_blog();
 	  }
 	  
 	  
 	  
-	  
-	  
-	  
- 
         return apply_filters( 'plugin_settings', $settings );
     }
+	
+	static function getAllCustomPostTypes() {
+	 $post_types = array();
+	  /*
+	  $network_sites = wp_get_sites();	
+	  foreach ( $network_sites as $network_site ) {
+		
+		$blog_id = $network_site['blog_id'];
+		
+		switch_to_blog($blog_id);
+		*/
+		$args = array(
+		  
+		  '_builtin' => false
+		);
+		
+		$output = 'names';
+		// names or objects, note names is the default
+		$operator = 'and';
+		// 'and' or 'or'
+		
+		$post_types = array_merge($post_types,get_post_types( $args, $output, $operator ));
+		
+	
+	  /*
+		// Switch back to the main blog
+		restore_current_blog();
+	  }
+	  
+	  */
+	  return array_unique($post_types);
+	
+	}
 	
 	/**
 	* Register and add settings
