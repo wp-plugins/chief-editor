@@ -268,7 +268,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  log_me($recipients_array);
 	  $multiple_to_recipients = implode(',', $recipients_array);
 	  log_me('All recipients of ready for printing email : '.$multiple_to_recipients);
-	  $msg_object = __("In Press",'chief-editor').' : '.$post_title;
+	  $msg_object = __("Ready for printing",'chief-editor').' : '.$post_title;
 	  
 	  // add other email recipients
 	  $sender_email = get_site_option('sender_email');
@@ -2113,7 +2113,7 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 		  $complete_new_table_line .= '<td>'.$userdisplayname.' ('.$userlogin.')';
 		  if (current_user_can('delete_others_pages')) {
 			$complete_new_table_line .= '<div class="wrap"><form id="'.$post_id.'_chief-editor-bat-form" class="chief-editor-bat-form" action="" method="POST">';
-			$complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send BAT to author','chief-editor').'"/>';
+			$complete_new_table_line .= '<div><input type="submit" id="'.$post_id.'_chief-editor-bat-submit" name="chief-editor-bat-submit" class="chief-editor-bat-submit button-primary" value="'.__('Send RFP to author','chief-editor').'"/>';
 			$complete_new_table_line .= '<input type="hidden" id="postID" name="postID" value="'.$post_id.'">';
 			$complete_new_table_line .= '<input type="hidden" id="blogID" name="blogID" value="'.$blog_id.'">';
 			$complete_new_table_line .= '<input type="hidden" id="authorID" name="authorID" value="'.$author.'">';
