@@ -191,7 +191,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  add_action( 'admin_init', array ($this, 'register_calendar_tab'));
 	  add_action( 'admin_init', array( $this, 'register_advanced_settings' ) );
 	  add_action( 'admin_init', array ($this, 'register_stats_tab'));
-	  add_action( 'admin_init', array ($this, 'register_options_tab'));
+	  //add_action( 'admin_init', array ($this, 'register_options_tab'));
 	  add_action( 'admin_init', array ($this, 'settings_page_init'));
 	  
 	  add_action( 'admin_menu', array( $this, 'add_admin_menus' ));
@@ -199,6 +199,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  add_action( 'wp_ajax_ce_send_author_std_validation_email', array( $this,'ce_process_ajax'));
 	  add_action( 'wp_ajax_ce_send_author_std_validation_email_confirmed', array( $this,'ce_process_ajax_bat_confirm'));
 	  
+	  $this->init();
 	}
 	
 	/**
@@ -242,8 +243,8 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $user_displayname = $user_info->display_name;
 	  $user_email = $user_info->user_email;
 	  
-	  $chief_editor_option_name = 'blog_'.$blogID.'_chief_editor';
-	  $editors_in_chief_concerned = $options[$chief_editor_option_name];
+	  $chief_editor_option_name = 'select_blog_'.$blogID.'_chief_editor';
+	  $editors_in_chief_concerned = get_site_option($chief_editor_option_name);
 	  
 	  
 	  
@@ -251,57 +252,46 @@ if(!class_exists('ChiefEditorSettings')) {
 	  
 	  log_me('send_confirmation_email_to_author_of_post::');
 	  log_me($editors_in_chief_concerned);
-	  
+	  $recipients_array = array();
 	  // build mail content with std text
-	  $multiple_to_recipients = $user_email.','.$options['email_recipients'];
+	  $recipients_array[] = $user_email;
+	  $recipients_array = array_merge($recipients_array,explode(',',get_site_option('email_recipients')));
+	  
+	  $multiple_to_recipients = $user_email.','.get_site_option('email_recipients');
 	  foreach ($editors_in_chief_concerned as $new_user_id) {
 	  	$user_info = get_userdata($new_user_id);
 		$user_email = $user_info->user_email;
-		$multiple_to_recipients .= ','.$user_email;
+		$recipients_array[] = $user_email;
+		log_me('Adding chief editor : '.$user_email);
 	  }
-	  log_me($multiple_to_recipients);
-	  $msg_object = __("BAT",'chief-editor').' : '.$post_title;
-	  //$msg_content = $options['email_content'];
-	  //echo $msg_object;
-	  //echo $multiple_to_recipients;
-	  //echo $msg_content;
+	  
+	  log_me($recipients_array);
+	  $multiple_to_recipients = implode(',', $recipients_array);
+	  log_me('All recipients of ready for printing email : '.$multiple_to_recipients);
+	  $msg_object = __("In Press",'chief-editor').' : '.$post_title;
+	  
 	  // add other email recipients
-	  $sender_email = $options['sender_email'];
-	  $sender_name = $options['sender_name'];
+	  $sender_email = get_site_option('sender_email');
+	  $sender_name = get_site_option('sender_name');
 	  
 	  // send email to recipents
 	  $headers[] = "From: ".$sender_name." <".$sender_email.">";
 	  $headers[] = "Content-type: text/html";
 	  
-	  //add_filter( 'wp_mail_content_type', 'set_html_content_type' );
-	  
 	  $search = array ('/%username%/', '/%userlogin%/','/%useremail%/', '/%postlink%/', '/%posttitle%/','/%blogurl%/','/%n%/');
 	  
 	  $replace = array ($user_displayname, $user_login,( $user_email == "" ? "no email" : $user_email ), $permalink, $post_title,$blog_url, "\n");
-	  /*foreach ( $userdata_fields as $userdata_key => $userdata_field ) {
 	  
-	  $ind = 1 + $userdata_key;
-	  array_push($search, '/%userdata'.$ind.'%/');
-	  
-	  array_push($replace, $userdata_field["value"]);
-	  }
-	  */
-	  $msg_content = preg_replace($search, $replace, $options['email_content']);
-	  
-	  //echo $msg_content;
-	  
-	  $success = wp_mail( $multiple_to_recipients, $msg_object, $msg_content, $headers );
-	  
-	  // Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
-	  //remove_filter( 'wp_mail_content_type', 'set_html_content_type' );
-	  
-	  
+	  $msg_content = preg_replace($search, $replace, get_site_option('email_content-textarea'));
+	  $msg_content = stripslashes_deep($msg_content);
+	  $success = wp_mail( $recipients_array, $msg_object, $msg_content, $headers );
+	  	  
 	  // send confirmation for ajax callback
-	  $message_to_user = $success ? __('Email sent successfully','chief-editor') : __('Problem sending email...','chief-editor') . "\n" 
+	  $message_to_user = $success ? __('Email sent successfully','chief-editor') .__(' to ')."\n".$multiple_to_recipients : __('Problem sending email...','chief-editor') . "\n" 
 		. $multiple_to_recipients . "\n" .$msg_object ."\n" . $msg_content ."\n"."From ".$sender_name."<".$sender_email.">";
 	  //. $multiple_to_recipients .'\n' . $msg_object.'\n' . $headers'\n' . $msg_content;
 	  
-	  
+	  log_me($message_to_user);
 	  echo $message_to_user;
 	}
 	
@@ -328,7 +318,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  restore_current_blog();
 	  
 	  echo '<form id="'.$bID.'_'.$pID.'_chief-editor-bat-form-send" class="chief-editor-bat-form-send" action="" method="POST"><div>';
-	  echo __('Are you sure you want to sent BAT email?','chief-editor').'<br/>';
+	  echo __('Are you sure you want to sent "ready for printing" email?','chief-editor').'<br/>';
 	  echo $title . '<br/>';
 	  echo $userdisplayname.' ('.$userlogin.')'. '<br/>';
 	  echo $user_email. '<br/>';
@@ -392,7 +382,7 @@ if(!class_exists('ChiefEditorSettings')) {
 		  //echo '<p>' . $post_type . '</p>';
 		  //log_me($post_type );
 		  $element_name = 'checkbox_'.$post_type;
-		  $checked = ($this->options[$element_name] == 1);
+		  $checked = (get_site_option($element_name) == 1);
 		  //log_me('"'.$this->options[$element_name].'"');
 		  //log_me($post_type .' => '.$element_name. ' : '.$this->options[$element_name] . ' ' .$checked);
 		  if ($checked) {
@@ -571,6 +561,13 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  }
 	  elseif ($current_tab == 'chief_editor_settings_tab' ) {
 		
+		/*echo '<form method="post" action="settings.php">';
+		self::show_network_settings();
+		submit_button(); 
+		echo '</form>';*/
+		
+		
+		/*
 		$this->options = get_option( 'chief_editor_option' );
 		//echo $this->options;
 		echo '<div class="wrap">'.screen_icon();
@@ -582,7 +579,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 		submit_button(); 
 		
 		echo '</form></div>';
-		
+		*/
 	  }
 	  if (current_user_can('delete_others_pages')){
 		echo '<div style="text-align:right;">';
@@ -701,6 +698,322 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  return $result;
 	}
 	
+	// sitewide settings
+	
+	// multisite wide settings
+	
+	private function init() {
+ 
+        //Adds settings to Network Settings
+        add_filter( 'wpmu_options'       , array( $this, 'show_network_settings' ) );
+        add_action( 'update_wpmu_options', array( $this, 'save_network_settings' ) );
+ 
+    }
+ 
+    public static function save_network_settings() {
+	  
+	  //$posted_settings  = array_map( 'sanitize_text_field', $_POST['chief-editor'] );
+	  
+	  //log_me($_POST['chief-editor']);
+	  foreach ($_POST['chief-editor'] as $settingKey => $settingValue) {
+		//if ($settingItem)
+	  	
+		log_me('==> saving '.$settingKey.' =>'.$settingValue);
+		if (strpos($settingKey,'textarea') !== false) {
+		  
+		  $posted_settings[$settingKey] = stripslashes(wp_filter_post_kses(addslashes($settingValue)));
+		  
+		} else if (strpos($settingKey,'select') !== false) {
+		   log_me('Saving SELECT : ' .$settingKey.' =>'.$settingValue);
+		  $posted_settings[$settingKey] = $settingValue;
+		} else if (  strpos($settingKey,'checkbox') !== false) {
+		  
+		  log_me('Saving : ' .$settingKey.' =>'.$settingValue);
+		  $posted_settings[$settingKey] = $settingValue;// == 'on' ? 1 : 0;
+		  
+		} else {
+			$posted_settings[$settingKey] = sanitize_text_field($settingValue);
+		}
+	}
+	  
+	  $settings = self::get_network_settings();
+	  foreach ($settings as $setting) {
+		$isCheckbox = boolval(strpos($setting['type'],'checkbox') !== false);
+		$inArray = boolval(array_key_exists($setting['id'], $posted_settings));
+		log_me($setting['id'] .' : '.$isCheckbox. ' '.$inArray);
+		if (!$inArray && $isCheckbox ) {
+		  
+		  //set to false:
+		  $posted_settings[$setting['id']] = 0;//$posted_settings[$settingKey] == 1 ? 1 : 0;
+		}
+	  }
+	  
+	  log_me($posted_settings);
+	  
+        foreach ( $posted_settings as $name => $value ) {
+		  //$valueToSave = esc_html($value);
+            update_site_option( $name, $value );
+        }
+    }
+ 
+    public static function show_network_settings() {
+        $settings = self::get_network_settings();
+    ?>
+        <h3><?php _e( 'Chief Editor Settings' ); ?></h3>
+        <table id="menu" class="form-table">
+            <?php
+                foreach ( $settings as $setting ) :
+	  			$tag = $setting['tag'] ? $setting['tag'] : 'input';
+	  			$type = esc_attr($setting['type']);
+	  //$callback = esc_attr($setting['callback']);
+            ?>
+ 
+            <tr valign="top">
+                <th scope="row"><?php echo $setting['name']; ?></th>
+                <td>
+				  <?php if ($type === 'select') {
+			  $blog_id = esc_attr($setting['blog_id']);
+				$setting_id = esc_attr($setting['id']);
+			  
+			  //call_user_func($callback,$args);
+			  $chief_editors_roles = array('contributor','author','editor');
+			  $blogusers = array();
+			  
+			  
+			  foreach ($chief_editors_roles as $role) {
+				
+				$other_blogusers = get_users( 'blog_id='.$blog_id.'&orderby=nicename&role='.$role );
+				if ($other_blogusers){
+				  $blogusers = array_merge($blogusers, $other_blogusers);
+				}
+			  }
+			  
+			  log_me( 'Showing multiple select for blog '.$blog_id.' : '. count($blogusers) . ' '.count($chief_editors_roles). ' : ');
+			  
+			  $fieldID = 'chief_editors_selector_'.$blog_id;
+			  $fieldName = 'chief-editor['.$setting_id.']';
+			  
+			  printf (
+				'<select multiple="multiple" name="%s[]" id="%s" class="widefat" size="5" style="margin-bottom:10px">',
+				$fieldName,
+				$fieldID
+			  );
+			  
+			  // Each individual option
+			  foreach( $blogusers as $user )
+			  {
+				$id = $user->ID;
+				$userEmail = $user->user_email;
+				$userLogin = $user->user_login;
+				$userNicename = $user->display_name;
+				log_me("Setting selected back $id : $userEmail = ");
+				$checkedOptions =  get_site_option( $setting['id'] );
+				log_me( $checkedOptions);
+				
+				printf(
+				  '<option value="%s" %s style="margin-bottom:3px;">%s</option>',
+				  $id,
+				  in_array( $id, $checkedOptions) ? 'selected="selected"' : '',
+				  $id .' - '.$userLogin.' - '.$userNicename . ' (' . $userEmail .')'
+				);
+			  }
+			  
+			  echo '</select>';
+			  
+			  
+			  
+			  
+			  
+			  
+			  
+			  // $callback($args);
+			}
+	  else {
+		$item = '<'.$tag.' type="'. $type .'"';
+	  				$item .= ($setting['size'] ? ' size="'.esc_attr($setting['size']) . '"' : '');
+	  				$item .= ($setting['cols'] ? ' cols="'.esc_attr($setting['cols']) . '"' : '');
+	  				$item .= ($setting['rows'] ? ' rows="'.esc_attr($setting['rows']) .'"' : '');
+	  				$item .= ' name="chief-editor['.esc_attr($setting['id']).']"';
+	  if ($tag === 'textarea') {
+		// esc_textarea()
+		$savedValue = esc_textarea( stripslashes_deep(get_site_option( $setting['id'] ) ));
+		
+		//$item .= ' value="'.$savedValue.'"';
+		$item .= '>'.$savedValue.'</'.$tag.'>';
+		
+	  } else if ($type === 'checkbox') {
+		
+		$optionVal = get_site_option( $setting['id'] );
+		//$currentState = boolval($optionVal);
+		$checkPart = checked(1,$optionVal,false);
+		$item .= ' value="1" ' . $checkPart;
+		log_me('$currentState : '.$optionVal.' html:'.$checkPart);
+		$item .= '/>';
+		
+	  } else {
+	  	$item .= ' value="'.esc_attr( get_site_option( $setting['id'] ) ).'"';
+		$item .= '/>';
+	  }		
+	  	
+                    
+				  	echo $item;
+			}
+				  ?>
+				  <br /><?php echo '<em>'.$setting['desc'].'</em>'; ?>
+                </td>
+            </tr>
+            <?php
+        endforeach;
+        echo '</table>';
+    }
+ 
+    public static function get_network_settings() {
+ 
+        $settings[] = array(
+                    'id'   => 'sender_email',
+                    'name' => __('Sender email address'),
+                    'desc' => __( 'Email address used for sendings' ),
+                    'type' => 'text',
+                    'size' => 'regular'
+        );
+ 
+        $settings[] = array(
+                    'id'   => 'sender_name',
+                    'name' => __( 'Sender name' ),
+                    'desc' => __( 'Name, as it will be seen by recipients' ),
+                    'std'  => 'regular',
+                    'type' => 'text'
+        );
+	  
+	  $settings[] = array(
+                    'id'   => 'email_recipients',
+                    'name' => __( 'Recipients emails' ),
+                    'desc' => __( 'Addresses to which all email will be sent to' ),
+                    'std'  => 'regular',
+					'size' => '50',
+                    'type' => 'text'
+        );
+	  
+
+	  $settings[] = array(
+                    'tag'  => 'textarea',
+					'rows' => '20',
+					'cols' => '110',
+					'id'   => 'email_content-textarea',
+                    'name' => __( 'Email content' ),
+					'desc' => __( 'This is the standard email sent for to authors in order to validate the post' ).
+		'<br/>'.
+		__( 'You can use the following tags inside:').
+		'<br/>'.
+		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%username%</span>'.
+		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%userlogin%</span>'.
+		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%useremail%</span>'.
+		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%postlink%</span>'.
+		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%posttitle%</span>'.
+		'<span style="padding:2px 5px;margin:2px 5px;background-color:#5C5C5C;color:#CCCCCC;border-radius:4px;">%blogurl%</span>',
+                    'std'  => '50',
+                    'type' => 'text'
+        );
+	  
+	  
+	  
+	  
+	  $args = array(
+		/*'public'   => false,*/
+		'_builtin' => false
+	  );
+	  
+	  $output = 'names';
+	  // names or objects, note names is the default
+	  $operator = 'and';
+	  // 'and' or 'or'
+	  
+	  $post_types = get_post_types( $args, $output, $operator );
+	  
+	  
+	  foreach ( $post_types as $post_type ) {
+		$args     = array (
+		  'post_type' => $post_type
+		);
+		$element_name = 'checkbox_'.$post_type;
+		$settings[] = array(
+                    'id'   => $element_name,
+		  'name' => __( 'Show posts of type ' ).'<br/><em>'.$post_type.'</em>',
+                    'desc' => __( 'give you ability to manage posts of this type in a specific tab' ),
+                    'std'  => 'regular',
+		  //'size' => '50',
+                    'type' => 'checkbox'
+        );
+		/*
+		add_settings_field(  
+		  $element_name,  
+		  $post_type,  
+		  array( $this, 'checkbox_element_callback'),  // callback
+		  'chief_editor_plugin_options',   // page
+		  'custom_posts_section_id',  //section
+		  $args
+		);
+		*/
+	  }
+	  
+	  
+	  // ******
+	  
+	  
+	  
+	  // Iterate through your list of blogs
+	  foreach (wp_get_sites() as $blog) {
+		//foreach ($blog_ids as $blog_id){
+		$blog_id = $blog['blog_id'];
+		
+		// Switch to the next blog in the loop.
+		// This will start at $id == 1 because of your ORDER BY statement.
+		switch_to_blog($blog_id);
+		
+		// Get the 5 latest posts for the blog and store them in the $globalquery variable.
+		//$globalquery = get_posts('numberposts=5&post_type=any');
+		$blog_details = get_blog_details($blog_id);
+		$blog_name = $blog_details->blogname;
+		$setting_id = "select_blog_" . $blog_id . '_chief_editor';
+		$args     = array (
+		  'blog_id' => $blog_id,
+		  'setting_id' => $setting_id
+		);
+		
+		//log_me('Adding setting for blog '.$blog_name.' id '.$blog_id.' and setting id '.$setting_id);
+		$settings[] = array(
+                    'id'   => $setting_id,
+		  			'name' => $blog_name,
+                    'desc' => __( 'Set chief editor(s) for this blog' ),
+                    'std'  => 'regular',
+		  			//'size' => '50',
+                    'type' => 'select',
+		  			'callback' => 'ce_blog_chief_editor_callback',
+					'blog_id' =>  $blog_id
+		);
+		/*
+		add_settings_field(
+		  $setting_id, // ID
+		  $blog_name, // Title 
+		  array( $this, 'ce_blog_chief_editor_callback' ), // Callback
+		  'chief_editor_plugin_options', // Page
+		  'chief_editors_section_id', // Section   
+		  $args // args
+		);
+		*/
+		
+		// Switch back to the main blog
+		restore_current_blog();
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
+ 
+        return apply_filters( 'plugin_settings', $settings );
+    }
 	
 	/**
 	* Register and add settings
@@ -927,7 +1240,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	
 	public function ce_print_section_editors_info()
 	{
-	print __('Attribute Chief editors to each blog in order for them to receive','chief-editor').' '.__('all','chief-editor').' '.__('in press','chief-editor').' '.__('notifications','chief-editor');
+	print __('Attribute Chief editors to each blog in order for them to receive','chief-editor').' '.__('all','chief-editor').' '.__('ready for printing','chief-editor').' '.__('notifications','chief-editor');
 
 	}
 	
@@ -948,7 +1261,7 @@ ORDER BY comment_date_gmt DESC LIMIT 1000";
 	  print __( $html,'chief-editor');
 	}
 	
-	public function ce_blog_chief_editor_callback(array $args){
+	function ce_blog_chief_editor_callback(array $args){
 	  
 	  $blog_id  = $args['blog_id'];
 	  $setting_id = $args['setting_id'];
@@ -1097,13 +1410,13 @@ c\'est que vous n\'etes pas connecte au site.
 	  $weeksInPast = 4;
 	  $weeksInFuture = 4;
 	  $thisWeekColor = "#F5B800";
-	  $backgroundColor = "#6B6B6B";
+	  $backgroundColor = "#6B747A";//"#6B6B6B";
 	  $lightGreyColor = "#E0E0E0";
 	  $startingWeek = max($weekNumber - $weeksInPast,1);
 	  $currentYear = date("Y");
 	  echo '<table class="sortable" id="calendar_table" style="border:solid #6B6B6B 1px;width:100%;">';
 	  //$color_bool = true;
-	  $chief_editor_table_header = '<tr style="background-color:'.$backgroundColor.';color:#FFFFFF">';
+	  $chief_editor_table_header = '<tr style="color:#FFAF30;background-color:'.$backgroundColor.';color:#FFFFFF">';
 	  $chief_editor_table_header .= '<td>#</td>';
 	  $chief_editor_table_header .= '<td>'.__('Blog','chief-editor').'</td>';
 	  for ($week = $startingWeek; $week <= $weekNumber + $weeksInFuture; $week++) {
