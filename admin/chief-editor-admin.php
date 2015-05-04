@@ -297,7 +297,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	}
 	
 	
-	function ce_process_ajax() {
+  function ce_process_ajax() {
 	  
 	  //print_r($_POST);
 	  
@@ -318,11 +318,45 @@ if(!class_exists('ChiefEditorSettings')) {
 	  
 	  restore_current_blog();
 	  
+	  $recipients_array = array();
+	  // build mail content with std text
+	  //$recipients_array[] = $user_email;
+	  $cc_emails = get_site_option('email_recipients');
+	  if (!empty($cc_emails)) {
+	  	$recipients_array = explode(',',$cc_emails);
+	  }
+	  $chief_editor_option_name = 'select_blog_'.$bID.'_chief_editor';
+	  $editors_in_chief_concerned = get_site_option($chief_editor_option_name);
+	  
+	  //$multiple_to_recipients = $user_email.','.get_site_option('email_recipients');
+	  foreach ($editors_in_chief_concerned as $new_user_id) {
+	  	$user_info = get_userdata($new_user_id);
+		$user_email = $user_info->user_email;
+		$recipients_array[] = $user_email;
+		log_me('Adding chief editor : '.$user_email);
+	  }
+	  
+	  $recipients_array = array_unique($recipients_array);
+	  log_me($recipients_array);
+	  
 	  echo '<form id="'.$bID.'_'.$pID.'_chief-editor-bat-form-send" class="chief-editor-bat-form-send" action="" method="POST"><div>';
 	  echo __('Are you sure you want to sent "ready for printing" email?','chief-editor').'<br/>';
-	  echo $title . '<br/>';
-	  echo $userdisplayname.' ('.$userlogin.')'. '<br/>';
-	  echo $user_email. '<br/>';
+	  echo '<b>'.$title . '</b><br/>';
+	  
+	  $emailList = '<ul>';
+	  
+	  foreach ($recipients_array as $user_email) {
+		$user = get_user_by( 'email', $user_email );
+		//$user_info = get_userdata($user);
+		//$user_email = $user_info->user_email;
+		$user_display = $user->display_name;
+		$emailList .= '<li>' . $user_display.' ( '.$user_email.' )'.'</li>';
+	  }
+	  
+	  $emailList .= '</ul>';
+	  
+	  echo  $emailList;
+	  //echo $user_email. '<br/>';
 	  echo '<input type="hidden" id="postID" name="postID" value="'.$pID.'">';
 	  echo '<input type="hidden" id="blogID" name="blogID" value="'. $bID .'">';
 	  echo '<input type="submit" id="chief-editor-bat-send-confirm" name="chief-editor-bat-send-confirm" class="chief-editor-bat-send-confirm button-primary" value="'.__('Send','chief-editor').'"/>';

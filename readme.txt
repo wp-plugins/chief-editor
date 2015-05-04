@@ -7,17 +7,18 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Helps wp multisite "chief editor" to manage all drafts, comments, authors and "for press" sends across the network. Also includes a calendar and full authors stats.
+Helps wordpress multisite "chief editor" to manage all drafts, comments, authors and "ready for publication" sends across the network. Also includes a calendar and full authors stats.
 
 == Description ==
 
-This plugin is aimed to help the multisite wordpress editor-in-chief in order to plan publication of posts.
-Chief editor can manage all posts across all sites in the network. They are shown with a link to the article for quick reviewing or editing.
-Chief editor can see all recent comments accross the network of a multisite install, a link allow the user to answer directly.
-The Authors tab allow you to compare all authors efficiency accross the network. And give much more stats.
-"For Press" automatic email is now possible.
-Calendar for global view is available for chief editor of blog network.
-Only editors (or higher roles) can use the plugin.
+This plugin is aimed to *help the multisite wordpress editor-in-chief* in order to plan publication of posts. More particularly:
+
+* *Manage all posts* across all sites in the network : they are shown with a link to the article for quick reviewing or editing.
+* *See all recent comments* accross the network of a multisite install, a link allow the user to answer directly.
+* *Author stats* tab allow you to compare all authors efficiency accross the network. And give much more stats.
+* *One button ready for publication* notification process in order for authors to receive their post and validate it before publication
+* *Calendar*, allowing for global point of view, is available for chief editor of blog network.
+* *Roles aware* allow editors to manage almost all, and contributors to only see prepared posts.
 
 == Installation ==
 
@@ -38,6 +39,9 @@ Only editors (or higher roles) can use the plugin.
 5. Pie Chart
 
 == Changelog ==
+
+= 3.5 =
+* Double check for email recipients before sending email
 
 = 3.4 =
 * settings page moved to network settings : www.mysite.com/wp-admin/network/settings.php
