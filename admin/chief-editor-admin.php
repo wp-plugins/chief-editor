@@ -373,11 +373,12 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $emailList .= '</ul>';
 	  
 	  echo  $emailList;
-	  //echo $user_email. '<br/>';
 	  echo '<input type="hidden" id="postID" name="postID" value="'.$pID.'">';
 	  echo '<input type="hidden" id="blogID" name="blogID" value="'. $bID .'">';
-	  echo '<input type="submit" id="chief-editor-bat-send-confirm" name="chief-editor-bat-send-confirm" class="chief-editor-bat-send-confirm button-primary" value="'.__('Send','chief-editor').'"/>';
-	  
+	  echo '<input type="submit" id="'.$bID.'_'.$pID.'chief-editor-bat-send-confirm" name="chief-editor-bat-send-confirm" class="chief-editor-bat-send-confirm button-primary" value="';
+	  echo __('Send','chief-editor').'"/>';
+	  $loading_image =  CHIEF_EDITOR_PLUGIN_URL . '/images/loading_ring_fullframe.gif';
+	  echo '<img id="'.$bID.'_'.$pID.'ce_loading_icon" class="ce_loading_icon" src="'.$loading_image.'" style="width:22px;height:auto;display:none;"></img>';
 	  echo '</div></form>';
 	  
 	  die();
