@@ -221,7 +221,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	}
 	
 	
-	function send_confirmation_email_to_author_of_post($blogID,$postID,$options) {
+  function send_confirmation_email_to_author_of_post($blogID,$postID,$options) {
 	  //echo "need to send BAT for blog ".$blogID." fo post ".$postID;
 	  //echo "send_confirmation_email_to_author_of_post";
 	  
@@ -246,8 +246,6 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $chief_editor_option_name = 'select_blog_'.$blogID.'_chief_editor';
 	  $editors_in_chief_concerned = get_site_option($chief_editor_option_name);
 	  
-	  
-	  
 	  restore_current_blog();
 	  
 	  log_me('send_confirmation_email_to_author_of_post::');
@@ -255,6 +253,15 @@ if(!class_exists('ChiefEditorSettings')) {
 	  $recipients_array = array();
 	  // build mail content with std text
 	  $recipients_array[] = $user_email;
+	  
+	  $current_user = wp_get_current_user();
+	  if ($current_user instanceof WP_User)
+	  {
+	  	$recipients_array[] = $current_user->user_email;
+		log_me('Adding current user to email recipient : '.$current_user->user_email);
+		  
+	  }
+	  
 	  $recipients_array = array_merge($recipients_array,explode(',',get_site_option('email_recipients')));
 	  
 	  $multiple_to_recipients = $user_email.','.get_site_option('email_recipients');
@@ -267,13 +274,23 @@ if(!class_exists('ChiefEditorSettings')) {
 	  
 	  $recipients_array = array_unique($recipients_array);
 	  log_me($recipients_array);
+	  $recipients_array = array_values( array_filter($recipients_array));
+	  log_me($recipients_array);
 	  $multiple_to_recipients = implode(',', $recipients_array);
 	  log_me('All recipients of ready for printing email : '.$multiple_to_recipients);
+	  	    
 	  $msg_object = __("In Press",'chief-editor').' : '.$post_title;
 	  
 	  // add other email recipients
 	  $sender_email = get_site_option('sender_email');
 	  $sender_name = get_site_option('sender_name');
+	  
+	  if (empty($sender_email) || empty($sender_name)) {
+	  	$message_to_user = __("Please fill in sender name and email in network settings",'chief-editor');
+		log_me($message_to_user);
+	  	echo $message_to_user;
+		return;
+	  }
 	  
 	  // send email to recipents
 	  $headers[] = "From: ".$sender_name." <".$sender_email.">";
