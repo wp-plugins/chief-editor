@@ -1,5 +1,12 @@
 jQuery(document).ready(function($) {
   
+	jQuery(function() {
+        jQuery( ".datepicker" ).datepicker({
+            dateFormat : "dd-mm-yy"
+        });
+    });
+    
+	
   $('.chief-editor-bat-submit').click(function() {
 	
 	var $this = $(this);

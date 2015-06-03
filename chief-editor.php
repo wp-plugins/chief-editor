@@ -3,7 +3,7 @@
 Plugin Name: Chief Editor
 Plugin URI: http://www.termel.fr
 Description: Manage all posts, comments and authors accross the network. The Chief Editor toolbox.
-Version: 3.5
+Version: 3.6
 Author: Max UNGER
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
@@ -19,16 +19,20 @@ $ChiefEditorSettings = new ChiefEditorSettings();
 //SCRIPTS
 function chief_editor_scripts(){
   //echo 'Loading Chief Editor scripts...';
-  // enqueue the jquery ui datepicker library from your plugin:	
-  wp_enqueue_script('jquery-ui-datepicker');
-  global $wp_scripts;
+  // enqueue the jquery ui datepicker library from your plugin:
+  //wp_enqueue_script('jquery-ui-datepicker');
+  //global $wp_scripts;
   
   // get registered script object for jquery-ui
-  $ui = $wp_scripts->query('jquery-ui-core');
+  //$ui = $wp_scripts->query('jquery-ui-core');
   // tell WordPress to load the Smoothness theme from Google CDN
-  $protocol = is_ssl() ? 'https' : 'http';
-  $url = "$protocol://ajax.googleapis.com/ajax/libs/jqueryui/{$ui->ver}/themes/smoothness/jquery-ui.min.css";
-  wp_enqueue_style('jquery-ui-smoothness', $url, false, null);
+  //$protocol = is_ssl() ? 'https' : 'http';
+  //$url = "$protocol://ajax.googleapis.com/ajax/libs/jqueryui/{$ui->ver}/themes/smoothness/jquery-ui.min.css";
+  //wp_enqueue_style('jquery-ui-smoothness', $url, false, null);
+  //jQuery UI date picker file
+  wp_enqueue_script('jquery-ui-datepicker');
+  //jQuery UI theme css file
+  wp_enqueue_style('e2b-admin-ui-css','http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/base/jquery-ui.css',false,"1.9.0",false);
   
   wp_register_script( 'chief-editor-js', plugins_url( '/js/chief-editor.js', __FILE__ ));
   
@@ -47,6 +51,14 @@ function chief_editor_scripts(){
   wp_enqueue_script('chief-editor-graph-js');
   
 }
+
+function add_e2_date_picker(){
+//jQuery UI date picker file
+wp_enqueue_script('jquery-ui-datepicker');
+//jQuery UI theme css file
+wp_enqueue_style('e2b-admin-ui-css','http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/base/jquery-ui.css',false,"1.9.0",false);
+}
+//add_action('admin_enqueue_scripts', 'add_e2_date_picker'); 
 
 add_action('admin_enqueue_scripts','chief_editor_scripts');
 add_action( 'init', 'chief_editor_load_lang' );

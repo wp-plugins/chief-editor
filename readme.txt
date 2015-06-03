@@ -19,12 +19,14 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 * *One button ready for publication* notification process in order for authors to receive their post and validate it before publication
 * *Calendar*, allowing for global point of view, is available for chief editor of blog network.
 * *Roles aware* allow editors to manage almost all, and contributors to only see prepared posts.
+* *Custom statistics* for more precise control
 
 == Installation ==
 
 1. Upload `chief-editor.zip` to the `/wp-content/plugins/` directory OR install with WP admin GUI at network level
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to one of the blogs settings menu -> "Chief editor" item should appear OR go directly to url : http://www.my_site.com/wp-admin/options-general.php?page=chief-editor-admin
+3. Settings available at : http://MY_SITE_URL/wp-admin/options-general.php?page=chief-editor-settings
+4. Dashboard available at : http://MY_SITE_URL/wp-admin/admin.php?page=chief-editor-dashboard
 
 == Frequently Asked Questions ==
 
@@ -39,6 +41,10 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 5. Pie Chart
 
 == Changelog ==
+
+= 3.6 =
+* New settings and dashboard pages URL : please change your favorites
+* Custom stats available, specify period in settings
 
 = 3.5 =
 * Double check for email recipients before sending email
