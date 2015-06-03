@@ -200,7 +200,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  add_action( 'admin_init', array ($this, 'register_stats_tab'));
 	  //add_action( 'admin_init', array ($this, 'register_options_tab'));
 	  //add_action( 'admin_init', array ($this, 'settings_page_init'));
-	  add_action('admin_menu', array($this,'ched_register_settings_submenu_page'));
+	  //add_action('admin_menu', array($this,'ched_register_settings_submenu_page'));
 	  
 	  add_action( 'admin_menu', array( $this, 'add_admin_menus' ));
 	  add_action( 'admin_enqueue_scripts',array( $this,'chief_editor_load_scripts'));
@@ -1726,7 +1726,7 @@ c\'est que vous n\'etes pas connecte au site.
 	  $color_bool = true;
 	  $chief_editor_table_header = '<tr style="background-color:#6B6B6B;color:#FFFFFF">';
 	  $chief_editor_table_header .= '<td>'.__('Nom','chief-editor').'</td>';
-	  $chief_editor_table_header .= '<td>'.__('Prnom','chief-editor').'</td>';
+	  $chief_editor_table_header .= '<td>'.__('PrÂnom','chief-editor').'</td>';
 	  $chief_editor_table_header .= '<td>'.__('Blog','chief-editor').'</td>';
 	  $chief_editor_table_header .= '<td>'.__('Posts','chief-editor').'</td>';
 	  $chief_editor_table_header .= '<td>'.__('Commentaires','chief-editor').'</td>';
@@ -3097,3 +3097,4 @@ text-align:center;">';
 	}
   }
 }
+?>
