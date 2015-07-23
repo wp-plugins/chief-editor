@@ -42,6 +42,9 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 
 == Changelog ==
 
+= 3.7 =
+* Serbian translation by https://webhostinggeeks.com/
+
 = 3.6 =
 * New settings and dashboard pages URL : please change your favorites
 * Custom stats available, specify period in settings
@@ -110,3 +113,7 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 
 = 1.0 =
 * First version
+
+== Translations ==
+
+* Serbian : https://webhostinggeeks.com/
