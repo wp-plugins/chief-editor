@@ -21,6 +21,10 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 * *Roles aware* allow editors to manage almost all, and contributors to only see prepared posts.
 * *Custom statistics* for more precise control
 
+= Translations =
+
+* Serbian : https://webhostinggeeks.com/
+
 == Installation ==
 
 1. Upload `chief-editor.zip` to the `/wp-content/plugins/` directory OR install with WP admin GUI at network level
@@ -113,7 +117,3 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 
 = 1.0 =
 * First version
-
-== Translations ==
-
-* Serbian : https://webhostinggeeks.com/
