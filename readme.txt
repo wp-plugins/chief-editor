@@ -29,12 +29,12 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 
 1. Upload `chief-editor.zip` to the `/wp-content/plugins/` directory OR install with WP admin GUI at network level
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Settings available at : http://MY_SITE_URL/wp-admin/network/settings.php
-4. Dashboard available at : http://MY_SITE_URL/wp-admin/admin.php?page=chief-editor-dashboard
+3. Settings available at network level : http://MY_SITE_URL/wp-admin/network/settings.php
+4. Dashboard available at each network site level : http://MY_SITE_URL/wp-admin/admin.php?page=chief-editor-dashboard
 
 == Frequently Asked Questions ==
 
-[Post a comment here](http://www.termel.fr/ "Support")
+If you have questions, please [post a comment here](http://www.termel.fr/ "Support")
 
 == Screenshots ==
 
@@ -47,7 +47,7 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 == Changelog ==
 
 = 3.7 =
-* Serbo-Croatian translation by https://webhostinggeeks.com/
+* Serbo-Croatian translation by https://webhostinggeeks.com/ : thanks to them ! :)
 
 = 3.6 =
 * New settings and dashboard pages URL : please change your favorites
