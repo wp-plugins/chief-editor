@@ -23,7 +23,7 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 
 = Translations =
 
-* Serbian : https://webhostinggeeks.com/
+* Serbo-Croatian : https://webhostinggeeks.com/
 
 == Installation ==
 
@@ -47,7 +47,7 @@ This plugin is aimed to *help the multisite wordpress editor-in-chief* in order 
 == Changelog ==
 
 = 3.7 =
-* Serbian translation by https://webhostinggeeks.com/
+* Serbo-Croatian translation by https://webhostinggeeks.com/
 
 = 3.6 =
 * New settings and dashboard pages URL : please change your favorites
