@@ -6,19 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
   // Exit if accessed directly
 }
 
-if (isset($_POST['submitDate'])) {
-  
-  echo $_POST["datepicker"] . '_' .$_POST["blog_id"]. '_'.$_POST["post_id"];
-  //echo $_POST["name"];
-  updatePostDate($_POST["blog_id"],$_POST["post_id"],$_POST["datepicker"]);
-  
-}
-else if (isset($_POST['unschedulePost'])) {
-  
-  echo 'Unscheduling post : '.$_POST["datepicker"] . '_' .$_POST["blog_id"]. '_'.$_POST["post_id"];
-  unschedulePost( $_POST["blog_id"],$_POST["post_id"] );
-}
-
 define("CE_SCHEDULED_COLOR", "#91FEFF");
 define("CE_INPRESS_COLOR", "#CFF09E");
 define("CE_DRAFT_COLOR", "#cccccc");
@@ -120,7 +107,7 @@ function updatePostDate($blog_id, $post_id, $post_date) {
   }
 }
 
-
+/*
 function unschedulePost($blog_id, $post_id) {
   
   //echo 'unschedulePost-1';
@@ -135,7 +122,7 @@ function unschedulePost($blog_id, $post_id) {
   $err = wp_update_post($newpostdata);
   //echo 'wp_update_post::Error return: '.$err .'\r\n';
   
-}
+}*/
 
 class Sort_Posts {
   var $order, $orderby;
@@ -2493,16 +2480,6 @@ ORDER BY $wpdb->posts.post_status DESC, $wpdb->posts.post_date DESC
 			$complete_new_table_line .= '<td>'.__('not scheduled','chief-editor').'</td>';
 		  }
 		  
-		  /*
-		  $date_chooser_name = 'datepicker';//_'.$blog_id.'_'.$new_post->ID;
-		  
-		  $complete_new_table_line .= '<td><form name="changeDateForm" method="post" action="">';
-		  $complete_new_table_line .= '<input type="hidden" name="post_id" value="'.$new_post->ID.'"/>';
-		  $complete_new_table_line .= '<input type="hidden" name="blog_id" value="'.$blog_id.'">';
-		  $change_date_button = '<input style="float:right;background-color:#2AA2CC;color:#000000;" id="save-post" class="button" type="submit" value="Schedule" name="submitDate"></input>';
-		  $unschedule_button = '<input style="float:right;" id="save-post" class="button" type="submit" value="Unchedule" name="unschedulePost"></input>';
-		  $complete_new_table_line .= '<input type="text" class="datepicker" name="'.$date_chooser_name.'" value="'.$date.'"/>'.$change_date_button.$unschedule_button.'</form></td>';
-		  */
 		  $complete_new_table_line .= '</tr>';
 		  
 		  echo $complete_new_table_line;
