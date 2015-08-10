@@ -1424,7 +1424,7 @@ Voici la previsualisation de votre article pour obtention d\'un Bon A Tirer : <b
 
 Vous devez etre authentifie avec vos identifiants personnels <a href="%blogurl%">sur le site</a> pour visualiser cet article en ligne:
 <ul><li>Utiliser votre login : <strong>%userlogin%</strong></li>
-<li>et votre mot de passe (si vous l\'avez oublie, demandez-en un nouveau en cliquant ici : <a href="http://www.idweblogs.com/wp-login.php?action=lostpassword">Service de recuperation de mot de passe</a>)
+<li>et votre mot de passe (si vous l\'avez oublie, demandez-en un nouveau en cliquant ici : <a href="http://www.termel.com/wp-login.php?action=lostpassword">Service de recuperation de mot de passe</a>)
 </ul>
 Si le message suivant apparait:<br/>
 <em>Desole, mais la page demande ne peut etre trouvee.</em>
