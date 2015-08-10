@@ -46,6 +46,9 @@ If you have questions, please [post a comment here](http://www.termel.fr/ "Suppo
 
 == Changelog ==
 
+= 3.7.2 =
+* Security fixes to repect wordpress plugins repo standards
+
 = 3.7 =
 * Serbo-Croatian translation by https://webhostinggeeks.com/ : thanks to them ! :)
 

@@ -34,7 +34,6 @@ jQuery(document).ready(function($) {
 		
 		//alert(response);
 		var $submit_button = $this;
-		
 		//alert ($submit_button.attr('id'));
 		var $parent = $submit_button.parents('form');
 		//alert($parent.attr('id'));

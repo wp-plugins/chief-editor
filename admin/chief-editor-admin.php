@@ -190,25 +190,16 @@ if(!class_exists('ChiefEditorSettings')) {
 	  //add_action('admin_menu', array($this,'ched_register_settings_submenu_page'));
 	  
 	  add_action( 'admin_menu', array( $this, 'add_admin_menus' ));
-	  add_action( 'admin_enqueue_scripts',array( $this,'chief_editor_load_scripts'));
+	  //add_action( 'admin_enqueue_scripts',array( $this,'chief_editor_load_scripts'));
 	  add_action( 'wp_ajax_ce_send_author_std_validation_email', array( $this,'ce_process_ajax'));
 	  add_action( 'wp_ajax_ce_send_author_std_validation_email_confirmed', array( $this,'ce_process_ajax_bat_confirm'));
 	  
 	  $this->init();
 	}
-	
-	/**
-	* Register and enqueue style sheet.
-	*/
-	public function register_plugin_styles() {	  
-	  wp_register_style( 'chief-editor', plugins_url( 'chief-editor/css/chief-editor.css' ) );
-	  wp_enqueue_style( 'chief-editor' );
-	}
-	
+		
 	function ce_process_ajax_bat_confirm() {
 	  $pID = htmlspecialchars($_POST['postID']);
-	  $bID = htmlspecialchars($_POST['blogID']);
-	  
+	  $bID = htmlspecialchars($_POST['blogID']);	  
 	  
 	  $this->send_confirmation_email_to_author_of_post($bID,$pID,$this->options);
 	  die();
@@ -392,16 +383,7 @@ if(!class_exists('ChiefEditorSettings')) {
 	  ), $this->advanced_settings );
 	}
 	
-	function chief_editor_load_scripts($hook) {
-	  global $chief_editor_settings;
-	  
-	  if ($hook != $chief_editor_settings) {
-		return;
-	  }
-	  
-	  //wp_enqueue_script('','');
-	  $this->register_plugin_styles();
-	}
+	
 	
 	function register_general_settings() {
 	  if (current_user_can('edit_others_posts')) {
@@ -2279,34 +2261,6 @@ c\'est que vous n\'etes pas connecte au site.
 	
 	
 	
-	/**
-	* Registers and enqueues admin-specific styles.
-	*
-	* @version		1.0
-	* @since 		1.0
-	*/
-	public function register_admin_styles() {
-	  
-	  wp_enqueue_style( 'jquery-ui-datepicker', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/smoothness/jquery-ui.css' );
-	  wp_enqueue_style( 'wp-jquery-date-picker', plugins_url( CHIEF_EDITOR_PLUGIN_NAME . '/css/chief-editor.css' ) );
-	  
-	  
-	}
-	// end register_admin_styles
-	
-	/**
-	* Registers and enqueues admin-specific JavaScript.
-	*
-	* @version		1.0
-	* @since 		1.0
-	*/	
-	public function register_admin_scripts() {
-	  
-	  wp_enqueue_script( 'jquery-ui-datepicker' );
-	  wp_enqueue_script( 'wp-jquery-date-picker', plugins_url( CHIEF_EDITOR_PLUGIN_NAME . '/js/chief-editor.js' ) );
-	  
-	}
-	// end register_admin_scripts
 	
 	private function findBlogIdFromPostId($postId, $postTable){
 	  
@@ -2969,45 +2923,6 @@ text-align:center;">';
 	  
 	}
 	
-	function multisite_get_thumb($postID, $w = 400, $h = 300, $blogID = 1, $link = true, $return = false) {
-	  
-	  switch_to_blog($blogID);
-	  $scriptpath = get_bloginfo('template_directory');
-	  
-	  if( $thumbnail = get_post_meta($postID, 'thumbnail', true) ){
-		$iurl = '/wp-content/iptv/img/'.$thumbnail;
-	  }
-	  else {
-		
-		//$images = get_children( array( 'post_parent' => $postID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order', 'order' => 'ASC', 'numberposts' => 999 ) );
-		
-		$images = get_children(array('post_parent' => $postID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'orderby' => 'menu_order'));
-		
-		//echo "Getting featured image for post id ".$blogID."/".$postID." nbOfImages :".count($images)."\n";
-		
-		if ( $images ){
-		  $img = array_shift($images);
-		  $imagelink = wp_get_attachment_image_src($img->ID,array($w,$h));
-		  $iurl = $imagelink[0];
-		  echo $blogID.'/'.$postID.' $iurl:'.$iurl;
-		}
-	  }
-	  $out = '';
-	  if( $iurl ){
-		$img = $iurl;
-		$out .= $img;
-		
-	  }
-	  
-	  restore_current_blog();
-	  
-	  if($return) {
-		return $out;
-	  }
-	  else {
-		echo $out;
-	  }
-	}
 	
 	function get_userdata_for_blog($author,$blog_id) {
 	  switch_to_blog($blog_id);

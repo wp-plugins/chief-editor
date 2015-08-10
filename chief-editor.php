@@ -3,7 +3,7 @@
 Plugin Name: Chief Editor
 Plugin URI: http://www.termel.fr
 Description: Manage all posts, comments and authors accross the network. The Chief Editor toolbox.
-Version: 3.7
+Version: 3.7.2
 Author: Termel
 Author URI: http://www.maxizone.fr
 License: A "Slug" license name e.g. GPL2
@@ -18,47 +18,26 @@ $ChiefEditorSettings = new ChiefEditorSettings();
 
 //SCRIPTS
 function chief_editor_scripts(){
-  //echo 'Loading Chief Editor scripts...';
-  // enqueue the jquery ui datepicker library from your plugin:
-  //wp_enqueue_script('jquery-ui-datepicker');
-  //global $wp_scripts;
   
-  // get registered script object for jquery-ui
-  //$ui = $wp_scripts->query('jquery-ui-core');
-  // tell WordPress to load the Smoothness theme from Google CDN
-  //$protocol = is_ssl() ? 'https' : 'http';
-  //$url = "$protocol://ajax.googleapis.com/ajax/libs/jqueryui/{$ui->ver}/themes/smoothness/jquery-ui.min.css";
-  //wp_enqueue_style('jquery-ui-smoothness', $url, false, null);
-  //jQuery UI date picker file
-  wp_enqueue_script('jquery-ui-datepicker');
-  //jQuery UI theme css file
-  wp_enqueue_style('e2b-admin-ui-css','http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/base/jquery-ui.css',false,"1.9.0",false);
+  wp_register_script( 'jqueryui-js', plugins_url( '/libs/jqueryui/1.11.4/jquery-ui.min.js', __FILE__ ));
+  wp_enqueue_script('jqueryui-js');
+  wp_enqueue_style( 'jquery-ui-css', plugins_url( '/libs/jqueryui/1.11.4/jquery-ui.css', __FILE__ ));
   
   wp_register_script( 'chief-editor-js', plugins_url( '/js/chief-editor.js', __FILE__ ));
-  
   wp_enqueue_script('chief-editor-js');
+  wp_enqueue_style( 'chief-editor-css', plugins_url( '/css/chief-editor.css', __FILE__ ));
   
   wp_register_script( 'sorttable-js', plugins_url( '/js/sorttable.js', __FILE__ ));
-  
   wp_enqueue_script('sorttable-js');
   
   wp_register_script( 'Chart-js', plugins_url( '/js/ChartNew.js', __FILE__ ));
-  
   wp_enqueue_script('Chart-js');
   
   wp_register_script( 'chief-editor-graph-js', plugins_url( '/js/chief-editor-graph.js', __FILE__ ));
-  
   wp_enqueue_script('chief-editor-graph-js');
   
 }
 
-function add_e2_date_picker(){
-//jQuery UI date picker file
-wp_enqueue_script('jquery-ui-datepicker');
-//jQuery UI theme css file
-wp_enqueue_style('e2b-admin-ui-css','http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/base/jquery-ui.css',false,"1.9.0",false);
-}
-//add_action('admin_enqueue_scripts', 'add_e2_date_picker'); 
 
 add_action('admin_enqueue_scripts','chief_editor_scripts');
 add_action( 'init', 'chief_editor_load_lang' );
@@ -79,15 +58,5 @@ function chief_editor_load_lang() {
 	//echo 'ERROR::loading lang file';
   }
 }
-
-/**
- * Register style sheet.
- */
-/*
-function register_plugin_styles() {
-	wp_register_style( 'chief-editor', plugins_url( '/css/chief-editor.css', __FILE__ ) );
-	wp_enqueue_style( 'chief-editor' );
-}
-*/
 
 ?>
